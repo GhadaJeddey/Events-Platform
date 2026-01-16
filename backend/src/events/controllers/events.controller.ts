@@ -8,7 +8,11 @@ import {
   Delete,
   HttpCode,
   HttpStatus,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
 import { EventsService } from '../services/events.service';
 import { CreateEventDto } from '../dto/create-event.dto';
 import { UpdateEventDto } from '../dto/update-event.dto';
@@ -18,8 +22,29 @@ export class EventsController {
   constructor(private readonly eventsService: EventsService) { }
 
   @Post("create/:id")
-  create(@Body() createEventDto: CreateEventDto, @Param('id') id: string) {
-    this.eventsService.create(createEventDto, id);
+  @UseInterceptors(FileInterceptor('image', {
+    storage: diskStorage({
+      destination: './uploads/events',
+      filename: (req, file, cb) => {
+        const uniqueName = `${Date.now()}-${file.originalname}`;
+        cb(null, uniqueName);
+      }
+    })
+  }))
+  create(
+    @Body() createEventDto: CreateEventDto,
+    @Param('id') id: string,
+    @UploadedFile() file: Express.Multer.File
+  ) {
+    // Ajouter l'URL de l'image si un fichier a été uploadé
+    const imageUrl = file ? `/uploads/events/${file.filename}` : createEventDto.imageUrl;
+
+    const eventData = {
+      ...createEventDto,
+      imageUrl
+    };
+
+    return this.eventsService.create(eventData, id);
   }
 
 
@@ -43,8 +68,25 @@ export class EventsController {
 
   // Mettre à jour un événement
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateEventDto: UpdateEventDto) {
-    return this.eventsService.update(id, updateEventDto);
+  @UseInterceptors(FileInterceptor('image', {
+    storage: diskStorage({
+      destination: './uploads/events',
+      filename: (req, file, cb) => {
+        const uniqueName = `${Date.now()}-${file.originalname}`;
+        cb(null, uniqueName);
+      }
+    })
+  }))
+  update(
+    @Param('id') id: string,
+    @Body() updateEventDto: UpdateEventDto,
+    @UploadedFile() file: Express.Multer.File
+  ) {
+    const updateData = { ...updateEventDto };
+    if (file) {
+      updateData.imageUrl = `/uploads/events/${file.filename}`;
+    }
+    return this.eventsService.update(id, updateData);
   }
 
   //Incrémenter inscriptions

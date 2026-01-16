@@ -27,6 +27,7 @@
 - @nestjs/mapped-types: ^2.1.0
 - rxjs: ^7.8.1
 - reflect-metadata: ^0.2.2
+- multer: ^2.0.2
 
 ### Outils de Développement
 - @nestjs/cli: ^11.0.0
@@ -120,6 +121,7 @@ npm update                        # Mettre à jour tous les packages
 - TypeScript Frontend: 5.9.2
 - MySQL: 8.x
 - Bootstrap: 5.3.8
+- Multer: 2.0.2 (Backend)
 
 ---
 

@@ -1,5 +1,4 @@
 import { Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
 import { Router } from '@angular/router';
 import { EventsService } from '../../services/events';
@@ -7,7 +6,7 @@ import { EventsService } from '../../services/events';
 @Component({
   selector: 'app-create-event-form',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [FormsModule],
   templateUrl: './create-event-form.html',
   styleUrl: './create-event-form.css',
 })
@@ -33,24 +32,30 @@ export class CreateEventForm {
   onSubmit(form: NgForm) {
     // La validation de l'image est manuelle car ngModel ne gère pas nativement les fichiers
     if (form.valid && this.selectedFile) {
-      const formData = form.value;
-      const imagePath = `assets/eventimages/${this.selectedFile.name}`;
-
-      const newEvent = {
-        ...formData,
-        imageUrl: imagePath,
-        currentRegistrations: 0,
-        eventStatus: 'upcoming',
-        approvalStatus: 'pending'
+      const eventData = {
+        title: form.value.title,
+        description: form.value.description,
+        startDate: form.value.startDate,
+        endDate: form.value.endDate,
+        location: form.value.location,
+        capacity: form.value.capacity
       };
 
-      console.log('Nouvel évènement (Template-driven):', newEvent);
-      alert('Évènement créé avec succès !');
-      this.router.navigate(['/events']);
+      // Envoyer au backend avec l'image
+      this.eventsService.createEvent(eventData, this.selectedFile).subscribe({
+        next: (response) => {
+          console.log('Événement créé avec succès:', response);
+          alert('Événement créé avec succès !');
+          this.router.navigate(['/events']);
+        },
+        error: (err) => {
+          console.error('Erreur lors de la création:', err);
+          alert('Erreur lors de la création de l\'événement');
+        }
+      });
     } else {
       // Marquer tous les champs comme touchés pour afficher les erreurs
       form.form.markAllAsTouched();
-
     }
   }
 }

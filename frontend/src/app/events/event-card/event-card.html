@@ -1,6 +1,6 @@
 <div class="event-card">
     <div class="event-card-image">
-        <img [src]="event()?.imageUrl" [alt]="event()?.title" />
+        <img [src]="getImageUrl(event()?.imageUrl)" [alt]="event()?.title" />
         <div class="event-card-badge">
             <span class="badge-status">{{ event()?.eventStatus }}</span>
         </div>

@@ -1,7 +1,6 @@
 .form-page-container {
     min-height: calc(100vh - 80px);
     background: #0f172a;
-    /* Dark base */
     background-image:
         radial-gradient(at 0% 0%, hsla(253, 16%, 7%, 1) 0, transparent 50%),
         radial-gradient(at 50% 0%, hsla(225, 39%, 30%, 1) 0, transparent 50%),
@@ -14,7 +13,6 @@
     overflow: hidden;
 }
 
-/* Background floating shapes for WOW effect */
 .form-page-container::before,
 .form-page-container::after {
     content: '';
@@ -153,19 +151,6 @@
     transform: translateY(-2px);
 }
 
-.form-group input.invalid,
-.form-group textarea.invalid {
-    border-color: #f87171;
-    background: #fef2f2;
-}
-
-.error-message {
-    color: #ef4444;
-    font-size: 13px;
-    font-weight: 600;
-    margin-left: 5px;
-}
-
 .form-actions {
     display: flex;
     gap: 20px;
@@ -194,17 +179,6 @@
     filter: brightness(1.1);
 }
 
-.btn-submit:active {
-    transform: translateY(-2px) scale(1);
-}
-
-.btn-submit:disabled {
-    background: #cbd5e1;
-    box-shadow: none;
-    cursor: not-allowed;
-    opacity: 0.7;
-}
-
 .btn-cancel {
     flex: 1;
     background: #ffffff;
@@ -224,7 +198,6 @@
     color: #1e293b;
 }
 
-/* Image Upload Styling */
 .image-upload-container {
     width: 100%;
     height: 240px;
@@ -256,23 +229,6 @@
 
 .upload-placeholder svg {
     color: #6366f1;
-    transition: transform 0.3s ease;
-}
-
-.image-upload-container:hover .upload-placeholder svg {
-    transform: translateY(-5px);
-}
-
-.upload-placeholder p {
-    font-weight: 700;
-    font-size: 17px;
-    margin: 0;
-}
-
-.upload-placeholder span {
-    font-size: 13px;
-    font-weight: 500;
-    color: #94a3b8;
 }
 
 .image-preview {
@@ -321,27 +277,25 @@
     transform: translateY(0);
 }
 
-@media (max-width: 768px) {
-    .form-page-container {
-        padding: 0;
-    }
+.loading-state {
+    text-align: center;
+    padding: 40px;
+    color: #64748b;
+    font-size: 18px;
+    font-weight: 600;
+}
 
+@media (max-width: 768px) {
     .form-card {
         padding: 40px 20px;
         border-radius: 0;
-        min-height: 100vh;
     }
 
     .form-grid {
         grid-template-columns: 1fr;
-        gap: 20px;
     }
 
     .full-width {
         grid-column: span 1;
-    }
-
-    .form-actions {
-        flex-direction: column-reverse;
     }
 }

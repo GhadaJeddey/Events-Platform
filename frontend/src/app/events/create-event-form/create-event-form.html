@@ -2,7 +2,7 @@
     <div class="form-card">
         <div class="form-header">
             <h1>Publier un évènement</h1>
-            <p>Partagez votre passion avec la communauté EventTime</p>
+            <p>Partagez votre évènement avec la communauté EventTime</p>
         </div>
 
         <form #eventForm="ngForm" (ngSubmit)="onSubmit(eventForm)" class="modern-form">
@@ -70,7 +70,8 @@
                         <input #fileInput type="file" (change)="onFileSelected($event)" accept="image/*"
                             style="display: none">
 
-                        <div class="upload-placeholder" *ngIf="!imagePreview">
+                        @if (!imagePreview) {
+                        <div class="upload-placeholder">
                             <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24"
                                 fill="none" stroke="currentColor" stroke-width="2">
                                 <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
@@ -80,13 +81,16 @@
                             <p>Cliquez pour choisir une image</p>
                             <span>Format JPG, PNG ou WEBP</span>
                         </div>
+                        }
 
-                        <div class="image-preview" *ngIf="imagePreview">
+                        @if (imagePreview) {
+                        <div class="image-preview">
                             <img [src]="imagePreview" alt="Aperçu">
                             <div class="change-overlay">
                                 <span>Changer l'image</span>
                             </div>
                         </div>
+                        }
                     </div>
                     <!-- Validation manuelle de l'image -->
                     @if(!selectedFile && eventForm.submitted) {

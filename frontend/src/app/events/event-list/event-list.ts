@@ -14,5 +14,5 @@ import { AsyncPipe } from '@angular/common';
 export class EventList {
   private eventsService = inject(EventsService);
 
-  events$: Observable<Event[]> = this.eventsService.events$;
+  events$: Observable<Event[]> = this.eventsService.getEvents();
 }

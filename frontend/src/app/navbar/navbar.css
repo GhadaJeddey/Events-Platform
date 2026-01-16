@@ -83,14 +83,14 @@
     width: 100%;
 }
 
-/* .nav-link.active {
+.nav-link.active {
     color: #667eea;
     font-weight: 600;
 }
 
 .nav-link.active:after {
     width: 100%;
-} */
+}
 
 .nav-link:focus {
     outline: none;

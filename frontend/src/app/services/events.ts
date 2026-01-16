@@ -1,75 +1,72 @@
-import { Injectable } from '@angular/core';
-import { Observable, of, BehaviorSubject } from 'rxjs';
+import { Injectable, inject } from '@angular/core';
+import { Observable } from 'rxjs';
 import { Event } from '../Models/Event';
-
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../Commun/environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class EventsService {
-  // Données de test
-  private eventsData: Event[] = [
-    {
-      id: '1',
-      title: 'Angular Workshop',
-      description: 'Learn Angular from scratch with hands-on exercises and real-world examples.',
-      startDate: '2026-02-15T10:00:00',
-      endDate: '2026-02-15T16:00:00',
-      location: 'Tech Hub, Building A, Room 101',
-      capacity: 50,
-      currentRegistrations: 23,
-      imageUrl: 'https://images.stockcake.com/public/2/e/e/2ee809d0-2c47-4406-9ed6-da53d72f0e0b_large/hackathon-event-buzz-stockcake.jpg',
-      approvalStatus: 'approved',
-      eventStatus: 'upcoming',
-      clubId: 'club-uuid-1',
-      organizerId: 'user-uuid-1',
-    },
-    {
-      id: '2',
-      title: 'Web Development Bootcamp',
-      description: 'Intensive bootcamp covering HTML, CSS, JavaScript, and modern frameworks.',
-      startDate: '2026-03-01T09:00:00',
-      endDate: '2026-03-05T18:00:00',
-      location: 'Innovation Center, Floor 3',
-      capacity: 30,
-      currentRegistrations: 30,
-      imageUrl: 'https://miro.medium.com/v2/resize:fit:1200/1*5akpxEAq4fjVmd5pDtqDig.jpeg',
-      approvalStatus: 'approved',
-      eventStatus: 'upcoming',
-      clubId: 'club-uuid-2',
-      organizerId: 'user-uuid-2',
-    },
-    {
-      id: '3',
-      title: 'Tech Meetup',
-      description: 'Monthly meetup for tech enthusiasts to network and share knowledge.',
-      startDate: '2026-01-20T18:00:00',
-      endDate: '2026-01-20T21:00:00',
-      location: 'Coffee & Code Café',
-      capacity: 100,
-      currentRegistrations: 45,
-      imageUrl: 'https://i.ytimg.com/vi/0m0Jvcp76sE/maxresdefault.jpg',
-      approvalStatus: 'approved',
-      eventStatus: 'upcoming',
-      clubId: 'club-uuid-1',
-      organizerId: 'user-uuid-3',
-    },
-  ];
+  // Injection de HttpClient
+  private http = inject(HttpClient);
 
-  // BehaviorSubject pour gérer l'état des événements
-  private eventsSubject = new BehaviorSubject<Event[]>(this.eventsData);
+  // URL du backend depuis l'environnement
+  private apiUrl = environment.apiUrl;
 
-  // Observable public pour s'abonner
-  public events$ = this.eventsSubject.asObservable();
-
-  // Méthode pour récupérer les événements (retourne un Observable)
+  // Méthode pour récupérer tous les événements publics
   getEvents(): Observable<Event[]> {
-    return of(this.eventsData);
-  }
-  // Méthode pour récupérer un événement par ID
-  getEventById(id: string): Observable<Event | undefined> {
-    const event = this.eventsData.find(event => event.id === id);
-    return of(event);
+    return this.http.get<Event[]>(`${this.apiUrl}/events/public`);
   }
 
+  // Méthode pour récupérer un événement par ID
+  getEventById(id: string): Observable<Event> {
+    return this.http.get<Event>(`${this.apiUrl}/events/${id}`);
+  }
+
+  // Méthode pour créer un événement avec upload d'image
+  createEvent(eventData: any, imageFile: File | null, userId: string = 'user-temp'): Observable<any> {
+    const formData = new FormData();
+
+    // Ajouter tous les champs du formulaire
+    formData.append('title', eventData.title);
+    formData.append('description', eventData.description);
+    formData.append('startDate', eventData.startDate);
+    formData.append('endDate', eventData.endDate);
+    formData.append('location', eventData.location);
+    formData.append('capacity', eventData.capacity.toString());
+
+    // Ajouter l'image si elle existe
+    if (imageFile) {
+      formData.append('image', imageFile);
+    }
+
+    return this.http.post(`${this.apiUrl}/events/create/${userId}`, formData);
+  }
+
+  // Méthode pour mettre à jour un événement (PATCH)
+  updateEvent(id: string, eventData: any, imageFile: File | null = null): Observable<any> {
+    const formData = new FormData();
+
+    // On n'ajoute que les champs présents dans eventData
+    if (eventData.title) formData.append('title', eventData.title);
+    if (eventData.description) formData.append('description', eventData.description);
+    if (eventData.startDate) formData.append('startDate', eventData.startDate);
+    if (eventData.endDate) formData.append('endDate', eventData.endDate);
+    if (eventData.location) formData.append('location', eventData.location);
+    if (eventData.capacity) formData.append('capacity', eventData.capacity.toString());
+
+    if (imageFile) {
+      formData.append('image', imageFile);
+    }
+
+    // Note: Le backend actuel attend du JSON pour Patch, 
+    // mais si on veut gérer l'image, FormData est nécessaire.
+    // Si pas d'image, on pourrait envoyer du JSON pur.
+    if (!imageFile) {
+      return this.http.patch(`${this.apiUrl}/events/${id}`, eventData);
+    }
+
+    return this.http.patch(`${this.apiUrl}/events/${id}`, formData);
+  }
 }
