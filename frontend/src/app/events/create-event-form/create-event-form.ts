@@ -49,9 +49,8 @@ export class CreateEventForm {
       this.router.navigate(['/events']);
     } else {
       // Marquer tous les champs comme touchés pour afficher les erreurs
-      Object.keys(form.controls).forEach(key => {
-        form.controls[key].markAsTouched();
-      });
+      form.form.markAllAsTouched();
+
     }
   }
 }
