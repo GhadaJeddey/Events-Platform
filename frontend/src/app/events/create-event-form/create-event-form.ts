@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { Router } from '@angular/router';
 import { EventsService } from '../../services/events';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-create-event-form',
@@ -13,6 +14,7 @@ import { EventsService } from '../../services/events';
 export class CreateEventForm {
   private eventsService = inject(EventsService);
   private router = inject(Router);
+  private toastr = inject(ToastrService);
 
   selectedFile: File | null = null;
   imagePreview: string | null = null;
@@ -44,13 +46,11 @@ export class CreateEventForm {
       // Envoyer au backend avec l'image
       this.eventsService.createEvent(eventData, this.selectedFile).subscribe({
         next: (response) => {
-          console.log('Événement créé avec succès:', response);
-          alert('Événement créé avec succès !');
+          this.toastr.success('Événement créé avec succès !');
           this.router.navigate(['/events']);
         },
         error: (err) => {
-          console.error('Erreur lors de la création:', err);
-          alert('Erreur lors de la création de l\'événement');
+          this.toastr.error('Erreur lors de la création de l\'événement');
         }
       });
     } else {

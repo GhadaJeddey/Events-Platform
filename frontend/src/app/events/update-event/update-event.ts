@@ -5,6 +5,7 @@ import { EventsService } from '../../services/events';
 import { Event } from '../../Models/Event';
 import { environment } from '../../../../Commun/environments/environment';
 import { InputDatePipe } from '../../../../Commun/pipes/input-date-pipe';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-update-event',
@@ -17,6 +18,7 @@ export class UpdateEvent implements OnInit {
   private eventsService = inject(EventsService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
+  private toastr = inject(ToastrService);
 
   eventId: string | null = null;
   currentEvent = signal<Event | null>(null);
@@ -60,12 +62,12 @@ export class UpdateEvent implements OnInit {
       this.eventsService.updateEvent(this.eventId, eventData, this.selectedFile).subscribe({
         next: (response) => {
 
-          alert('Événement mis à jour avec succès !');
+          this.toastr.success('Événement mis à jour avec succès !');
           this.router.navigate(['/event/details', this.eventId]);
         },
         error: (err) => {
 
-          alert('Erreur lors de la mise à jour de l\'événement');
+          this.toastr.error('Erreur lors de la mise à jour de l\'événement');
         }
       });
     }
