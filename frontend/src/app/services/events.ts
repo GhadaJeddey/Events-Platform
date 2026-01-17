@@ -25,7 +25,7 @@ export class EventsService {
   }
 
   // Méthode pour créer un événement avec upload d'image
-  createEvent(eventData: any, imageFile: File | null, userId: string = 'user-temp'): Observable<any> {
+  createEvent(eventData: any, imageFile: File | null, userId: string = '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d'): Observable<any> {
     const formData = new FormData();
 
     // Ajouter tous les champs du formulaire

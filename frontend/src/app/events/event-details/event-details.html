@@ -1,4 +1,4 @@
-@if (event$ | async; as event) {
+@if (event(); as event) {
 <div class="details-container">
     <header class="event-hero">
         <div class="hero-image">
@@ -53,8 +53,8 @@
                             </div>
                             <div class="info-text">
                                 <label>Date et Heure</label>
-                                <p>Du {{ event.startDate | date:'fullDate' }}</p>
-                                <p>Au {{ event.endDate | date:'fullDate' }}</p>
+                                <p>Du {{ event.startDate | date:'dd/MM/yyyy à HH:mm' }}</p>
+                                <p>Au {{ event.endDate | date:'dd/MM/yyyy à HH:mm' }}</p>
                             </div>
                         </div>
 

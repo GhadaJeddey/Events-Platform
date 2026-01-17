@@ -6,22 +6,25 @@
 
 ### Runtime
 - Node.js: v18+ ou v20+
-- npm: 11.7.0
+- npm: 10.x ou supérieur
 
 ### Framework Principal
 - @nestjs/common: ^11.0.1
 - @nestjs/core: ^11.0.1
-- @nestjs/platform-express: ^11.0.1
+- @nestjs/platform-express: ^11.1.12
 
 ### Configuration et Validation
 - @nestjs/config: ^4.0.2
 - class-validator: ^0.14.3
 - class-transformer: ^0.5.1
 
-### Base de Données
+### Documentation (API)
+- @nestjs/swagger: ^11.0.3 (Accessible sur /api)
+
+### Base de Données (Cloud)
 - @nestjs/typeorm: ^11.0.0
 - typeorm: ^0.3.28
-- mysql2: ^3.16.0
+- pg: ^8.17.1 (Driver PostgreSQL pour Supabase)
 
 ### Utilitaires
 - @nestjs/mapped-types: ^2.1.0
@@ -40,10 +43,6 @@
 ---
 
 ## FRONTEND (Angular)
-
-### Runtime
-- Node.js: v18+ ou v20+
-- npm: 11.7.0
 
 ### Framework Principal
 - @angular/core: ^21.0.0
@@ -70,59 +69,35 @@
 
 ---
 
-## Installation
+## Installation et Démarrage
 
-### Backend
+### Installation Rapide
 ```bash
+# Dans la racine du projet
+cd backend && npm install
+cd ../frontend && npm install
+```
+
+### Lancer le projet
+```bash
+# Terminal 1 (Backend)
 cd backend
-npm install
-```
+npm run start:dev
 
-### Frontend
-```bash
+# Terminal 2 (Frontend)
 cd frontend
-npm install
+npm start
 ```
 
 ---
 
-## Démarrage
+## Notes Techniques
 
-### Backend
-```bash
-cd backend
-npm run start        # Mode production
-npm run start:dev    # Mode développement
-```
-
-### Frontend
-```bash
-cd frontend
-npm start            # http://localhost:4200
-```
+- **Angular**: Version 21 (Signals et Control Flow)
+- **Base de données**: Supabase (PostgreSQL)
+- **API Documentation**: Swagger généré automatiquement
+- **Image Handling**: Multer (Stockage local /uploads/events)
 
 ---
 
-## Mise à jour
-
-```bash
-npm outdated                      # Vérifier les versions
-npm install <package>@latest      # Mettre à jour un package
-npm update                        # Mettre à jour tous les packages
-```
-
----
-
-## Notes
-
-- Angular: 21.0.0
-- NestJS: 11.0.1
-- TypeScript Backend: 5.7.3
-- TypeScript Frontend: 5.9.2
-- MySQL: 8.x
-- Bootstrap: 5.3.8
-- Multer: 2.0.2 (Backend)
-
----
-
-Dernière mise à jour: 16 janvier 2026
+Dernière mise à jour: 17 janvier 2026

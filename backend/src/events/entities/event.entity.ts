@@ -9,6 +9,8 @@ import {
   JoinColumn,
 } from 'typeorm';
 
+import { ApprovalStatus, EventStatus } from '../../common/enums/event.enums';
+
 @Entity('events')
 export class Event {
   @PrimaryGeneratedColumn('uuid')
@@ -40,17 +42,17 @@ export class Event {
 
   @Column({
     type: 'enum',
-    enum: ['pending', 'approved', 'rejected', 'cancelled'],
-    default: 'pending',
+    enum: ApprovalStatus,
+    default: ApprovalStatus.PENDING,
   })
-  approvalStatus: string;
+  approvalStatus: ApprovalStatus;
 
   @Column({
     type: 'enum',
-    enum: ['upcoming', 'ongoing', 'completed'],
-    default: 'upcoming',
+    enum: EventStatus,
+    default: EventStatus.UPCOMING,
   })
-  eventStatus: string;
+  eventStatus: EventStatus;
 
   // Relations 
 
@@ -77,19 +79,22 @@ export class Event {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  // Méthodes calculées (getters)
+  // getters
+  /* a utiliser pour interdire l'inscription si l'evenement est plein */
   get isFull(): boolean {
     return this.currentRegistrations >= this.capacity;
   }
 
+  /* a utiliser pour afficher le nombre de places restantes */
   get availableSpots(): number {
     return Math.max(0, this.capacity - this.currentRegistrations);
   }
 
+  /* a utiliser pour afficher si l'evenement est passé */
   get isPast(): boolean {
     return this.endDate < new Date();
   }
-
+  /* a utiliser pour verifier si un utilisateur peut s'inscrire */
   get isActive(): boolean {
     return !this.isPast && this.approvalStatus === 'approved';
   }

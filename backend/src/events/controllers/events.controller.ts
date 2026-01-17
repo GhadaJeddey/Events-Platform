@@ -61,11 +61,6 @@ export class EventsController {
     return this.eventsService.findOne(id);
   }
 
-  @Get(':id/availability')
-  checkAvailability(@Param('id') id: string) {
-    return this.eventsService.checkAvailability(id);
-  }
-
   // Mettre à jour un événement
   @Patch(':id')
   @UseInterceptors(FileInterceptor('image', {

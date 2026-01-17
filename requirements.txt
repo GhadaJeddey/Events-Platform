@@ -5,14 +5,15 @@
 # Framework NestJS
 @nestjs/common@^11.0.1
 @nestjs/core@^11.0.1
-@nestjs/platform-express@^11.0.1
+@nestjs/platform-express@^11.1.12
 @nestjs/config@^4.0.2
 @nestjs/typeorm@^11.0.0
 @nestjs/mapped-types@^2.1.0
+@nestjs/swagger@^11.0.3
 
-# Base de données
+# Base de données (Cloud Supabase)
 typeorm@^0.3.28
-mysql2@^3.16.0
+pg@^8.17.1            # Driver PostgreSQL pour Supabase
 
 # Validation et transformation
 class-validator@^0.14.3
@@ -40,7 +41,7 @@ eslint@^9.18.0
 # FRONTEND DEPENDENCIES (Angular)
 # ============================================
 
-# Framework Angular
+# Framework Angular (Version 21)
 @angular/core@^21.0.0
 @angular/common@^21.0.0
 @angular/compiler@^21.0.0
@@ -64,8 +65,9 @@ vitest@^4.0.8
 jsdom@^27.1.0
 
 # ============================================
-# RUNTIME REQUIREMENTS
+# RUNTIME & DATABASE REQUIREMENTS
 # ============================================
 # Node.js: v18.x ou v20.x
-# npm: v11.7.0
-# MySQL: v8.x (pour la base de données)
+# npm: v10.x ou supérieur
+# Database: Supabase PostgreSQL 
+# Documentation: Swagger accessible sur /api

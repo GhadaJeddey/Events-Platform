@@ -9,7 +9,6 @@ import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-update-event',
-  standalone: true,
   imports: [FormsModule, InputDatePipe],
   templateUrl: './update-event.html',
   styleUrl: './update-event.css',
@@ -22,7 +21,7 @@ export class UpdateEvent implements OnInit {
 
   eventId: string | null = null;
   currentEvent = signal<Event | null>(null);
-  selectedFile: File | null = null;
+  selectedFile = signal<File | null>(null);
   imagePreview = signal<string | null>(null);
 
   ngOnInit() {
@@ -46,7 +45,7 @@ export class UpdateEvent implements OnInit {
   onFileSelected(event: any) {
     const file = event.target.files[0];
     if (file) {
-      this.selectedFile = file;
+      this.selectedFile.set(file);
       const reader = new FileReader();
       reader.onload = () => {
         this.imagePreview.set(reader.result as string);
@@ -59,15 +58,15 @@ export class UpdateEvent implements OnInit {
     if (this.eventId) {
       const eventData = form.value;
 
-      this.eventsService.updateEvent(this.eventId, eventData, this.selectedFile).subscribe({
+      this.eventsService.updateEvent(this.eventId, eventData, this.selectedFile()).subscribe({
         next: (response) => {
 
           this.toastr.success('Événement mis à jour avec succès !');
           this.router.navigate(['/event/details', this.eventId]);
         },
         error: (err) => {
-
-          this.toastr.error('Erreur lors de la mise à jour de l\'événement');
+          const errorMessage = err.error?.message || 'Erreur lors de la mise à jour de l\'événement';
+          this.toastr.error(errorMessage);
         }
       });
     }

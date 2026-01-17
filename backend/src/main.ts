@@ -1,11 +1,22 @@
 import { ValidationPipe } from '@nestjs/common';
-import { AppModule } from './app.module';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+  // Configuration Swagger
+  const config = new DocumentBuilder()
+    .setTitle('Events Platform API')
+    .setDescription("Documentation de l'API de la plateforme de gestion d'évènements")
+    .setVersion('1.0')
+    .addTag('events')
+    .build();
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api', app, document);
 
   // Servir les fichiers uploadés comme fichiers statiques
   app.useStaticAssets(join(__dirname, '..', 'uploads'), {

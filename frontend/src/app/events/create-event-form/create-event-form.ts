@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { Router } from '@angular/router';
 import { EventsService } from '../../services/events';
@@ -6,7 +6,6 @@ import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-create-event-form',
-  standalone: true,
   imports: [FormsModule],
   templateUrl: './create-event-form.html',
   styleUrl: './create-event-form.css',
@@ -16,16 +15,17 @@ export class CreateEventForm {
   private router = inject(Router);
   private toastr = inject(ToastrService);
 
-  selectedFile: File | null = null;
-  imagePreview: string | null = null;
+  selectedFile = signal<File | null>(null);
+  imagePreview = signal<string | null>(null);
+  minDate = signal<string>(new Date().toISOString().slice(0, 16));
 
   onFileSelected(event: any) {
     const file = event.target.files[0];
     if (file) {
-      this.selectedFile = file;
+      this.selectedFile.set(file);
       const reader = new FileReader();
       reader.onload = () => {
-        this.imagePreview = reader.result as string;
+        this.imagePreview.set(reader.result as string);
       };
       reader.readAsDataURL(file);
     }
@@ -33,7 +33,7 @@ export class CreateEventForm {
 
   onSubmit(form: NgForm) {
     // La validation de l'image est manuelle car ngModel ne gère pas nativement les fichiers
-    if (form.valid && this.selectedFile) {
+    if (form.valid && this.selectedFile()) {
       const eventData = {
         title: form.value.title,
         description: form.value.description,
@@ -44,13 +44,14 @@ export class CreateEventForm {
       };
 
       // Envoyer au backend avec l'image
-      this.eventsService.createEvent(eventData, this.selectedFile).subscribe({
+      this.eventsService.createEvent(eventData, this.selectedFile()).subscribe({
         next: (response) => {
           this.toastr.success('Événement créé avec succès !');
           this.router.navigate(['/events']);
         },
         error: (err) => {
-          this.toastr.error('Erreur lors de la création de l\'événement');
+          const errorMessage = err.error?.message || 'Erreur lors de la création de l\'événement';
+          this.toastr.error(errorMessage);
         }
       });
     } else {

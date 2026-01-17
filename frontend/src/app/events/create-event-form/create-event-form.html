@@ -29,7 +29,8 @@
                 <!-- Dates -->
                 <div class="form-group">
                     <label for="startDate">Date de début</label>
-                    <input type="datetime-local" id="startDate" name="startDate" ngModel required #startInput="ngModel"
+                    <input [min]="minDate()" type="datetime-local" id="startDate" name="startDate" ngModel required
+                        #startInput="ngModel"
                         [class.invalid]="startInput.invalid && (startInput.dirty || startInput.touched)">
                     @if(startInput.invalid && (startInput.dirty || startInput.touched)) {
                     <div class="error-message">La date de début est obligatoire.</div>
@@ -38,8 +39,8 @@
 
                 <div class="form-group">
                     <label for="endDate">Date de fin</label>
-                    <input type="datetime-local" id="endDate" name="endDate" ngModel required #endInput="ngModel"
-                        [class.invalid]="endInput.invalid && (endInput.dirty || endInput.touched)">
+                    <input [min]="minDate()" type="datetime-local" id="endDate" name="endDate" ngModel required
+                        #endInput="ngModel" [class.invalid]="endInput.invalid && (endInput.dirty || endInput.touched)">
                     @if(endInput.invalid && (endInput.dirty || endInput.touched)) {
                     <div class="error-message">La date de fin est obligatoire.</div>
                     }
@@ -66,11 +67,11 @@
 
                 <div class="form-group full-width">
                     <label>Image de couverture</label>
-                    <div class="image-upload-container" [class.has-image]="imagePreview" (click)="fileInput.click()">
+                    <div class="image-upload-container" [class.has-image]="imagePreview()" (click)="fileInput.click()">
                         <input #fileInput type="file" (change)="onFileSelected($event)" accept="image/*"
                             style="display: none">
 
-                        @if (!imagePreview) {
+                        @if (!imagePreview()) {
                         <div class="upload-placeholder">
                             <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24"
                                 fill="none" stroke="currentColor" stroke-width="2">
@@ -83,9 +84,9 @@
                         </div>
                         }
 
-                        @if (imagePreview) {
+                        @if (imagePreview()) {
                         <div class="image-preview">
-                            <img [src]="imagePreview" alt="Aperçu">
+                            <img [src]="imagePreview()" alt="Aperçu">
                             <div class="change-overlay">
                                 <span>Changer l'image</span>
                             </div>
@@ -93,7 +94,7 @@
                         }
                     </div>
                     <!-- Validation manuelle de l'image -->
-                    @if(!selectedFile && eventForm.submitted) {
+                    @if(!selectedFile() && eventForm.submitted) {
                     <div class="error-message">
                         L'image de couverture est obligatoire.
                     </div>

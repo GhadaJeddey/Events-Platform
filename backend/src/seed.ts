@@ -9,7 +9,7 @@ async function bootstrap() {
 
     console.log(' Début du seeding des événements...');
 
-    // Les 3 événements du service frontend
+    // on cree des evenements pour tester
     const events: CreateEventDto[] = [
         {
             title: 'Angular Workshop',
@@ -19,7 +19,7 @@ async function bootstrap() {
             location: 'Tech Hub, Building A, Room 101',
             capacity: 50,
             imageUrl: 'https://images.stockcake.com/public/2/e/e/2ee809d0-2c47-4406-9ed6-da53d72f0e0b_large/hackathon-event-buzz-stockcake.jpg',
-            clubId: 'club-uuid-1',
+            clubId: '00000000-0000-0000-0000-000000000001',
         },
         {
             title: 'Web Development Bootcamp',
@@ -29,7 +29,7 @@ async function bootstrap() {
             location: 'Innovation Center, Floor 3',
             capacity: 30,
             imageUrl: 'https://miro.medium.com/v2/resize:fit:1200/1*5akpxEAq4fjVmd5pDtqDig.jpeg',
-            clubId: 'club-uuid-2',
+            clubId: '00000000-0000-0000-0000-000000000002',
         },
         {
             title: 'Tech Meetup',
@@ -39,12 +39,16 @@ async function bootstrap() {
             location: 'Coffee & Code Café',
             capacity: 100,
             imageUrl: 'https://i.ytimg.com/vi/0m0Jvcp76sE/maxresdefault.jpg',
-            clubId: 'club-uuid-1',
+            clubId: '00000000-0000-0000-0000-000000000001',
         },
     ];
 
     // IDs des organisateurs correspondants
-    const organizerIds = ['user-uuid-1', 'user-uuid-2', 'user-uuid-3'];
+    const organizerIds = [
+        '00000000-0000-0000-0000-000000000011',
+        '00000000-0000-0000-0000-000000000012',
+        '00000000-0000-0000-0000-000000000013'
+    ];
 
     for (let i = 0; i < events.length; i++) {
         try {

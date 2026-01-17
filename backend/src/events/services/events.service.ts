@@ -4,10 +4,11 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, MoreThanOrEqual, LessThan, Between } from 'typeorm';
+import { Repository, MoreThanOrEqual, LessThan, Between, In } from 'typeorm';
 import { Event } from '../entities/event.entity';
 import { CreateEventDto } from '../dto/create-event.dto';
 import { UpdateEventDto } from '../dto/update-event.dto';
+import { ApprovalStatus, EventStatus } from '../../common/enums/event.enums';
 
 @Injectable()
 export class EventsService {
@@ -29,8 +30,8 @@ export class EventsService {
     const event = this.eventsRepository.create({
       ...createEventDto,
       organizerId: userId,
-      approvalStatus: 'pending',
-      eventStatus: 'upcoming',
+      approvalStatus: ApprovalStatus.PENDING,
+      eventStatus: EventStatus.UPCOMING,
       currentRegistrations: 0,
     });
 
@@ -41,8 +42,8 @@ export class EventsService {
   async findAllPublic(): Promise<Event[]> {
     return await this.eventsRepository.find({
       where: {
-        approvalStatus: 'approved',
-        eventStatus: 'upcoming',
+        approvalStatus: ApprovalStatus.APPROVED,
+        eventStatus: In([EventStatus.UPCOMING, EventStatus.ONGOING]),
       },
       order: {
         startDate: 'ASC',
@@ -65,6 +66,15 @@ export class EventsService {
 
   // UPDATE - Mettre à jour un événement
   async update(id: string, updateEventDto: UpdateEventDto,) {
+    if (updateEventDto.startDate && updateEventDto.endDate) {
+      const startDate = new Date(updateEventDto.startDate);
+      const endDate = new Date(updateEventDto.endDate);
+      if (endDate <= startDate) {
+        throw new BadRequestException(
+          'La date de fin doit être après la date de début',
+        );
+      }
+    }
     await this.eventsRepository.update(id, updateEventDto);
   }
 
@@ -72,16 +82,16 @@ export class EventsService {
   async remove(id: string): Promise<void> {
     await this.eventsRepository.delete(id);
   }
-  
+
   // Archiver automatiquement les événements passés
   async archivePastEvents(): Promise<void> {
     await this.eventsRepository.update(
       {
         endDate: LessThan(new Date()),
-        eventStatus: 'upcoming',
+        eventStatus: EventStatus.UPCOMING,
       },
       {
-        eventStatus: 'completed',
+        eventStatus: EventStatus.COMPLETED,
       },
     );
   }
