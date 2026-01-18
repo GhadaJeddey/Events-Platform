@@ -1,0 +1,113 @@
+@if (event(); as event) {
+<div class="details-container">
+    <header class="event-hero">
+        <div class="hero-image">
+            <img [src]="getImageUrl(event.imageUrl)" [alt]="event.title" />
+            <div class="hero-overlay"></div>
+        </div>
+        <div class="hero-content">
+            <div class="container">
+                <a routerLink="/events" class="back-link">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2">
+                        <line x1="19" y1="12" x2="5" y2="12"></line>
+                        <polyline points="12 19 5 12 12 5"></polyline>
+                    </svg>
+                    Retour aux évènements
+                </a>
+                <h1 class="event-title">{{ event.title }}</h1>
+                <div class="event-quick-info">
+                    <span class="info-badge">{{ event.eventStatus }}</span>
+                    <span class="info-location">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                            <circle cx="12" cy="10" r="3"></circle>
+                        </svg>
+                        {{ event.location }}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="event-main">
+        <div class="container grid-layout">
+            <!-- Left Column: Description & Info -->
+            <section class="event-content-main">
+                <div class="card detail-card">
+                    <h2 class="section-title">À propos de cet évènement</h2>
+                    <p class="description-text">{{ event.description }}</p>
+
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="icon-box">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                                </svg>
+                            </div>
+                            <div class="info-text">
+                                <label>Date et Heure</label>
+                                <p>Du {{ event.startDate | date:'dd/MM/yyyy à HH:mm' }}</p>
+                                <p>Au {{ event.endDate | date:'dd/MM/yyyy à HH:mm' }}</p>
+                            </div>
+                        </div>
+
+                        <div class="info-item">
+                            <div class="icon-box">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                    <circle cx="12" cy="10" r="3"></circle>
+                                </svg>
+                            </div>
+                            <div class="info-text">
+                                <label>Lieu</label>
+                                <p>{{ event.location }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right Column: Registration -->
+            <aside class="event-signup-sidebar">
+                <div class="card sticky-card">
+                    <div class="registration-status">
+                        <div class="progress-info">
+                            <span class="spots-left">{{ event.capacity - event.currentRegistrations }} places
+                                restantes</span>
+                            <span class="total-capacity">{{ event.currentRegistrations }} / {{ event.capacity }}
+                                inscrits</span>
+                        </div>
+                        <div class="progress-bar-bg">
+                            <div class="progress-bar-fill" [style.width.%]="getFillPercentage(event)"></div>
+                        </div>
+                    </div>
+
+                    <button class="btn-register-primary" [disabled]="event.currentRegistrations >= event.capacity">
+                        {{ event.currentRegistrations >= event.capacity ? 'Évènement complet' : 'S\'inscrire maintenant'
+                        }}
+                    </button>
+
+                    @if (event.currentRegistrations < event.capacity) { <p class="signup-guarantee">
+                        Rejoignez-nous pour une expérience inoubliable !
+                        </p>
+                        }
+                </div>
+            </aside>
+        </div>
+    </main>
+</div>
+} @else {
+<div class="loading-state">
+    <div class="spinner"></div>
+    <p>Chargement de l'évènement...</p>
+    <a routerLink="/events" class="btn-secondary">Retour à la liste</a>
+</div>
+}

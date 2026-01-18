@@ -1,0 +1,117 @@
+.events-container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    padding: 60px 20px;
+}
+
+/* Header Section */
+.events-header {
+    text-align: center;
+    margin-bottom: 60px;
+    animation: fadeInDown 0.8s ease-out;
+}
+
+.events-title {
+    font-size: 48px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin: 0 0 16px 0;
+    letter-spacing: -1px;
+}
+
+.events-subtitle {
+    font-size: 18px;
+    color: #4a5568;
+    margin: 0;
+    font-weight: 400;
+}
+
+/* Events Grid */
+.events-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    gap: 32px;
+    max-width: 1400px;
+    margin: 0 auto;
+    animation: fadeInUp 0.8s ease-out 0.2s both;
+}
+
+/* Animations */
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .events-grid {
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 28px;
+    }
+}
+
+@media (max-width: 768px) {
+    .events-container {
+        padding: 40px 16px;
+    }
+
+    .events-header {
+        margin-bottom: 40px;
+    }
+
+    .events-title {
+        font-size: 36px;
+    }
+
+    .events-subtitle {
+        font-size: 16px;
+    }
+
+    .events-grid {
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
+}
+
+@media (max-width: 480px) {
+    .events-title {
+        font-size: 28px;
+    }
+
+    .events-subtitle {
+        font-size: 14px;
+    }
+}
+
+/* Loading State (optionnel) */
+.events-grid:empty::after {
+    content: "Chargement des événements...";
+    display: block;
+    text-align: center;
+    padding: 60px 20px;
+    color: #718096;
+    font-size: 16px;
+    grid-column: 1 / -1;
+}

@@ -3,34 +3,26 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { RegistrationsModule } from './registrations/registrations.module';
 import { UserModule } from './users/user.module';
-import { EventsModule } from './events/events.module';
-import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { EventsModule } from './events/events.module';
 
 @Module({
-  imports: [
-    
-    ConfigModule.forRoot({
-      isGlobal: true, 
-    }),
-    TypeOrmModule.forRoot({
+  imports: [ConfigModule.forRoot({
+    isGlobal: true,
+  }),
+  TypeOrmModule.forRootAsync({
+    imports: [ConfigModule],
+    inject: [ConfigService],
+    useFactory: (configService: ConfigService) => ({
       type: 'postgres',
-      host: process.env.DB_HOST,
-      port: parseInt(process.env.DB_PORT!, 10),
-      username: process.env.DB_USERNAME,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME,
-      autoLoadEntities: true, 
-      ssl: {
-        rejectUnauthorized: false, // Required for some Supabase/Cloud connections
-      },
-      // Dev Only
-      synchronize: true, 
+      url: configService.get<string>('DATABASE_URL'),
+      autoLoadEntities: true,
+      synchronize: true,
+      ssl: { rejectUnauthorized: false },
     }),
-    UserModule,
-    EventsModule,
-    RegistrationsModule],
+  }), EventsModule,UserModule, RegistrationsModule],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }

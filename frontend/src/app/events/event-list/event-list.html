@@ -1,0 +1,12 @@
+<div class="events-container">
+    <div class="events-header">
+        <h1 class="events-title">Événements à venir</h1>
+        <p class="events-subtitle">Découvrez et participez aux événements de notre communauté</p>
+    </div>
+
+    <div class="events-grid">
+        @for(event of events(); track event.id) {
+        <app-event-card [event]="event"></app-event-card>
+        }
+    </div>
+</div>
