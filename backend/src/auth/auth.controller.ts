@@ -4,7 +4,13 @@ import { Body } from "@nestjs/common";
 import { AuthService } from "./auth.service";
 import { CreateUserDto } from "../users/dto/create-user.dto";
 import { SignInDto } from "../users/dto/SignInDto";
-
+import { UseGuards } from "@nestjs/common";
+import { AuthGuard } from "./Guards/auth.guard";
+import { Get } from "@nestjs/common";
+import { Request } from "@nestjs/common";
+import { RolesGuard } from "./Guards/roles.guard";
+import { Roles } from "./decorators/roles.decorator";
+import { Role } from "./enums/role.enum";
 @Controller('auth')
 /**
  * Controller for authentication endpoints.
@@ -30,6 +36,18 @@ export class AuthController {
     @Post('login')
     async login(@Body() body: SignInDto) {
         return this.authService.authenticate(body);
+    }
+
+    @UseGuards(AuthGuard)
+    @Get('me')
+    getUserInfo(@Request() req) {
+        return req.user;
+    }
+    @Get('admin-only')
+    @Roles(Role.ADMIN)
+    @UseGuards(AuthGuard, RolesGuard)
+    async adminOnly() {
+        return 'Direct access for admins only';
     }
 }
 

@@ -1,6 +1,7 @@
 import { UsersService } from './src/users/users.service';
 import { AuthService } from './src/auth/auth.service';
 import { UserEntity } from './src/users/entities/user.entity';
+import { Role } from './src/auth/enums/role.enum';
 
 // Stateful Mock Repository
 const mockRepository = {
@@ -25,7 +26,7 @@ async function test() {
     const authService = new AuthService(usersService, mockJwtService as any);
 
     console.log('Testing register...');
-    const user = await authService.register({ email: 'test@example.com', password: 'password123', role: 'user' });
+    const user = await authService.register({ email: 'test@example.com', password: 'password123', role: Role.USER });
     console.log('User registered:', user);
     console.log('Password hashed check:', user.password !== 'password123');
 

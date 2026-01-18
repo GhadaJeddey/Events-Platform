@@ -1,18 +1,19 @@
 import { UsersService } from './src/users/users.service';
 import { UserEntity } from './src/users/entities/user.entity';
+import { Role } from './src/auth/enums/role.enum';
 
 // Mock Repository
 const mockRepository: any = {
     create: (dto: any) => dto as UserEntity,
     save: (user: UserEntity) => Promise.resolve({ ...user, id: '1' }),
-    findOne: ({ where }: any) => Promise.resolve(where.email === 'test@example.com' ? { id: '1', email: 'test@example.com', password: 'hashed_password', role: 'student' } : null),
+    findOne: ({ where }: any) => Promise.resolve(where.email === 'test@example.com' ? { id: '1', email: 'test@example.com', password: 'hashed_password', role: Role.STUDENT } : null),
 };
 
 async function test() {
     const service = new UsersService(mockRepository);
 
     console.log('Testing create user...');
-    const user = await service.create({ email: 'test@example.com', password: 'password', role: 'student' });
+    const user = await service.create({ email: 'test@example.com', password: 'password', role: Role.STUDENT });
     console.log('User created:', user);
 
     console.log('Testing findByEmail...');

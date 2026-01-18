@@ -4,6 +4,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UserEntity } from './entities/user.entity';
 import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm';
+import { Role } from '../auth/enums/role.enum';
 
 @Injectable()
 /**
