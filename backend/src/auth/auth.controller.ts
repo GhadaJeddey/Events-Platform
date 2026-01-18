@@ -29,7 +29,7 @@ export class AuthController {
      */
     @Post('login')
     async login(@Body() body: SignInDto) {
-        return this.authService.login(body);
+        return this.authService.authenticate(body);
     }
 }
 

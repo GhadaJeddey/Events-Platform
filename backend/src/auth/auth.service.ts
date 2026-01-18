@@ -3,7 +3,8 @@ import { UsersService } from "../users/users.service";
 import { CreateUserDto } from "../users/dto/create-user.dto";
 import { SignInDto } from "../users/dto/SignInDto";
 import * as bcrypt from 'bcrypt';
-
+import { JwtService } from "@nestjs/jwt";
+import { UserEntity } from "src/users/entities/user.entity";
 @Injectable()
 /**
  * Service for handling authentication logic.
@@ -11,6 +12,7 @@ import * as bcrypt from 'bcrypt';
 export class AuthService {
     constructor(
         private usersService: UsersService,
+        private jwtService: JwtService,
     ) { }
 
     /**
@@ -28,12 +30,35 @@ export class AuthService {
      * @returns {Promise<Omit<UserEntity, 'password'>>} The user entity without password.
      * @throws {UnauthorizedException} If credentials are invalid.
      */
-    async login(body: SignInDto) {
-        const user = await this.usersService.findByEmail(body.email);
-        if (user && await bcrypt.compare(body.password, user.password)) {
+
+
+
+
+    async validateUser(input: SignInDto) {
+        const user = await this.usersService.findByEmail(input.email);
+        if (user && await bcrypt.compare(input.password, user.password)) {
             const { password, ...result } = user;
             return result;
         }
         throw new UnauthorizedException();
+
+    }
+
+    async authenticate(input: SignInDto) {
+        const user = await this.validateUser(input);
+        return this.SignIn(user);
+    }
+
+    async SignIn(input: Omit<UserEntity, 'password'>) {
+        const tokenPayload = {
+            sub: input.id,
+            email: input.email,
+            role: input.role
+        }
+        const accesstoken = this.jwtService.sign(tokenPayload);
+        return {
+            input,
+            accesstoken,
+        };
     }
 }
