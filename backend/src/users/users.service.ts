@@ -6,12 +6,20 @@ import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm';
 
 @Injectable()
+/**
+ * Service for managing user data.
+ */
 export class UsersService {
     constructor(
         @InjectRepository(UserEntity)
         private usersRepository: Repository<UserEntity>,
     ) { }
 
+    /**
+     * Creates a new user with hashed password.
+     * @param {CreateUserDto} createUserDto - The user creation DTO.
+     * @returns {Promise<UserEntity>} The created user entity.
+     */
     async create(createUserDto: CreateUserDto): Promise<UserEntity> {
         const salt = await bcrypt.genSalt();
         const hashedPassword = await bcrypt.hash(createUserDto.password, salt);
@@ -23,6 +31,11 @@ export class UsersService {
         return this.usersRepository.save(user);
     }
 
+    /**
+     * Finds a user by email address.
+     * @param {string} email - The email to search for.
+     * @returns {Promise<UserEntity | null>} The found user or null.
+     */
     async findByEmail(email: string): Promise<UserEntity | null> {
         return this.usersRepository.findOne({ where: { email } });
     }

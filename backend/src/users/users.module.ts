@@ -7,4 +7,8 @@ import { UserEntity } from './entities/user.entity';
     providers: [UsersService],
     exports: [UsersService],
 })
+/**
+ * Module for managing user-related operations.
+ * Exports UsersService for use in other modules.
+ */
 export class UsersModule { }

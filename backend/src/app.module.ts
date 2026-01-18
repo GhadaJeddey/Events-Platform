@@ -19,4 +19,8 @@ import { UserEntity } from './users/entities/user.entity';
   controllers: [AppController],
   providers: [AppService],
 })
+/**
+ * Root module of the application.
+ * Configures the application, including DB connection and sub-modules.
+ */
 export class AppModule { }

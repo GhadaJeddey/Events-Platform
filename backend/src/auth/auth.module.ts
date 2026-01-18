@@ -20,4 +20,8 @@ import { UserEntity } from '../users/entities/user.entity';
     providers: [AuthService],
     controllers: [AuthController],
 })
+/**
+ * Authentication module.
+ * Manages user authentication, including registration and login.
+ */
 export class AuthModule { }
