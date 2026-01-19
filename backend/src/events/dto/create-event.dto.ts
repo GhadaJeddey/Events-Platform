@@ -14,17 +14,25 @@ import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateEventDto {
-  @ApiProperty({ example: 'Séminaire Angular', description: "Titre de l'évènement" })
+  @ApiProperty({
+    example: 'Séminaire Angular',
+    description: "Titre de l'évènement",
+  })
   @IsString()
   @IsNotEmpty({ message: 'Le titre est obligatoire' })
   @MinLength(3, { message: 'Le titre doit contenir au moins 3 caractères' })
   @MaxLength(200, { message: 'Le titre ne peut pas dépasser 200 caractères' })
   title: string;
 
-  @ApiProperty({ example: 'Apprendre les bases de NestJS...', description: "Description détaillée" })
+  @ApiProperty({
+    example: 'Apprendre les bases de NestJS...',
+    description: 'Description détaillée',
+  })
   @IsString()
   @IsNotEmpty({ message: 'La description est obligatoire' })
-  @MinLength(10, { message: 'La description doit contenir au moins 10 caractères' })
+  @MinLength(10, {
+    message: 'La description doit contenir au moins 10 caractères',
+  })
   description: string;
 
   @ApiProperty({ example: '2026-06-15T10:00:00Z' })
@@ -35,7 +43,7 @@ export class CreateEventDto {
   @IsDateString({}, { message: 'La date de fin doit être valide' })
   endDate: string;
 
-  @ApiProperty({ example: 'Amphi A, ISIM', description: 'Lieu de l\'évènement' })
+  @ApiProperty({ example: 'Amphi A, ISIM', description: "Lieu de l'évènement" })
   @IsString()
   @IsNotEmpty({ message: 'Le lieu est obligatoire' })
   @MaxLength(255)
@@ -52,7 +60,10 @@ export class CreateEventDto {
   @IsUrl({}, { message: "L'URL de l'image n'est pas valide" })
   imageUrl?: string;
 
-  @ApiProperty({ required: false, example: '00000000-0000-0000-0000-000000000001' })
+  @ApiProperty({
+    required: false,
+    example: '00000000-0000-0000-0000-000000000001',
+  })
   @IsOptional()
   @IsUUID('4', { message: 'ID du club invalide' })
   clubId?: string;

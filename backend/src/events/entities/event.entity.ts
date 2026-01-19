@@ -54,7 +54,7 @@ export class Event {
   })
   eventStatus: EventStatus;
 
-  // Relations 
+  // Relations
 
   // @ManyToOne(() => Club, (club) => club.events, { eager: true })
   // @JoinColumn({ name: 'clubId' })

@@ -19,41 +19,43 @@ import { UpdateEventDto } from '../dto/update-event.dto';
 
 @Controller('events')
 export class EventsController {
-  constructor(private readonly eventsService: EventsService) { }
+  constructor(private readonly eventsService: EventsService) {}
 
-  @Post("create/:id")
-  @UseInterceptors(FileInterceptor('image', {
-    storage: diskStorage({
-      destination: './uploads/events',
-      filename: (req, file, cb) => {
-        const uniqueName = `${Date.now()}-${file.originalname}`;
-        cb(null, uniqueName);
-      }
-    })
-  }))
+  @Post('create/:id')
+  @UseInterceptors(
+    FileInterceptor('image', {
+      storage: diskStorage({
+        destination: './uploads/events',
+        filename: (req, file, cb) => {
+          const uniqueName = `${Date.now()}-${file.originalname}`;
+          cb(null, uniqueName);
+        },
+      }),
+    }),
+  )
   create(
     @Body() createEventDto: CreateEventDto,
     @Param('id') id: string,
-    @UploadedFile() file: Express.Multer.File
+    @UploadedFile() file: Express.Multer.File,
   ) {
     // Ajouter l'URL de l'image si un fichier a été uploadé
-    const imageUrl = file ? `/uploads/events/${file.filename}` : createEventDto.imageUrl;
+    const imageUrl = file
+      ? `/uploads/events/${file.filename}`
+      : createEventDto.imageUrl;
 
     const eventData = {
       ...createEventDto,
-      imageUrl
+      imageUrl,
     };
 
     return this.eventsService.create(eventData, id);
   }
-
 
   //  Événements publics
   @Get('public')
   findAllPublic() {
     return this.eventsService.findAllPublic();
   }
-
 
   // retourner un événement par ID
   @Get(':id')
@@ -63,19 +65,21 @@ export class EventsController {
 
   // Mettre à jour un événement
   @Patch(':id')
-  @UseInterceptors(FileInterceptor('image', {
-    storage: diskStorage({
-      destination: './uploads/events',
-      filename: (req, file, cb) => {
-        const uniqueName = `${Date.now()}-${file.originalname}`;
-        cb(null, uniqueName);
-      }
-    })
-  }))
+  @UseInterceptors(
+    FileInterceptor('image', {
+      storage: diskStorage({
+        destination: './uploads/events',
+        filename: (req, file, cb) => {
+          const uniqueName = `${Date.now()}-${file.originalname}`;
+          cb(null, uniqueName);
+        },
+      }),
+    }),
+  )
   update(
     @Param('id') id: string,
     @Body() updateEventDto: UpdateEventDto,
-    @UploadedFile() file: Express.Multer.File
+    @UploadedFile() file: Express.Multer.File,
   ) {
     const updateData = { ...updateEventDto };
     if (file) {
