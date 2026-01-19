@@ -1,20 +1,26 @@
-import { UsersService } from './src/users/users.service';
+import { UsersService } from './src/users/services/users.service';
 import { AuthService } from './src/auth/auth.service';
-import { UserEntity } from './src/users/entities/user.entity';
-import { Role } from './src/auth/enums/role.enum';
+import { User } from './src/users/entities/user.entity';
+import { UserRole } from './src/common/enums/user.enums';
 
 // Stateful Mock Repository
 const mockRepository = {
-    users: [] as UserEntity[],
-    create: (dto: any) => dto as UserEntity,
-    save: async (user: UserEntity) => {
-        const newUser = { ...user, id: Math.floor(Math.random() * 100000) };
+    users: [] as User[],
+    create: (dto: any) => dto as User,
+    save: async (user: User) => {
+        const newUser = {
+            ...user,
+            id: Math.random().toString(36).substring(2, 15), // Generate string ID
+        };
         mockRepository.users.push(newUser);
         return newUser;
     },
     findOne: async ({ where }: any) => {
-        return mockRepository.users.find(u => u.email === where.email) || null;
-    }
+        return mockRepository.users.find((u) => u.email === where.email) || null;
+    },
+    findOneBy: async ({ id }: any) => {
+        return mockRepository.users.find((u) => u.id === id) || null;
+    },
 };
 
 const mockJwtService = {
@@ -26,25 +32,45 @@ async function test() {
     const authService = new AuthService(usersService, mockJwtService as any);
 
     console.log('Testing register...');
-    const user = await authService.register({ email: 'test@example.com', password: 'password123', role: Role.USER });
-    console.log('User registered:', user);
-    console.log('Password hashed check:', user.password !== 'password123');
-
-    console.log('Testing login (correct password)...');
     try {
-        const loginResult = await authService.authenticate({ email: 'test@example.com', password: 'password123' });
-        console.log('Login successful:', loginResult);
+        const user = await authService.register({
+            firstName: 'Test',
+            lastName: 'User',
+            email: 'test@example.com',
+            password: 'password123',
+            role: UserRole.STUDENT,
+        });
+        console.log('User registered:', { ...user, password: '[HASHED]' });
+        console.log('Password hashed check:', user.password !== 'password123');
     } catch (e) {
-        console.error('Login failed:', e.message);
+        console.error('Registration failed:', e.message);
     }
 
-    console.log('Testing login (incorrect password)...');
+    console.log('\nTesting login (correct password)...');
     try {
-        await authService.authenticate({ email: 'test@example.com', password: 'wrongpassword' });
+        const loginResult = await authService.authenticate({
+            email: 'test@example.com',
+            password: 'password123',
+        });
+        console.log('Login successful:', {
+            ...loginResult,
+            input: { ...loginResult.input, password: '[REDACTED]' },
+        });
+    } catch (e) {
+        console.error('Login failed:', e.name, e.message);
+    }
+
+    console.log('\nTesting login (incorrect password)...');
+    try {
+        await authService.authenticate({
+            email: 'test@example.com',
+            password: 'wrongpassword',
+        });
         console.log('Login successful (unexpected)');
     } catch (e) {
-        console.log('Login failed (expected):', e.message);
+        console.log('Login failed (expected):', e.name, e.message);
     }
 }
 
 test();
+

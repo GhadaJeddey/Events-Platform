@@ -5,7 +5,7 @@ import { AuthController } from './auth.controller';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { UserEntity } from '../users/entities/user.entity';
+import { User } from '../users/entities/user.entity';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
@@ -17,10 +17,10 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
             inject: [ConfigService],
             useFactory: (configService: ConfigService) => ({
                 secret: configService.get<string>('JWT_SECRET'),
-                signOptions: { expiresIn: '3600s' },
+                signOptions: { expiresIn: '1h' },
             }),
         }),
-        TypeOrmModule.forFeature([UserEntity])
+        TypeOrmModule.forFeature([User])
     ],
     providers: [AuthService],
     controllers: [AuthController],
