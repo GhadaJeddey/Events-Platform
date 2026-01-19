@@ -1,0 +1,113 @@
+<div class="form-page-container">
+    <div class="form-card">
+        <div class="form-header">
+            <h1>Publier un évènement</h1>
+            <p>Partagez votre évènement avec la communauté EventTime</p>
+        </div>
+
+        <form #eventForm="ngForm" (ngSubmit)="onSubmit(eventForm)" class="modern-form">
+            <div class="form-grid">
+                <!-- Titre -->
+                <div class="form-group full-width">
+                    <label for="title">Titre de l'évènement</label>
+                    <input type="text" id="title" name="title" ngModel required minlength="5" #titleInput="ngModel"
+                        [class.invalid]="titleInput.invalid && (titleInput.dirty || titleInput.touched)">
+                    @if(titleInput.invalid && (titleInput.dirty || titleInput.touched)) {
+                    <div class="error-message">
+                        Le titre est requis (min. 5 caractères).
+                    </div>
+                    }
+                </div>
+
+                <!-- Description -->
+                <div class="form-group full-width">
+                    <label for="description">Description</label>
+                    <textarea id="description" name="description" ngModel rows="4"
+                        placeholder="Décrivez votre évènement..."></textarea>
+                </div>
+
+                <!-- Dates -->
+                <div class="form-group">
+                    <label for="startDate">Date de début</label>
+                    <input [min]="minDate()" type="datetime-local" id="startDate" name="startDate" ngModel required
+                        #startInput="ngModel"
+                        [class.invalid]="startInput.invalid && (startInput.dirty || startInput.touched)">
+                    @if(startInput.invalid && (startInput.dirty || startInput.touched)) {
+                    <div class="error-message">La date de début est obligatoire.</div>
+                    }
+                </div>
+
+                <div class="form-group">
+                    <label for="endDate">Date de fin</label>
+                    <input [min]="minDate()" type="datetime-local" id="endDate" name="endDate" ngModel required
+                        #endInput="ngModel" [class.invalid]="endInput.invalid && (endInput.dirty || endInput.touched)">
+                    @if(endInput.invalid && (endInput.dirty || endInput.touched)) {
+                    <div class="error-message">La date de fin est obligatoire.</div>
+                    }
+                </div>
+
+
+                <div class="form-group">
+                    <label for="location">Lieu</label>
+                    <input type="text" id="location" name="location" ngModel required #locInput="ngModel"
+                        [class.invalid]="locInput.invalid && (locInput.dirty || locInput.touched)">
+                    @if(locInput.invalid && (locInput.dirty || locInput.touched)) {
+                    <div class="error-message">Le lieu est obligatoire.</div>
+                    }
+                </div>
+
+                <div class="form-group">
+                    <label for="capacity">Capacité (participants)</label>
+                    <input type="number" id="capacity" name="capacity" ngModel required min="5" #capInput="ngModel"
+                        [class.invalid]="capInput.invalid && (capInput.dirty || capInput.touched)">
+                    @if(capInput.invalid && (capInput.dirty || capInput.touched)) {
+                    <div class="error-message">la capacité doit être superieur ou égale a 5 personnes .</div>
+                    }
+                </div>
+
+                <div class="form-group full-width">
+                    <label>Image de couverture</label>
+                    <div class="image-upload-container" [class.has-image]="imagePreview()" (click)="fileInput.click()">
+                        <input #fileInput type="file" (change)="onFileSelected($event)" accept="image/*"
+                            style="display: none">
+
+                        @if (!imagePreview()) {
+                        <div class="upload-placeholder">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                <polyline points="21 15 16 10 5 21"></polyline>
+                            </svg>
+                            <p>Cliquez pour choisir une image</p>
+                            <span>Format JPG, PNG ou WEBP</span>
+                        </div>
+                        }
+
+                        @if (imagePreview()) {
+                        <div class="image-preview">
+                            <img [src]="imagePreview()" alt="Aperçu">
+                            <div class="change-overlay">
+                                <span>Changer l'image</span>
+                            </div>
+                        </div>
+                        }
+                    </div>
+                    <!-- Validation manuelle de l'image -->
+                    @if(!selectedFile() && eventForm.submitted) {
+                    <div class="error-message">
+                        L'image de couverture est obligatoire.
+                    </div>
+                    }
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="btn-cancel" (click)="eventForm.reset()">Réinitialiser</button>
+                <button type="submit" class="btn-submit" [disabled]="eventForm.invalid && eventForm.submitted">
+                    Créer l'évènement
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

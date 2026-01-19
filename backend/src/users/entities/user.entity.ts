@@ -1,37 +1,38 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
-import { Role } from '../../auth/enums/role.enum';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
+import { UserRole } from '../../common/enums/user.enums';
 
-@Entity()
-/**
- * User Entity
- * Represents a user in the database.
- */
-export class UserEntity {
-    /**
-     * Unique identifier for the user.
-     */
-    @PrimaryGeneratedColumn()
-    id: number;
+@Entity('users')
+export class User {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-    /**
-     * User's email address. Must be unique.
-     */
-    @Column({ unique: true })
-    email: string;
+  @Column({ length: 255 })
+  firstName: string;
 
-    /**
-     * Hashed password for the user.
-     */
-    @Column()
-    password: string;
+  @Column({ length: 255 })
+  lastName: string;
 
-    /**
-     * Role of the user (e.g., 'student', 'admin').
-     */
-    @Column({
-        type: 'enum',
-        enum: Role,
-        default: Role.STUDENT,
-    })
-    role: Role;
+  @Column({ length: 255, unique: true })
+  email: string;
+
+  @Column({ length: 255 })
+  password: string;
+
+  @Column({ type: 'enum', enum: UserRole, default: UserRole.STUDENT })
+  role: UserRole;
+
+  @Column({ default: true })
+  isActive: boolean;
+
+  @CreateDateColumn({ type: 'timestamp' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ type: 'timestamp' })
+  updatedAt: Date;
 }
