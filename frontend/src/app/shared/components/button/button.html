@@ -1,0 +1,10 @@
+<button [type]="type()" [disabled]="isDisabled() || isLoading()" [class]="'btn btn-' + variant() + ' ' + className()"
+    (click)="onClick()" [class.loading]="isLoading()">
+    @if (isLoading()) {
+    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+    }
+    <span class="btn-content">
+        <ng-content></ng-content>
+        {{ label() }}
+    </span>
+</button>

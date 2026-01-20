@@ -1,0 +1,56 @@
+<div class="auth-wrapper d-flex align-items-center justify-content-center py-5">
+    <app-card title="Créer un compte" subtitle="Rejoignez la plateforme Events Platform" className="auth-card"
+        shadow="lg">
+        <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+            <div class="row">
+                <div class="col-md-6">
+                    <app-input label="Prénom" formControlName="firstName" placeholder="Jean"
+                        [error]="registerForm.get('firstName')?.invalid && registerForm.get('firstName')?.touched ? 'Le prénom est requis.' : null"></app-input>
+                </div>
+                <div class="col-md-6">
+                    <app-input label="Nom" formControlName="lastName" placeholder="Dupont"
+                        [error]="registerForm.get('lastName')?.invalid && registerForm.get('lastName')?.touched ? 'Le nom est requis.' : null"></app-input>
+                </div>
+            </div>
+
+            <app-input label="Adresse email" type="email" formControlName="email" placeholder="nom@exemple.com"
+                [error]="registerForm.get('email')?.invalid && registerForm.get('email')?.touched ? 'Veuillez entrer une adresse email valide.' : null"></app-input>
+
+            <div class="mb-3">
+                <label class="form-label d-block text-muted small fw-bold text-uppercase">Je suis un...</label>
+                <div class="d-flex gap-3">
+                    @for (role of roles; track role.value) {
+                    <div class="flex-grow-1">
+                        <input type="radio" class="btn-check" [id]="role.value" formControlName="role"
+                            [value]="role.value">
+                        <label class="btn btn-outline-primary w-100" [for]="role.value">{{ role.label }}</label>
+                    </div>
+                    }
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <app-input label="Mot de passe" type="password" formControlName="password" placeholder="••••••••"
+                        [error]="registerForm.get('password')?.invalid && registerForm.get('password')?.touched ? 'Le mot de passe doit contenir au moins 6 caractères.' : null"></app-input>
+                </div>
+                <div class="col-md-6">
+                    <app-input label="Confirmer" type="password" formControlName="confirmPassword"
+                        placeholder="••••••••"
+                        [error]="(registerForm.get('confirmPassword')?.invalid || registerForm.hasError('passwordMismatch')) && registerForm.get('confirmPassword')?.touched ? (registerForm.hasError('passwordMismatch') ? 'Les mots de passe ne correspondent pas.' : 'La confirmation est requise.') : null"></app-input>
+                </div>
+            </div>
+
+            <app-button type="submit" [isLoading]="isLoading()" [isDisabled]="registerForm.invalid"
+                className="w-100 mt-2">
+                S'inscrire
+            </app-button>
+        </form>
+
+        <div footer class="text-center mt-4">
+            <p class="mb-0 text-muted">Déjà un compte ?
+                <a [routerLink]="['/auth/login']" class="fw-bold text-decoration-none">Connectez-vous</a>
+            </p>
+        </div>
+    </app-card>
+</div>
