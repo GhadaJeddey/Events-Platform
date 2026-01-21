@@ -10,6 +10,7 @@ import {
 } from 'typeorm';
 
 import { ApprovalStatus, EventStatus } from '../../common/enums/event.enums';
+import { Registration } from '../../registrations/entities/registration.entity';
 
 @Entity('events')
 export class Event {
@@ -78,6 +79,9 @@ export class Event {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @OneToMany(() => Registration, (registration) => registration.event)
+  registrations: Registration[];
 
   // getters
   /* a utiliser pour interdire l'inscription si l'evenement est plein */

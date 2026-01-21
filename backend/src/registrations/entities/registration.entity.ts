@@ -1,7 +1,7 @@
 import { Entity, Unique, PrimaryGeneratedColumn, CreateDateColumn, ManyToOne,Column} from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import { Event } from '../../events/entities/event.entity';
-import { RegistrationStatus } from '../enums/registration-status.enum';
+import { RegistrationStatus } from '../../common/enums/registration-status.enum';
 
 @Entity()
 @Unique (['user', 'event']) // Prevents multiple registrations to the same event by same user 

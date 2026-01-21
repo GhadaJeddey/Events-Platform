@@ -1,12 +1,11 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateRegistrationDto } from './dto/create-registration.dto';
-import { UpdateRegistrationDto } from './dto/update-registration.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, In } from 'typeorm';
 import { Registration } from './entities/registration.entity';
 import { Event } from '../events/entities/event.entity';
 import { User } from '../users/entities/user.entity';
-import { RegistrationStatus } from './enums/registration-status.enum';
+import { RegistrationStatus } from '../common/enums/registration-status.enum';
 
 @Injectable()
 export class RegistrationsService {
@@ -21,13 +20,13 @@ export class RegistrationsService {
 
   async create(createRegistrationDto: CreateRegistrationDto, userId: number) {
     const user = await this.userRepository.findOne({ where: { id: userId } });
-    const event = await this.eventRepository.findOne({ where: { id: createRegistrationDto.eventId } });
+    const event = await this.eventRepository.findOne({ where: { id: String(createRegistrationDto.eventId) } });
 
     if (!user || !event) {
       throw new NotFoundException('User or Event not found');
     }
 
-    if (event.currentRegistrations >= event.maxCapacity) {
+    if (event.currentRegistrations >= event.capacity) {
       // user will be added to the waitlist
       const waitlistRegistration = this.registrationRepository.create({
         user,
@@ -48,8 +47,10 @@ export class RegistrationsService {
   async findAll(userId: number) {
     // find all registrations for a specific user
       return await this.registrationRepository.find({
-        where: { user: { id: userId },
-                status: ['confirmed', 'waitlist'] },
+        where: { 
+          user: { id: userId },
+          status: In([RegistrationStatus.CONFIRMED, RegistrationStatus.WAITLIST])
+        },
         relations: ['event'], // Include event details
         order: { createdAt: 'DESC' }
       });
@@ -115,7 +116,7 @@ export class RegistrationsService {
   async getAwaitingRegistrations(eventId: number) : Promise<number>{
     return await this.registrationRepository.count({
       where: {
-        event: { id: eventId },
+        event: { id: String(eventId) },
         status: RegistrationStatus.WAITLIST
       }
     });
@@ -124,7 +125,7 @@ export class RegistrationsService {
   async getConfirmedRegistrations(eventId: number) : Promise<number>{
     return await this.registrationRepository.count({
       where: {
-        event: { id: eventId },
+        event: { id: String(eventId) },
         status: RegistrationStatus.CONFIRMED
       }
     });
@@ -133,7 +134,7 @@ export class RegistrationsService {
   async getCancelledRegistrations(eventId: number) : Promise<number>{
       return await this.registrationRepository.count({
         where: {
-          event: { id: eventId },
+          event: { id: String(eventId) },
           status: RegistrationStatus.CANCELLED
         }
       });

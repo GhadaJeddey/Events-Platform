@@ -74,7 +74,11 @@ describe('RegistrationsService', () => {
     const result = await service.create(dto, userId);
 
     // D. Assertions (The Proof)
-    expect(result.status).toEqual('waitlist'); // <--- CHECK STATUS
+    if (Array.isArray(result)) {
+      expect(result[0].status).toEqual('waitlist'); // <--- CHECK STATUS
+    } else {
+      expect(result.status).toEqual('waitlist'); // <--- CHECK STATUS
+    }
     expect(mockEventRepo.save).not.toHaveBeenCalled(); // We should NOT increment count
   });
 
@@ -100,7 +104,11 @@ describe('RegistrationsService', () => {
     const result = await service.create(dto, userId);
 
     // D. Assertions
-    expect(result.status).toEqual('confirmed'); // <--- CHECK STATUS
+    if (Array.isArray(result)) {
+      expect(result[0].status).toEqual('confirmed'); // <--- CHECK STATUS
+    } else {
+      expect(result.status).toEqual('confirmed'); // <--- CHECK STATUS
+    }
     expect(mockEventRepo.save).toHaveBeenCalled(); // We SHOULD increment count
     expect(mockOpenEvent.currentParticipants).toBe(11); // 10 + 1
   });
