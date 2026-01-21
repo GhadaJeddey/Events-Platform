@@ -11,7 +11,9 @@ async function bootstrap() {
   // Configuration Swagger
   const config = new DocumentBuilder()
     .setTitle('Events Platform API')
-    .setDescription("Documentation de l'API de la plateforme de gestion d'évènements")
+    .setDescription(
+      "Documentation de l'API de la plateforme de gestion d'évènements",
+    )
     .setVersion('1.0')
     .addTag('events')
     .build();

@@ -1,12 +1,12 @@
 export enum ApprovalStatus {
-    PENDING = 'pending',
-    APPROVED = 'approved',
-    REJECTED = 'rejected',
-    CANCELLED = 'cancelled',
+  PENDING = 'pending',
+  APPROVED = 'approved',
+  REJECTED = 'rejected',
+  CANCELLED = 'cancelled',
 }
 
 export enum EventStatus {
-    UPCOMING = 'upcoming',
-    ONGOING = 'ongoing',
-    COMPLETED = 'completed',
+  UPCOMING = 'upcoming',
+  ONGOING = 'ongoing',
+  COMPLETED = 'completed',
 }
