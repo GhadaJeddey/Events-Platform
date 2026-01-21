@@ -10,7 +10,7 @@ import { Get } from "@nestjs/common";
 import { Request } from "@nestjs/common";
 import { RolesGuard } from "./Guards/roles.guard";
 import { Roles } from "./decorators/roles.decorator";
-import { Role } from "./enums/role.enum";
+import { Role } from "../common/enums/role.enum";
 @Controller('auth')
 /**
  * Controller for authentication endpoints.
