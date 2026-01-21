@@ -10,6 +10,7 @@ import {
 } from 'typeorm';
 
 import { ApprovalStatus, EventStatus } from '../../common/enums/event.enums';
+import { Registration } from '../../registrations/entities/registration.entity';
 
 @Entity('events')
 export class Event {
@@ -54,7 +55,7 @@ export class Event {
   })
   eventStatus: EventStatus;
 
-  // Relations 
+  // Relations
 
   // @ManyToOne(() => Club, (club) => club.events, { eager: true })
   // @JoinColumn({ name: 'clubId' })
@@ -70,8 +71,8 @@ export class Event {
   @Column({ type: 'uuid', nullable: true })
   organizerId?: string;
 
-  // @OneToMany(() => Registration, (registration) => registration.event)
-  // registrations: Registration[];
+  @OneToMany(() => Registration, (registration) => registration.event)
+  registrations: Registration[];
 
   @CreateDateColumn()
   createdAt: Date;

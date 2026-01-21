@@ -1,13 +1,13 @@
-import { Entity, Unique, PrimaryGeneratedColumn, CreateDateColumn, ManyToOne,Column} from 'typeorm';
+import { Entity, Unique, PrimaryGeneratedColumn, CreateDateColumn, ManyToOne, Column } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import { Event } from '../../events/entities/event.entity';
 import { RegistrationStatus } from '../enums/registration-status.enum';
 
 @Entity()
-@Unique (['user', 'event']) // Prevents multiple registrations to the same event by same user 
+@Unique(['user', 'event']) // Prevents multiple registrations to the same event by same user 
 export class Registration {
-    @PrimaryGeneratedColumn()
-    id: number;
+    @PrimaryGeneratedColumn('uuid')
+    id: string;
 
     @ManyToOne(() => User, (user) => user.registrations, { onDelete: 'CASCADE' })
     user: User;
@@ -16,10 +16,10 @@ export class Registration {
     event: Event;
 
     // status for waitlist or confirmed
-    @Column({ 
+    @Column({
         type: 'enum',
         enum: RegistrationStatus,
-        default: RegistrationStatus.CONFIRMED 
+        default: RegistrationStatus.CONFIRMED
     })
     status: RegistrationStatus;
 

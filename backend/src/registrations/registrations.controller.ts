@@ -1,8 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req, ParseUUIDPipe } from '@nestjs/common';
 import { RegistrationsService } from './registrations.service';
 import { CreateRegistrationDto } from './dto/create-registration.dto';
 import { UpdateRegistrationDto } from './dto/update-registration.dto';
-import { Roles} from '../auth/decorators/roles.decorator';
+import { Roles } from '../auth/decorators/roles.decorator';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { AuthGuard } from '../auth/guards/auth.guard';
 
@@ -13,11 +13,11 @@ import { AuthGuard } from '../auth/guards/auth.guard';
 // RolesGuard checks if the user has the appropriate role to access the endpoint
 
 export class RegistrationsController {
-  constructor(private readonly registrationsService: RegistrationsService) {}
+  constructor(private readonly registrationsService: RegistrationsService) { }
 
   @Post()
   @Roles('student')
-  create(@Body() createRegistrationDto: CreateRegistrationDto , @Req() req) {
+  create(@Body() createRegistrationDto: CreateRegistrationDto, @Req() req) {
     return this.registrationsService.create(createRegistrationDto, req.user.id);
   }
 
@@ -29,14 +29,14 @@ export class RegistrationsController {
 
   @Get(':id')
   @Roles('student')
-  findOne(@Param('id', ParseIntPipe) id: number, @Req() req ) {
+  findOne(@Param('id', ParseUUIDPipe) id: string, @Req() req) {
     return this.registrationsService.findOne(id, req.user.id);
   }
 
 
   @Delete(':id')
   @Roles('student')
-  cancelRegistration(@Param('id', ParseIntPipe) id: number, @Req() req) {
+  cancelRegistration(@Param('id', ParseUUIDPipe) id: string, @Req() req) {
     return this.registrationsService.cancelRegistration(id, req.user.id);
   }
 

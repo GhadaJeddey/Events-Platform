@@ -15,13 +15,13 @@ export class EventsService {
   constructor(
     @InjectRepository(Event)
     private eventsRepository: Repository<Event>,
-  ) { }
+  ) {}
 
   // CREATE - Créer un événement
   async create(createEventDto: CreateEventDto, userId: string): Promise<Event> {
     const startDate = new Date(createEventDto.startDate);
     const endDate = new Date(createEventDto.endDate);
-    //Vérifier la cohérence 
+    //Vérifier la cohérence
     if (endDate <= startDate) {
       throw new BadRequestException(
         'La date de fin doit être après la date de début',
@@ -65,7 +65,7 @@ export class EventsService {
   }
 
   // UPDATE - Mettre à jour un événement
-  async update(id: string, updateEventDto: UpdateEventDto,) {
+  async update(id: string, updateEventDto: UpdateEventDto) {
     if (updateEventDto.startDate && updateEventDto.endDate) {
       const startDate = new Date(updateEventDto.startDate);
       const endDate = new Date(updateEventDto.endDate);

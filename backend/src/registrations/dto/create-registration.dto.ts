@@ -1,7 +1,7 @@
-import { IsInt, IsNotEmpty } from 'class-validator';
+import { IsNotEmpty, IsUUID } from 'class-validator';
 
 export class CreateRegistrationDto {
-    @IsInt()
+    @IsUUID()
     @IsNotEmpty()
-    eventId: number;    
+    eventId: string;
 }
