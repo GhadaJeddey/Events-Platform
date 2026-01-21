@@ -7,10 +7,8 @@ import { EventsModule } from './events/events.module';
 import { UsersModule } from './users/users.module';
 import { RegistrationsModule } from './registrations/registrations.module';
 
-
 import { AuthModule } from './auth/auth.module';
 @Module({
-
   imports: [AuthModule,
     ConfigModule.forRoot({
       isGlobal: true,
@@ -27,6 +25,7 @@ import { AuthModule } from './auth/auth.module';
       }),
     }),
     EventsModule,
+    RegistrationsModule,
     UsersModule,
     RegistrationsModule
   ],

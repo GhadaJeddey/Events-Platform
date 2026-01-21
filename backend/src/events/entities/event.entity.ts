@@ -71,8 +71,8 @@ export class Event {
   @Column({ type: 'uuid', nullable: true })
   organizerId?: string;
 
-  // @OneToMany(() => Registration, (registration) => registration.event)
-  // registrations: Registration[];
+  @OneToMany(() => Registration, (registration) => registration.event)
+  registrations: Registration[];
 
   @CreateDateColumn()
   createdAt: Date;

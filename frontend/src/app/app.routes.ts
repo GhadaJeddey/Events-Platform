@@ -3,7 +3,6 @@ import { EventList } from './events/event-list/event-list';
 import { EventDetails } from './events/event-details/event-details';
 import { CreateEventForm } from './events/create-event-form/create-event-form';
 import { UpdateEvent } from './events/update-event/update-event';
-
 import { LoginComponent } from './auth/login/login';
 import { RegisterComponent } from './auth/register/register';
 import { ForgotPasswordComponent } from './auth/forgot-password/forgot-password';
@@ -12,7 +11,6 @@ import { authGuard } from './guards/auth.guard';
 export const routes: Routes = [
     { path: '', redirectTo: 'events', pathMatch: 'full' },
     { path: 'events', component: EventList },
-
     {
         path: 'events/create',
         component: CreateEventForm,

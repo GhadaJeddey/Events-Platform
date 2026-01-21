@@ -16,9 +16,9 @@ export class RegistrationsService {
     private eventRepository: Repository<Event>,
     @InjectRepository(User)
     private userRepository: Repository<User>,
-  ) {}
+  ) { }
 
-  async create(createRegistrationDto: CreateRegistrationDto, userId: number) {
+  async create(createRegistrationDto: CreateRegistrationDto, userId: string) {
     const user = await this.userRepository.findOne({ where: { id: userId } });
     const event = await this.eventRepository.findOne({ where: { id: String(createRegistrationDto.eventId) } });
 
@@ -31,7 +31,7 @@ export class RegistrationsService {
       const waitlistRegistration = this.registrationRepository.create({
         user,
         event,
-        status: 'waitlist', 
+        status: RegistrationStatus.WAITLIST,
       });
       return await this.registrationRepository.save(waitlistRegistration);
     }
@@ -44,76 +44,76 @@ export class RegistrationsService {
 
   }
 
-  async findAll(userId: number) {
+  async findAll(userId: string) {
     // find all registrations for a specific user
-      return await this.registrationRepository.find({
-        where: { 
-          user: { id: userId },
-          status: In([RegistrationStatus.CONFIRMED, RegistrationStatus.WAITLIST])
-        },
-        relations: ['event'], // Include event details
-        order: { createdAt: 'DESC' }
-      });
-    }
+    return await this.registrationRepository.find({
+      where: {
+        user: { id: userId },
+        status: In([RegistrationStatus.CONFIRMED, RegistrationStatus.WAITLIST])
+      },
+      relations: ['event'], // Include event details
+      order: { createdAt: 'DESC' }
+    });
+  }
 
-  async findOne(id: number, userId: number) {
+  async findOne(id: string, userId: string) {
     // find a specific registration by id for a specific user
-      const registration = await this.registrationRepository.findOne({
-        where: { id },
-        relations: ['event', 'user'],
-      });
+    const registration = await this.registrationRepository.findOne({
+      where: { id },
+      relations: ['event', 'user'],
+    });
 
-      if (!registration) {
-        throw new NotFoundException(`Registration #${id} not found`);
-      }
-
-      // Security
-      if (registration.user.id !== userId) {
-        throw new ForbiddenException('You can only view your own registrations');
-      }
-
-      return registration;
+    if (!registration) {
+      throw new NotFoundException(`Registration #${id} not found`);
     }
 
-  async cancelRegistration(id: number, userId: number) {
-      const registration = await this.registrationRepository.findOne({
-        where: { id },
-        relations: ['event', 'user'],
-      });
-
-      if (!registration) throw new NotFoundException('Registration not found');
-      
-      // Security
-      if (registration.user.id !== userId) {
-        throw new ForbiddenException('You cannot cancel someone else\'s registration');
-      }
-      registration.status == RegistrationStatus.CANCELLED;
-      await this.registrationRepository.save(registration);
-
-      const event = registration.event;
-
-      if (registration.status === RegistrationStatus.CONFIRMED) {
-      
-        const nextInLine = await this.registrationRepository.findOne({
-          where: { event: { id: event.id }, status: RegistrationStatus.WAITLIST },
-          order: { createdAt: 'ASC' }, // FIFO for waitlist
-          relations: ['user'] 
-        });
-
-        if (nextInLine) {
-          nextInLine.status = RegistrationStatus.CONFIRMED;
-          await this.registrationRepository.save(nextInLine);
-          console.log(`Promoted user ${nextInLine.user.id} from waitlist.`);
-        } else {
-          event.currentRegistrations -= 1;
-          await this.eventRepository.save(event);
-        }
-      }
-
-      return { message: 'Registration cancelled successfully', id };
+    // Security
+    if (registration.user.id !== userId) {
+      throw new ForbiddenException('You can only view your own registrations');
     }
 
-  async getAwaitingRegistrations(eventId: number) : Promise<number>{
+    return registration;
+  }
+
+  async cancelRegistration(id: string, userId: string) {
+    const registration = await this.registrationRepository.findOne({
+      where: { id },
+      relations: ['event', 'user'],
+    });
+
+    if (!registration) throw new NotFoundException('Registration not found');
+
+    // Security
+    if (registration.user.id !== userId) {
+      throw new ForbiddenException('You cannot cancel someone else\'s registration');
+    }
+    registration.status == RegistrationStatus.CANCELLED;
+    await this.registrationRepository.save(registration);
+
+    const event = registration.event;
+
+    if (registration.status === RegistrationStatus.CONFIRMED) {
+
+      const nextInLine = await this.registrationRepository.findOne({
+        where: { event: { id: event.id }, status: RegistrationStatus.WAITLIST },
+        order: { createdAt: 'ASC' }, // FIFO for waitlist
+        relations: ['user']
+      });
+
+      if (nextInLine) {
+        nextInLine.status = RegistrationStatus.CONFIRMED;
+        await this.registrationRepository.save(nextInLine);
+        console.log(`Promoted user ${nextInLine.user.id} from waitlist.`);
+      } else {
+        event.currentRegistrations -= 1;
+        await this.eventRepository.save(event);
+      }
+    }
+
+    return { message: 'Registration cancelled successfully', id };
+  }
+
+  async getAwaitingRegistrations(eventId: string): Promise<number> {
     return await this.registrationRepository.count({
       where: {
         event: { id: String(eventId) },
@@ -121,8 +121,8 @@ export class RegistrationsService {
       }
     });
   }
-  
-  async getConfirmedRegistrations(eventId: number) : Promise<number>{
+
+  async getConfirmedRegistrations(eventId: string): Promise<number> {
     return await this.registrationRepository.count({
       where: {
         event: { id: String(eventId) },
