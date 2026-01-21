@@ -14,7 +14,7 @@
     overflow: hidden;
 }
 
-/* Background floating shapes for WOW effect */
+/* Background floating shapes*/
 .form-page-container::before,
 .form-page-container::after {
     content: '';

@@ -5,10 +5,10 @@ import { AuthService } from "./auth.service";
 import { CreateUserDto } from "../users/dto/create-user.dto";
 import { SignInDto } from "../users/dto/SignInDto";
 import { UseGuards } from "@nestjs/common";
-import { AuthGuard } from "./Guards/auth.guard";
+import { AuthGuard } from "./guards/auth.guard";
 import { Get } from "@nestjs/common";
 import { Request } from "@nestjs/common";
-import { RolesGuard } from "./Guards/roles.guard";
+import { RolesGuard } from "./guards/roles.guard";
 import { Roles } from "./decorators/roles.decorator";
 import { Role } from "./enums/role.enum";
 @Controller('auth')

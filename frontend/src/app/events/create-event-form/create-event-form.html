@@ -10,11 +10,11 @@
                 <!-- Titre -->
                 <div class="form-group full-width">
                     <label for="title">Titre de l'évènement</label>
-                    <input type="text" id="title" name="title" ngModel required minlength="5" #titleInput="ngModel"
+                    <input type="text" id="title" name="title" ngModel required minlength="3" #titleInput="ngModel"
                         [class.invalid]="titleInput.invalid && (titleInput.dirty || titleInput.touched)">
                     @if(titleInput.invalid && (titleInput.dirty || titleInput.touched)) {
                     <div class="error-message">
-                        Le titre est requis (min. 5 caractères).
+                        Le titre est requis (min. 3 caractères).
                     </div>
                     }
                 </div>
@@ -22,8 +22,14 @@
                 <!-- Description -->
                 <div class="form-group full-width">
                     <label for="description">Description</label>
-                    <textarea id="description" name="description" ngModel rows="4"
-                        placeholder="Décrivez votre évènement..."></textarea>
+                    <textarea id="description" name="description" ngModel required minlength="10" #descInput="ngModel"
+                        rows="4" placeholder="Décrivez votre évènement (min. 10 caractères)..."
+                        [class.invalid]="descInput.invalid && (descInput.dirty || descInput.touched)"></textarea>
+                    @if(descInput.invalid && (descInput.dirty || descInput.touched)) {
+                    <div class="error-message">
+                        La description est obligatoire (min. 10 caractères).
+                    </div>
+                    }
                 </div>
 
                 <!-- Dates -->
@@ -58,10 +64,10 @@
 
                 <div class="form-group">
                     <label for="capacity">Capacité (participants)</label>
-                    <input type="number" id="capacity" name="capacity" ngModel required min="5" #capInput="ngModel"
+                    <input type="number" id="capacity" name="capacity" ngModel required min="1" #capInput="ngModel"
                         [class.invalid]="capInput.invalid && (capInput.dirty || capInput.touched)">
                     @if(capInput.invalid && (capInput.dirty || capInput.touched)) {
-                    <div class="error-message">la capacité doit être superieur ou égale a 5 personnes .</div>
+                    <div class="error-message">La capacité doit être au moins de 1 personne.</div>
                     }
                 </div>
 
