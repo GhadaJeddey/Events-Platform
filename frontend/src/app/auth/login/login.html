@@ -1,0 +1,31 @@
+<div class="auth-wrapper d-flex align-items-center justify-content-center">
+    <app-card title="Connexion" subtitle="Accédez à votre espace Events Platform" className="auth-card" shadow="lg">
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+            <app-input label="Adresse email" type="email" formControlName="email" placeholder="nom@exemple.com"
+                [error]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched ? 'Veuillez entrer une adresse email valide.' : null"></app-input>
+
+            <app-input label="Mot de passe" type="password" formControlName="password" placeholder="••••••••"
+                [error]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched ? 'Le mot de passe doit contenir au moins 6 caractères.' : null"></app-input>
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="rememberMe">
+                    <label class="form-check-label text-muted" for="rememberMe">
+                        Se souvenir de moi
+                    </label>
+                </div>
+                <a [routerLink]="['/auth/forgot-password']" class="text-decoration-none small">Mot de passe oublié ?</a>
+            </div>
+
+            <app-button type="submit" [isLoading]="isLoading()" [isDisabled]="loginForm.invalid" className="w-100">
+                Se connecter
+            </app-button>
+        </form>
+
+        <div footer class="text-center mt-4">
+            <p class="mb-0 text-muted">Pas encore de compte ?
+                <a [routerLink]="['/auth/register']" class="fw-bold text-decoration-none">Inscrivez-vous</a>
+            </p>
+        </div>
+    </app-card>
+</div>

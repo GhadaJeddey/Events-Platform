@@ -1,14 +1,14 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { RegistrationsModule } from './registrations/registrations.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { EventsModule } from './events/events.module';
 import { UsersModule } from './users/users.module';
 
+import { AuthModule } from './auth/auth.module';
 @Module({
-  imports: [
+  imports: [AuthModule,
     ConfigModule.forRoot({
       isGlobal: true,
     }),
@@ -23,11 +23,14 @@ import { UsersModule } from './users/users.module';
         ssl: { rejectUnauthorized: false },
       }),
     }),
-    RegistrationsModule,
-    EventsModule,
+    //EventsModule,
     UsersModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
+/**
+ * Root module of the application.
+ * Configures the application, including DB connection and sub-modules.
+ */
 export class AppModule { }

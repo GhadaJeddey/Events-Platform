@@ -4,10 +4,8 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
-  OneToMany,
 } from 'typeorm';
 import { UserRole } from '../../common/enums/user.enums';
-import { Registration } from '../../registrations/entities/registration.entity';
 
 @Entity('users')
 export class User {
@@ -37,7 +35,4 @@ export class User {
 
   @UpdateDateColumn({ type: 'timestamp' })
   updatedAt: Date;
-
-  @OneToMany(() => Registration, (registration) => registration.user)
-  registrations: Registration[];
 }

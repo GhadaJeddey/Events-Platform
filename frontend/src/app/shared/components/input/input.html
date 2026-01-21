@@ -1,0 +1,16 @@
+<div class="input-wrapper mb-3">
+    @if (label()) {
+    <label [for]="id()" class="form-label">{{ label() }}</label>
+    }
+    <div class="input-container">
+        <input [type]="type()" [id]="id()" [placeholder]="placeholder()" [value]="value()" [disabled]="isDisabled()"
+            (input)="handleInput($event)" (blur)="handleBlur()" class="form-control"
+            [class.is-invalid]="error() && isTouched()">
+        <div class="focus-border"></div>
+    </div>
+    @if (error() && isTouched()) {
+    <div class="invalid-feedback d-block">
+        {{ error() }}
+    </div>
+    }
+</div>

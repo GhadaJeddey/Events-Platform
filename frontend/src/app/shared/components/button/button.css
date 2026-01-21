@@ -1,0 +1,75 @@
+.btn {
+    border-radius: 8px;
+    padding: 0.6rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.2s ease-in-out;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn:active {
+    transform: scale(0.98);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+    border: none;
+    color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+    background: linear-gradient(135deg, #0b5ed7 0%, #084298 100%);
+    box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3);
+}
+
+.btn-secondary {
+    background: #6c757d;
+    border: none;
+    color: white;
+}
+
+.btn-secondary:hover:not(:disabled) {
+    background: #5c636a;
+    box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+}
+
+.btn-outline {
+    background: transparent;
+    border: 2px solid #0d6efd;
+    color: #0d6efd;
+}
+
+.btn-outline:hover:not(:disabled) {
+    background: #0d6efd;
+    color: white;
+}
+
+.btn-danger {
+    background: #dc3545;
+    border: none;
+    color: white;
+}
+
+.btn-danger:hover:not(:disabled) {
+    background: #bb2d3b;
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+}
+
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    filter: grayscale(0.5);
+}
+
+.btn-content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.loading .btn-content {
+    visibility: visible;
+}
