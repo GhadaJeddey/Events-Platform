@@ -47,8 +47,6 @@ export class EventsService {
   // Méthode pour mettre à jour un événement (PATCH)
   updateEvent(id: string, eventData: any, imageFile: File | null = null): Observable<any> {
     const formData = new FormData();
-
-    // On n'ajoute que les champs présents dans eventData
     if (eventData.title) formData.append('title', eventData.title);
     if (eventData.description) formData.append('description', eventData.description);
     if (eventData.startDate) formData.append('startDate', eventData.startDate);

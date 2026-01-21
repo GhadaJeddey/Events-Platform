@@ -32,7 +32,7 @@ export class EventDetails {
 
   //construire l'URL complète de l'image
   getImageUrl(imageUrl: string | undefined): string {
-    if (!imageUrl) return '';
+    if (!imageUrl) return 'assets/images/default-event.png';
     return environment.apiUrl + imageUrl;
   }
 }
