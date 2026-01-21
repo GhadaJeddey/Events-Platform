@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { RegistrationsModule } from './registrations/registrations.module';
+import { UserModule } from './users/user.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { EventsModule } from './events/events.module';
@@ -19,7 +21,7 @@ import { EventsModule } from './events/events.module';
       synchronize: true,
       ssl: { rejectUnauthorized: false },
     }),
-  }), EventsModule],
+  }), EventsModule,UserModule, RegistrationsModule],
   controllers: [AppController],
   providers: [AppService],
 })
