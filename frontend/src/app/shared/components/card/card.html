@@ -1,0 +1,21 @@
+<div class="card" [class]="'shadow-' + shadow() + ' ' + className()">
+    @if (title() || subtitle()) {
+    <div class="card-header border-0 bg-transparent pt-4 px-4 pb-0">
+        @if (title()) {
+        <h3 class="card-title fw-bold mb-1">{{ title() }}</h3>
+        }
+        @if (subtitle()) {
+        <p class="card-subtitle text-muted mb-0 small">{{ subtitle() }}</p>
+        }
+        <ng-content select="[header]"></ng-content>
+    </div>
+    }
+
+    <div class="card-body p-4">
+        <ng-content></ng-content>
+    </div>
+
+    <div class="card-footer border-0 bg-transparent pb-4 px-4 pt-0">
+        <ng-content select="[footer]"></ng-content>
+    </div>
+</div>

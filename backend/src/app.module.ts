@@ -1,19 +1,20 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { RegistrationsModule } from './registrations/registrations.module';
-import { UserModule } from './users/user.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { EventsModule } from './events/events.module';
 import { UsersModule } from './users/users.module';
+import { RegistrationsModule } from './registrations/registrations.module';
 
+
+import { AuthModule } from './auth/auth.module';
 @Module({
-  imports: [
+
+  imports: [AuthModule,
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -32,4 +33,8 @@ import { UsersModule } from './users/users.module';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+/**
+ * Root module of the application.
+ * Configures the application, including DB connection and sub-modules.
+ */
+export class AppModule { }

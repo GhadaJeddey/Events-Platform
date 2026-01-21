@@ -5,6 +5,7 @@ import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { User } from '../entities/user.entity';
 
+import * as bcrypt from 'bcrypt';
 @Injectable()
 export class UsersService {
   constructor(
@@ -12,11 +13,17 @@ export class UsersService {
     private readonly userRepository: Repository<User>,
   ) {}
 
-  // CREATE a new user
   async create(createUserDto: CreateUserDto): Promise<User> {
-    const newUser = this.userRepository.create(createUserDto);
-    return await this.userRepository.save(newUser);
-  }
+
+          const salt = await bcrypt.genSalt();
+          const hashedPassword = await bcrypt.hash(createUserDto.password, salt);
+  
+          const user = this.userRepository.create({
+              ...createUserDto,
+              password: hashedPassword,
+          });
+          return this.userRepository.save(user);
+      }
 
   // FIND ALL users
   async findAll(): Promise<User[]> {
@@ -46,4 +53,8 @@ export class UsersService {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
   }
+
+   async findByEmail(email: string): Promise<User | null> {
+          return this.userRepository.findOne({ where: { email } });
+      }
 }
