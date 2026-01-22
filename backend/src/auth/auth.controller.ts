@@ -43,6 +43,7 @@ export class AuthController {
     getUserInfo(@Request() req) {
         return req.user;
     }
+    
     @Get('admin-only')
     @Roles(Role.ADMIN)
     @UseGuards(AuthGuard, RolesGuard)

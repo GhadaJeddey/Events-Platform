@@ -2,7 +2,7 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../../Commun/environments/environment';
-import { AuthResponse, LoginRequest, RegisterRequest, User } from '../Models/auth.models';
+import { AuthResponse, LoginRequest, RegisterRequest, User, UserRole } from '../Models/auth.models';
 
 @Injectable({
     providedIn: 'root'
@@ -15,6 +15,7 @@ export class AuthService {
     private _currentUser = signal<User | null>(null);
     readonly currentUser = this._currentUser.asReadonly();
     readonly isAuthenticated = computed(() => !!this._currentUser());
+    readonly isAdmin = computed(() => this._currentUser()?.role === UserRole.ADMIN);
 
     constructor() {
         this.checkAuth();
@@ -57,12 +58,9 @@ export class AuthService {
      * Private helper to set session data
      */
     private setSession(token: string, user: User): void {
-        console.log('🔐 Storing JWT token:', token);
-        console.log('👤 Storing user:', user);
         localStorage.setItem('access_token', token);
         localStorage.setItem('user', JSON.stringify(user));
         this._currentUser.set(user);
-        console.log('✅ Token and user stored in localStorage');
     }
 
     /**
