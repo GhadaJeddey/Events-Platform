@@ -2,11 +2,41 @@
     <div class="events-header">
         <h1 class="events-title">Événements à venir</h1>
         <p class="events-subtitle">Découvrez et participez aux événements de notre communauté</p>
+
+        <div class="search-wrapper">
+            <div class="search-box">
+                <input type="text" class="search-input" placeholder="Rechercher un événement..."
+                    [(ngModel)]="searchTerm" (keyup.enter)="onSearch()" />
+                <button class="search-icon-btn" (click)="onSearch()">
+                    <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="3" fill="none"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
     </div>
 
+    @if (events() !== null) {
     <div class="events-grid">
-        @for(event of events(); track event.id) {
+        @for(event of events()!; track event.id) {
         <app-event-card [event]="event"></app-event-card>
         }
+        @empty {
+        <div class="no-results-message">
+            @if(searchQuery()) {
+            <p class="main-text">Aucun événement ne correspond à "{{ searchQuery() }}"</p>
+            } @else {
+            <p class="main-text">Aucun événement disponible.</p>
+            }
+        </div>
+        }
     </div>
+    } @else {
+    <div class="loading-state">
+        <div class="spinner"></div>
+        <p>Chargement des événements...</p>
+    </div>
+    }
 </div>

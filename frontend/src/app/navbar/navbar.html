@@ -13,19 +13,19 @@
             </div>
 
             <div class="navbar-actions">
-                <ng-container *ngIf="!authService.isAuthenticated(); else userMenu">
-                    <button class="btn-login" routerLink="/auth/login">Connexion</button>
-                    <button class="btn-signup" routerLink="/auth/register">S'inscrire</button>
-                </ng-container>
-
-                <ng-template #userMenu>
-                    <div class="user-info d-flex align-items-center gap-3">
-                        <span class="text-muted small d-none d-md-inline" *ngIf="authService.currentUser() as user">
-                            Bonjour, <strong>{{ user.firstName }}</strong>
-                        </span>
-                        <button class="btn-login" (click)="logout()">Déconnexion</button>
-                    </div>
-                </ng-template>
+                @if (!authService.isAuthenticated()) {
+                <button class="btn-login" routerLink="/auth/login">Connexion</button>
+                <button class="btn-signup" routerLink="/auth/register">S'inscrire</button>
+                } @else {
+                <div class="user-info d-flex align-items-center gap-3">
+                    @if (authService.currentUser(); as user) {
+                    <span class="text-muted small d-none d-md-inline">
+                        Bonjour, <strong>{{ user.firstName }}</strong>
+                    </span>
+                    }
+                    <button class="btn-login" (click)="logout()">Déconnexion</button>
+                </div>
+                }
             </div>
         </div>
     </div>

@@ -5,6 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { EventsModule } from './events/events.module';
 import { UsersModule } from './users/users.module';
+import { RegistrationsModule } from './registrations/registrations.module';
 
 import { AuthModule } from './auth/auth.module';
 @Module({
@@ -23,7 +24,8 @@ import { AuthModule } from './auth/auth.module';
         ssl: { rejectUnauthorized: false },
       }),
     }),
-    //EventsModule,
+    EventsModule,
+    RegistrationsModule,
     UsersModule,
   ],
   controllers: [AppController],

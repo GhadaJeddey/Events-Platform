@@ -4,7 +4,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, MoreThanOrEqual, LessThan, Between, In } from 'typeorm';
+import { Repository, MoreThanOrEqual, LessThan, Between, In, ILike, Or, And, Brackets } from 'typeorm';
 import { Event } from '../entities/event.entity';
 import { CreateEventDto } from '../dto/create-event.dto';
 import { UpdateEventDto } from '../dto/update-event.dto';
@@ -15,13 +15,20 @@ export class EventsService {
   constructor(
     @InjectRepository(Event)
     private eventsRepository: Repository<Event>,
-  ) {}
+  ) { }
 
-  // CREATE - Créer un événement
+  // CREATE Event
   async create(createEventDto: CreateEventDto, userId: string): Promise<Event> {
     const startDate = new Date(createEventDto.startDate);
     const endDate = new Date(createEventDto.endDate);
-    //Vérifier la cohérence
+    const now = new Date();
+
+    if (startDate < now) {
+      throw new BadRequestException(
+        'La date de début ne peut pas être dans le passé',
+      );
+    }
+
     if (endDate <= startDate) {
       throw new BadRequestException(
         'La date de fin doit être après la date de début',
@@ -38,7 +45,7 @@ export class EventsService {
     return await this.eventsRepository.save(event);
   }
 
-  // READ ALL PUBLIC - Événements visibles publiquement
+  // READ ALL PUBLIC
   async findAllPublic(): Promise<Event[]> {
     return await this.eventsRepository.find({
       where: {
@@ -51,7 +58,29 @@ export class EventsService {
     });
   }
 
-  //trouver un evenement
+  // SEARCH 
+  async searchEvents(searchTerm: string): Promise<Event[]> {
+    if (!searchTerm || searchTerm.trim() === '') {
+      return [];
+    }
+
+    return await this.eventsRepository.createQueryBuilder('event')
+      .where('event.approvalStatus = :status', { status: ApprovalStatus.APPROVED })
+      .andWhere('event.eventStatus IN (:...statuses)', {
+        statuses: [EventStatus.UPCOMING, EventStatus.ONGOING],
+      })
+      .andWhere(
+        new Brackets((qb) => {
+          qb.where('event.title ILIKE :term', { term: `%${searchTerm}%` })
+            .orWhere('event.description ILIKE :term', { term: `%${searchTerm}%` })
+            .orWhere('event.location ILIKE :term', { term: `%${searchTerm}%` });
+        }),
+      )
+      .orderBy('event.startDate', 'ASC')
+      .getMany();
+  }
+
+
   async findOne(id: string): Promise<Event> {
     const event = await this.eventsRepository.findOne({
       where: { id },
@@ -64,8 +93,19 @@ export class EventsService {
     return event;
   }
 
-  // UPDATE - Mettre à jour un événement
+  // UPDATE
   async update(id: string, updateEventDto: UpdateEventDto) {
+    const now = new Date();
+
+    if (updateEventDto.startDate) {
+      const startDate = new Date(updateEventDto.startDate);
+      if (startDate < now) {
+        throw new BadRequestException(
+          'La date de début ne peut pas être dans le passé',
+        );
+      }
+    }
+
     if (updateEventDto.startDate && updateEventDto.endDate) {
       const startDate = new Date(updateEventDto.startDate);
       const endDate = new Date(updateEventDto.endDate);
@@ -78,7 +118,7 @@ export class EventsService {
     await this.eventsRepository.update(id, updateEventDto);
   }
 
-  // DELETE - Supprimer un événement
+  // DELETE
   async remove(id: string): Promise<void> {
     await this.eventsRepository.delete(id);
   }

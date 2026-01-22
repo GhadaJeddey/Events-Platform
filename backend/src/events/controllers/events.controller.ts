@@ -10,18 +10,27 @@ import {
   HttpStatus,
   UseInterceptors,
   UploadedFile,
+  UseGuards,
+  Req,
+  Query,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { EventsService } from '../services/events.service';
 import { CreateEventDto } from '../dto/create-event.dto';
 import { UpdateEventDto } from '../dto/update-event.dto';
+import { AuthGuard } from '../../auth/guards/auth.guard';
+import { RolesGuard } from '../../auth/guards/roles.guard';
+import { Roles } from '../../auth/decorators/roles.decorator';
+import { Role } from '../../auth/enums/role.enum';
 
 @Controller('events')
 export class EventsController {
-  constructor(private readonly eventsService: EventsService) {}
+  constructor(private readonly eventsService: EventsService) { }
 
-  @Post('create/:id')
+  @Post('create')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(Role.ADMIN, Role.CLUB)
   @UseInterceptors(
     FileInterceptor('image', {
       storage: diskStorage({
@@ -35,7 +44,7 @@ export class EventsController {
   )
   create(
     @Body() createEventDto: CreateEventDto,
-    @Param('id') id: string,
+    @Req() req,
     @UploadedFile() file: Express.Multer.File,
   ) {
     // Ajouter l'URL de l'image si un fichier a été uploadé
@@ -48,13 +57,19 @@ export class EventsController {
       imageUrl,
     };
 
-    return this.eventsService.create(eventData, id);
+    return this.eventsService.create(eventData, req.user.id);
   }
 
   //  Événements publics
   @Get('public')
   findAllPublic() {
     return this.eventsService.findAllPublic();
+  }
+
+  // SEARCH - Rechercher des événements
+  @Get('search')
+  searchEvents(@Query('q') searchTerm: string) {
+    return this.eventsService.searchEvents(searchTerm);
   }
 
   // retourner un événement par ID
@@ -65,6 +80,8 @@ export class EventsController {
 
   // Mettre à jour un événement
   @Patch(':id')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(Role.ADMIN, Role.CLUB)
   @UseInterceptors(
     FileInterceptor('image', {
       storage: diskStorage({
@@ -103,6 +120,8 @@ export class EventsController {
   // DELETE - Supprimer un événement
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(Role.ADMIN, Role.CLUB)
   remove(@Param('id') id: string) {
     return this.eventsService.remove(id);
   }
