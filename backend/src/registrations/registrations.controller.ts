@@ -2,8 +2,8 @@ import { Controller, Get, Post, Body, Param, Delete, UseGuards, Req, ParseUUIDPi
 import { RegistrationsService } from './registrations.service';
 import { CreateRegistrationDto } from './dto/create-registration.dto';
 import { Roles } from '../auth/decorators/roles.decorator';
-import { RolesGuard } from '../auth/guards/roles.guard';
-import { AuthGuard } from '../auth/guards/auth.guard';
+import { RolesGuard } from '../auth/Guards/roles.guard';
+import { AuthGuard } from '../auth/Guards/auth.guard';
 import { Role } from '../auth/enums/role.enum';
 
 

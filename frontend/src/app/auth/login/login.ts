@@ -38,9 +38,7 @@ export class LoginComponent {
             this.authService.login(this.loginForm.value).subscribe({
                 next: () => {
                     this.toastr.success('Connexion réussie !');
-                    // TODO: Uncomment when /events route is implemented
-                    // this.router.navigate(['/events']);
-                    console.log('🎉 Login successful! Check localStorage for access_token');
+                    this.router.navigate(['/events']);
                     this.isLoading.set(false);
                 },
                 error: (err) => {
