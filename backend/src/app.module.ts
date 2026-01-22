@@ -22,7 +22,7 @@ import { UsersModule } from './users/users.module';
         ssl: { rejectUnauthorized: false },
       }),
     }),
-    //EventsModule,
+    EventsModule,
     UsersModule,
   ],
   controllers: [AppController],
