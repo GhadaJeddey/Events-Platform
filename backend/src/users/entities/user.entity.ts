@@ -5,7 +5,9 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
+// ✅ We keep this import because 'UserRole' is used below
 import { UserRole } from '../../common/enums/user.enums';
+
 @Entity('users')
 export class User {
   @PrimaryGeneratedColumn('uuid')
@@ -23,6 +25,7 @@ export class User {
   @Column({ length: 255 })
   password: string;
 
+  // This relies on the import we saved above 👆
   @Column({ type: 'enum', enum: UserRole, default: UserRole.STUDENT })
   role: UserRole;
 

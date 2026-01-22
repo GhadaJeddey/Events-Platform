@@ -1,0 +1,40 @@
+.card {
+    border: none;
+    border-radius: 16px;
+    background-color: #ffffff;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    width: 100%;
+}
+
+.shadow-none {
+    box-shadow: none;
+}
+
+.shadow-sm {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.shadow-md {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+.shadow-lg {
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.12);
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
+.card-title {
+    color: #212529;
+    letter-spacing: -0.02em;
+}
+
+.card-subtitle {
+    font-size: 0.875rem;
+}
+
+.card-body {
+    color: #495057;
+}

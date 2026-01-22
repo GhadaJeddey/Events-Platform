@@ -1,6 +1,6 @@
 <nav class="navbar">
     <div class="navbar-container">
-        <div class="navbar-logo">
+        <div class="navbar-logo" routerLink="/">
             <span class="logo-text">Event<span class="logo-accent">Time</span></span>
         </div>
 
@@ -13,8 +13,20 @@
             </div>
 
             <div class="navbar-actions">
-                <button class="btn-login">Connexion</button>
-                <button class="btn-signup">S'inscrire</button>
+                <ng-container *ngIf="!authService.isAuthenticated(); else userMenu">
+                    <button class="btn-login" routerLink="/auth/login">Connexion</button>
+                    <button class="btn-signup" routerLink="/auth/register">S'inscrire</button>
+                </ng-container>
+
+                <ng-template #userMenu>
+                    <div class="user-info d-flex align-items-center gap-3">
+                        <span class="text-muted small d-none d-md-inline" *ngIf="authService.currentUser() as user">
+                            Bonjour, <strong>{{ user.firstName }}</strong>
+                        </span>
+                        <button class="btn-login" routerLink="/profile" style="margin-right: 10px;">Profil</button>
+                        <button class="btn-signup" (click)="logout()">Déconnexion</button>
+                    </div>
+                </ng-template>
             </div>
         </div>
     </div>
