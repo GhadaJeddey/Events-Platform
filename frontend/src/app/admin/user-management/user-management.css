@@ -1,9 +1,24 @@
-.section-title {
-  font-size: 1.8rem;
+.header-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-top: 2rem;
   margin-bottom: 2rem;
-  font-weight: 700;
+  flex-wrap: wrap; 
+  gap: 1rem;
 }
+
+.section-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin: 0; 
+}
+
+.search-field {
+  width: 300px;
+  font-size: 0.9rem;
+}
+
 .table-container {
     background: white;
     border-radius: 15px;
@@ -15,13 +30,11 @@
     width: 100%;
 }
 
-/* Ajustement pour que le select Material soit plus petit dans le tableau */
 .dense-select {
     width: 150px;
     font-size: 0.9em;
 }
 
-/* Enlève le padding excessif sous le select */
 ::ng-deep .mat-mdc-form-field-subscript-wrapper {
     display: none;
 }

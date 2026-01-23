@@ -1,8 +1,26 @@
 <div class="container fade-in-up">
-  <h2 class="text-gradient section-title">User Management</h2>
+  
+  <div class="header-actions">
+    <h2 class="text-gradient section-title">User Management</h2>
+    
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Search users...</mat-label>
+      <mat-icon matPrefix>search</mat-icon>
+      <input matInput 
+             [ngModel]="searchTerm()" 
+             (ngModelChange)="searchTerm.set($event)" 
+             placeholder="Search by Name, Email...">
+      
+      @if (searchTerm()) {
+        <button mat-icon-button matSuffix (click)="searchTerm.set('')">
+          <mat-icon>close</mat-icon>
+        </button>
+      }
+    </mat-form-field>
+  </div>
   
   <div class="table-container">
-    <table mat-table [dataSource]="users()" class="custom-table">
+    <table mat-table [dataSource]="filteredUsers()" class="custom-table">
       
       <ng-container matColumnDef="email">
         <th mat-header-cell *matHeaderCellDef> Email </th>
@@ -23,7 +41,6 @@
         <th mat-header-cell *matHeaderCellDef> Role </th>
         <td mat-cell *matCellDef="let user">
           <mat-form-field appearance="outline" class="dense-select">
-            
             <mat-select [value]="user.role" (selectionChange)="updateRole(user, $event.value)">
               @for (role of roles; track role) {
                 <mat-option [value]="role">
@@ -31,13 +48,18 @@
                 </mat-option>
               }
             </mat-select>
-
           </mat-form-field>
         </td>
       </ng-container>
 
       <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
       <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      
+      <tr class="mat-row" *matNoDataRow>
+        <td class="mat-cell" [attr.colspan]="displayedColumns.length">
+          No data matching the filter "{{searchTerm()}}"
+        </td>
+      </tr>
     </table>
   </div>
-</div> 
+</div>

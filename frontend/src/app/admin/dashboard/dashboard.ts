@@ -13,7 +13,7 @@ import { RouterLink } from '@angular/router';
   templateUrl: './dashboard.html',
   styleUrls: ['./dashboard.css']
 })
-export class DashboardComponent {
+export class Dashboard {
   private adminService = inject(AdminService);
 
   stats = toSignal(this.adminService.getDashboardStats(), { initialValue: null });

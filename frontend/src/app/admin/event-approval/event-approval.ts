@@ -12,7 +12,7 @@ import { AdminService } from '../../services/admin.service';
   templateUrl: './event-approval.html',
   styleUrls: ['./event-approval.css']
 })
-export class EventApprovalComponent {
+export class EventApproval {
   private adminService = inject(AdminService);
   private toastr = inject(ToastrService);
   
