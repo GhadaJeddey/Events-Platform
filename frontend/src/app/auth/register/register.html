@@ -3,14 +3,20 @@
         shadow="lg">
         <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
             <div class="row">
-                <div class="col-md-6">
-                    <app-input label="Prénom" formControlName="firstName" placeholder="Jean"
-                        [error]="registerForm.get('firstName')?.invalid && registerForm.get('firstName')?.touched ? 'Le prénom est requis.' : null"></app-input>
+                <div class="row">
+                    <div class="col-md-6">
+                        <app-input [label]="fieldLabels().firstName" formControlName="firstName" placeholder="Jean"
+                            [error]="registerForm.get('firstName')?.invalid && registerForm.get('firstName')?.touched ? 'Le prénom est requis.' : null"></app-input>
+                    </div>
+                    <div class="col-md-6">
+                        <app-input [label]="fieldLabels().lastName" formControlName="lastName" placeholder="Dupont"
+                            [error]="registerForm.get('lastName')?.invalid && registerForm.get('lastName')?.touched ? 'Le nom est requis.' : null"></app-input>
+                    </div>
                 </div>
-                <div class="col-md-6">
-                    <app-input label="Nom" formControlName="lastName" placeholder="Dupont"
-                        [error]="registerForm.get('lastName')?.invalid && registerForm.get('lastName')?.touched ? 'Le nom est requis.' : null"></app-input>
-                </div>
+
+                <app-input [label]="fieldLabels().email" type="email" formControlName="email"
+                    placeholder="nom@exemple.com"
+                    [error]="registerForm.get('email')?.invalid && registerForm.get('email')?.touched ? 'Veuillez entrer une adresse email valide.' : null"></app-input>
             </div>
 
             <app-input label="Adresse email" type="email" formControlName="email" placeholder="nom@exemple.com"

@@ -11,7 +11,6 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
     provideHttpClient(),
-
     provideHttpClient(withInterceptors([authInterceptor])),
     provideAnimations(),
     provideToastr({

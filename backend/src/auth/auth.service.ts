@@ -30,10 +30,6 @@ export class AuthService {
      * @returns {Promise<Omit<User, 'password'>>} The user entity without password.
      * @throws {UnauthorizedException} If credentials are invalid.
      */
-
-
-
-
     async validateUser(input: SignInDto) {
         const user = await this.usersService.findByEmail(input.email);
         if (user && await bcrypt.compare(input.password, user.password)) {
@@ -41,12 +37,6 @@ export class AuthService {
             return result;
         }
         throw new UnauthorizedException();
-
-    }
-
-    async authenticate(input: SignInDto) {
-        const user = await this.validateUser(input);
-        return this.SignIn(user);
     }
 
     async SignIn(input: Omit<User, 'password'>) {
@@ -60,5 +50,10 @@ export class AuthService {
             input,
             accesstoken,
         };
+    }
+
+    async authenticate(input: SignInDto) {
+        const user = await this.validateUser(input);
+        return this.SignIn(user);
     }
 }

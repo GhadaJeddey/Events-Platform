@@ -4,7 +4,7 @@ import { CreateRegistrationDto } from './dto/create-registration.dto';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { AuthGuard } from '../auth/guards/auth.guard';
-import { Role } from '../auth/enums/role.enum';
+import { Role } from '../common/enums/role.enum';
 
 
 @Controller('registrations')
@@ -16,26 +16,26 @@ export class RegistrationsController {
   constructor(private readonly registrationsService: RegistrationsService) { }
 
   @Post()
-  @Roles(Role.STUDENT)////Roumaissa modifie  iciiiii
+  @Roles('student')
   create(@Body() createRegistrationDto: CreateRegistrationDto, @Req() req) {
     return this.registrationsService.create(createRegistrationDto, req.user.id);
   }
 
   @Get()
-  @Roles(Role.STUDENT)
+  @Roles('student')
   findAll(@Req() req) {
     return this.registrationsService.findAll(req.user.id);
   }
 
   @Get(':id')
-  @Roles(Role.STUDENT)
+  @Roles('student')
   findOne(@Param('id', ParseUUIDPipe) id: string, @Req() req) {
     return this.registrationsService.findOne(id, req.user.id);
   }
 
 
   @Delete(':id')
-  @Roles(Role.STUDENT)
+  @Roles('student')
   cancelRegistration(@Param('id', ParseUUIDPipe) id: string, @Req() req) {
     return this.registrationsService.cancelRegistration(id, req.user.id);
   }

@@ -14,6 +14,7 @@ import {
   Req,
   Query,
 } from '@nestjs/common';
+
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { EventsService } from '../services/events.service';
@@ -22,7 +23,7 @@ import { UpdateEventDto } from '../dto/update-event.dto';
 import { AuthGuard } from '../../auth/guards/auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Roles } from '../../auth/decorators/roles.decorator';
-import { Role } from '../../auth/enums/role.enum';
+import { Role } from '../../common/enums/role.enum';
 
 @Controller('events')
 export class EventsController {

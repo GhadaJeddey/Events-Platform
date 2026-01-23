@@ -11,6 +11,7 @@ import { authGuard } from './guards/auth.guard';
 export const routes: Routes = [
     { path: '', redirectTo: 'events', pathMatch: 'full' },
     { path: 'events', component: EventList },
+
     {
         path: 'events/create',
         component: CreateEventForm,
