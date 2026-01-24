@@ -2,6 +2,8 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  Inject,
+  forwardRef
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, MoreThanOrEqual, LessThan, Between, In, ILike, Or, And, Brackets } from 'typeorm';
@@ -10,6 +12,7 @@ import { CreateEventDto } from '../dto/create-event.dto';
 import { UpdateEventDto } from '../dto/update-event.dto';
 import { ApprovalStatus, EventStatus } from '../../common/enums/event.enums';
 import { OrganizersService } from '../../organizers/services/organizers.service';
+import { RegistrationsService } from '../../registrations/services/registrations.service';
 
 @Injectable()
 export class EventsService {
@@ -17,6 +20,8 @@ export class EventsService {
     @InjectRepository(Event)
     private eventsRepository: Repository<Event>,
     private organizersService: OrganizersService,
+    @Inject(forwardRef(() => RegistrationsService))
+    private registrationsService: RegistrationsService,
   ) { }
 
   // CREATE Event

@@ -1,11 +1,10 @@
-import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, ForbiddenException, forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateRegistrationDto } from '../dto/create-registration.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In, DataSource } from 'typeorm';
 import { Registration } from '../entities/registration.entity';
 import { Event } from '../../events/entities/event.entity';
 import { RegistrationStatus } from '../../common/enums/registration-status.enum';
-import { Student } from '../../students/entities/student.entity';
 import { MailerService } from '@nestjs-modules/mailer';
 import { StudentsService } from '../../students/services/students.service';
 import { EventsService } from '../../events/services/events.service';
@@ -16,6 +15,7 @@ export class RegistrationsService {
     @InjectRepository(Registration)
     private registrationRepository: Repository<Registration>,
     private studentsService: StudentsService,
+    @Inject(forwardRef(() => EventsService))
     private eventsService: EventsService,
     private dataSource: DataSource, // Utilisé pour les transactions
     private mailerService: MailerService,

@@ -1,4 +1,6 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
+import { AuthGuard } from './guards/auth.guard';
+import { RolesGuard } from './guards/roles.guard';
 import { UsersModule } from 'src/users/users.module';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
@@ -7,15 +9,16 @@ import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '../users/entities/user.entity';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { Student } from 'src/students/entities/student.entity';
 import { StudentsModule } from 'src/students/students.module';
 import { OrganizersModule } from 'src/organizers/organizers.module';
 
+console.log('AuthService:', AuthService);
+
 @Module({
     imports: [
-        UsersModule,
-        StudentsModule,
-        OrganizersModule,
+        forwardRef(() => UsersModule),
+        forwardRef(() => StudentsModule),
+        forwardRef(() => OrganizersModule),
         PassportModule.register({ defaultStrategy: 'jwt' }),
         JwtModule.registerAsync({
             imports: [ConfigModule],
@@ -27,12 +30,14 @@ import { OrganizersModule } from 'src/organizers/organizers.module';
         }),
         TypeOrmModule.forFeature([User])
     ],
-    providers: [AuthService],
+    providers: [AuthService, AuthGuard, RolesGuard],
     controllers: [AuthController],
-    exports: [AuthService, JwtModule, PassportModule],
+    exports: [AuthService, JwtModule, PassportModule, AuthGuard, RolesGuard],
 })
 /**
  * Authentication module.
  * Manages user authentication, including registration and login.
  */
-export class AuthModule { }
+export class AuthModule {
+    
+}

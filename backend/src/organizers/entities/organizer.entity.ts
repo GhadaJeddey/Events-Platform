@@ -1,7 +1,7 @@
 import { join } from "path";
 import { User } from "../../users/entities/user.entity";
 import { Entity,Column, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
-import { Event } from "../../events/entities/event.entity.js";
+import { Event } from "../../events/entities/event.entity";
 
 @Entity('organizer')
 export class Organizer {

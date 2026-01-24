@@ -3,7 +3,7 @@ import { CreateStudentDto } from '../dto/create-student.dto';
 import { UpdateStudentDto } from '../dto/update-student.dto';
 import { Repository } from 'typeorm';
 import { Student } from '../entities/student.entity';
-import { InjectRepository } from '@nestjs/typeorm/dist/common/typeorm.decorators';
+import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../../users/entities/user.entity';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 
