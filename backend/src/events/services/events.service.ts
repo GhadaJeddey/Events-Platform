@@ -47,7 +47,8 @@ export class EventsService {
 
   // READ ALL PUBLIC
   async findAllPublic(): Promise<Event[]> {
-    return await this.eventsRepository.find({
+    const now = new Date();
+    const events = await this.eventsRepository.find({
       where: {
         approvalStatus: ApprovalStatus.APPROVED,
         eventStatus: In([EventStatus.UPCOMING, EventStatus.ONGOING]),
@@ -56,6 +57,36 @@ export class EventsService {
         startDate: 'ASC',
       },
     });
+
+    const eventsToUpdate: Event[] = [];
+    events.forEach((event) => {
+      let changed = false;
+
+      if (
+        now >= new Date(event.startDate) &&
+        now < new Date(event.endDate) &&
+        event.eventStatus !== EventStatus.ONGOING
+      ) {
+        event.eventStatus = EventStatus.ONGOING;
+        changed = true;
+      }
+      else if (
+        now >= new Date(event.endDate) &&
+        event.eventStatus !== EventStatus.COMPLETED
+      ) {
+        event.eventStatus = EventStatus.COMPLETED;
+        changed = true;
+      }
+
+      if (changed) {
+        eventsToUpdate.push(event);
+      }
+    });
+
+    if (eventsToUpdate.length > 0) {
+      this.eventsRepository.save(eventsToUpdate);
+    }
+    return events.filter((e) => e.eventStatus !== EventStatus.COMPLETED);
   }
 
   // SEARCH 

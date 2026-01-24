@@ -32,8 +32,7 @@ export class CreateEventForm {
   }
 
   onSubmit(form: NgForm) {
-    // La validation de l'image est manuelle car ngModel ne gère pas nativement les fichiers
-    if (form.valid && this.selectedFile()) {
+    if (form.valid) {
       const eventData = {
         title: form.value.title,
         description: form.value.description,
