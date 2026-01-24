@@ -7,7 +7,6 @@ import {
   OneToOne,
 } from 'typeorm';
 import { UserRole } from '../../common/enums/user.enums';
-import { Registration } from '../../registrations/entities/registration.entity';
 import { Student } from '../../students/entities/student.entity';
 import { Organizer } from '../../organizers/entities/organizer.entity';
 import { Exclude } from 'class-transformer';
