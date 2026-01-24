@@ -40,11 +40,18 @@ async function test() {
     console.log('Testing register...');
     try {
         const user = await authService.register({
-            firstName: 'Test',
-            lastName: 'User',
-            email: 'test@example.com',
-            password: 'password123',
             role: UserRole.STUDENT,
+            user: {
+                firstName: 'Test',
+                lastName: 'User',
+                email: 'test@example.com',
+                password: 'password123',
+                role: UserRole.STUDENT,
+            },
+            studentProfile: {
+                major: 'RT',
+                studentCardNumber: '12345678'
+            }
         });
         console.log('User registered:', { ...user, password: '[HASHED]' });
         console.log('Password hashed check:', user.password !== 'password123');

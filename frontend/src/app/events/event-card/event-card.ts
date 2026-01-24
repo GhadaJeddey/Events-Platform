@@ -14,6 +14,7 @@ import { StatusBadgeDirective } from '../../directives/status-badge.directive';
 })
 export class EventCard {
   event = input<Event>();
+  isRegistered = input<boolean>();
 
   getImageUrl(imageUrl: string | undefined): string {
     if (!imageUrl) return 'assets/images/default-event.png';

@@ -1,0 +1,86 @@
+.dashboard-wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+    min-height: 80vh;
+}
+
+/* Espacement entre les grandes sections */
+.dashboard-section {
+    margin-bottom: 4rem;
+}
+
+.section-header {
+    margin-bottom: 1.5rem;
+}
+
+.section-header h2 {
+    font-size: 1.8rem;
+    color: #1a1a1a;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.section-header p {
+    color: #666;
+    font-size: 1rem;
+}
+
+/* Style spécial pour la section "Mes Inscriptions" */
+.my-events-section {
+    background-color: #f8f9fa; /* Gris très léger */
+    padding: 2rem;
+    border-radius: 16px;
+    border: 1px solid #eef0f2;
+}
+
+.my-events-section h2 {
+    color: #2563eb; /* Bleu */
+}
+
+/* Grille (Réutilisation de ta structure existante, ajustée) */
+.events-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+/* Divider visuel */
+.divider {
+    height: 1px;
+    background: #e5e7eb;
+    margin: 3rem 0;
+}
+
+/* --- Reprise de tes styles existants pour Search & Header --- */
+.events-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+.events-title { font-size: 2.5rem; font-weight: 800; color: #111; margin-bottom: 1rem; }
+.events-subtitle { font-size: 1.1rem; color: #666; margin-bottom: 2rem; }
+
+/* Search Box Styles (Identique à ton code) */
+.search-wrapper { max-width: 600px; margin: 0 auto; }
+.search-box { position: relative; display: flex; align-items: center; }
+.search-input {
+    width: 100%;
+    padding: 1rem 3rem 1rem 1.5rem;
+    border-radius: 50px;
+    border: 2px solid #e5e7eb;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    outline: none;
+}
+.search-input:focus { border-color: #2563eb; box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1); }
+.search-icon-btn {
+    position: absolute;
+    right: 1rem;
+    background: none;
+    border: none;
+    color: #6b7280;
+    cursor: pointer;
+    padding: 0.5rem;
+    transition: color 0.3s;
+}
+.search-icon-btn:hover { color: #2563eb; }

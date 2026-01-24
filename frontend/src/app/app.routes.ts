@@ -13,19 +13,15 @@ import { EventApproval } from './admin/event-approval/event-approval';
 import { UserManagement } from './admin/user-management/user-management';
 
 export const routes: Routes = [
-    { path: '', redirectTo: 'events', pathMatch: 'full' },
-    { path: 'events', component: EventList },
 
     {
-        path: 'events/create',
-        component: CreateEventForm,
-        canActivate: [authGuard]
-    },
-    { path: 'event/details/:id', component: EventDetails },
-    {
-        path: 'event/update/:id',
-        component: UpdateEvent,
-        canActivate: [authGuard]
+        path: 'events',
+        children: [
+            { path: '', component: EventList },
+            { path: 'create', component: CreateEventForm, canActivate: [authGuard] },
+            { path: ':id', component: EventDetails },
+            { path: ':id/edit', component: UpdateEvent, canActivate: [authGuard] }
+        ]
     },
     {
         path: 'auth',
@@ -36,7 +32,7 @@ export const routes: Routes = [
         ]
     },
 
-    { 
+    {
         path: 'admin',
         children: [
             { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
@@ -45,5 +41,7 @@ export const routes: Routes = [
             { path: 'users', component: UserManagement }
         ]
         // TODO: Plus tard, ajouter : canActivate: [AdminGuard]
-    }
+    }, 
+    
+    {path: '**', redirectTo: 'events' }
 ];

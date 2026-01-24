@@ -307,7 +307,6 @@ async function bootstrap() {
       location: 'Tech Hub, Building A, Room 101',
       capacity: 50,
       imageUrl: 'https://images.stockcake.com/public/2/e/e/2ee809d0-2c47-4406-9ed6-da53d72f0e0b_large/hackathon-event-buzz-stockcake.jpg',
-      clubId: '00000000-0000-0000-0000-000000000001',
     },
     {
       title: 'Web Development Bootcamp',
@@ -317,7 +316,6 @@ async function bootstrap() {
       location: 'Innovation Center, Floor 3',
       capacity: 30,
       imageUrl: 'https://miro.medium.com/v2/resize:fit:1200/1*5akpxEAq4fjVmd5pDtqDig.jpeg',
-      clubId: '00000000-0000-0000-0000-000000000002',
     },
     {
       title: 'Tech Meetup',
@@ -327,7 +325,6 @@ async function bootstrap() {
       location: 'Coffee & Code Café',
       capacity: 100,
       imageUrl: 'https://i.ytimg.com/vi/0m0Jvcp76sE/maxresdefault.jpg',
-      clubId: '00000000-0000-0000-0000-000000000001',
     },
   ];
 

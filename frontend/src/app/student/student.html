@@ -1,0 +1,72 @@
+<app-navbar></app-navbar>
+
+<div class="dashboard-wrapper">
+    
+    @if (myEvents() && myEvents()!.length > 0) {
+    <section class="dashboard-section my-events-section">
+        <div class="section-header">
+            <h2>Mes Inscriptions</h2>
+            <p>Préparez-vous pour vos prochains événements</p>
+        </div>
+        <div class="events-grid">
+            @for(event of myEvents()!; track event.id) {
+                <app-event-card [event]="event" [isRegistered]="true"></app-event-card>
+            }
+        </div>
+    </section>
+    }
+
+    @if (thisWeekEvents().length > 0) {
+    <section class="dashboard-section week-section">
+        <div class="section-header">
+            <h2>Cette Semaine</h2>
+            <p>Ne manquez pas ce qui se passe maintenant !</p>
+        </div>
+        <div class="events-grid">
+            @for(event of thisWeekEvents(); track event.id) {
+                <app-event-card [event]="event"></app-event-card>
+            }
+        </div>
+    </section>
+    }
+
+    <div class="divider"></div>
+
+    <div class="events-container">
+        <div class="events-header">
+            <h1 class="events-title">Explorer le Catalogue</h1>
+            <p class="events-subtitle">Découvrez tous les événements de notre communauté</p>
+
+            <div class="search-wrapper">
+                <div class="search-box">
+                    <input type="text" class="search-input" placeholder="Rechercher un événement..."
+                        [ngModel]="searchTerm()" (ngModelChange)="searchTerm.set($event)" />
+                    <button class="search-icon-btn">
+                        <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="3"
+                            fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        @if (filteredAllEvents() !== null) {
+        <div class="events-grid">
+            @for(event of filteredAllEvents()!; track event.id) {
+                <app-event-card [event]="event"></app-event-card>
+            }
+            @empty {
+            <div class="no-results-message">
+                <p class="main-text">Aucun événement ne correspond à votre recherche.</p>
+            </div>
+            }
+        </div>
+        } @else {
+            <app-loader message="Chargement des évènements..."></app-loader>
+        }
+    </div>
+</div>
+
+<app-footer></app-footer>

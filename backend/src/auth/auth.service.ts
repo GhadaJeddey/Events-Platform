@@ -8,6 +8,7 @@ import { User } from "../users/entities/user.entity";
 import { StudentsService } from "../students/services/students.service";
 import { OrganizersService } from "../organizers/services/organizers.service";
 import { UserRole } from "../common/enums/user.enums";
+import { UnifiedRegisterDto } from "./dto/unified-signup.dto";
 @Injectable()
 /**
  * Service for handling authentication logic.
@@ -25,20 +26,20 @@ export class AuthService {
      * @param {CreateUserDto} body - The user creation data.
      * @returns {Promise<User>} The created user entity.
      */
-    async register(body: any) {
-        const user = await this.usersService.create(body);
+    async register(dto: UnifiedRegisterDto) {
+        const user = await this.usersService.create(dto.user);
 
         if (user.role === UserRole.STUDENT) {
             await this.studentsService.create(user,{
-                major: body.major || 'Undeclared',
-                studentCardNumber: body.studentCardNumber || 'N/A',}
+                major: dto.studentProfile?.major || 'Undeclared',
+                studentCardNumber: dto.studentProfile?.studentCardNumber || 'N/A',}
             );
 
         } else if (user.role === UserRole.ORGANIZER) {
             await this.organizersService.create(user, {
-                name: body.organizationName || `${user.firstName} ${user.lastName}`,
-                description: body.description,
-                website: body.website,
+                name: dto.organizerProfile?.name || `${user.firstName} ${user.lastName}`,
+                description: dto.organizerProfile?.description,
+                website: dto.organizerProfile?.website,
             });
         }
 

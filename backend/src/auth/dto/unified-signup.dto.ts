@@ -23,4 +23,6 @@ export class UnifiedRegisterDto {
   @ValidateNested()
   @Type(() => CreateOrganizerDto)
   organizerProfile?: CreateOrganizerDto; // name, website, description
+
+  
 }

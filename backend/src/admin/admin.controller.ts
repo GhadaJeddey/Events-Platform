@@ -13,14 +13,15 @@ import { UpdateEventStatusDto } from './dto/update-event-status.dto';
 import { UpdateUserRoleDto } from './dto/update-user-role.dto';
 
 
-// TODO: Décommenter les Guards une fois prêts
-// import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-// import { RolesGuard } from '../auth/guards/roles.guard';
-// import { Roles } from '../auth/decorators/roles.decorator';
+
+import { AuthGuard } from '../auth/guards/auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { Role } from 'src/common/enums/role.enum';
 
 @Controller('admin')
-// @UseGuards(JwtAuthGuard, RolesGuard)
-// @Roles('admin')
+@UseGuards(AuthGuard, RolesGuard)
+@Roles(Role.ADMIN)
 export class AdminController {
     constructor(private readonly adminService: AdminService) { }
 
