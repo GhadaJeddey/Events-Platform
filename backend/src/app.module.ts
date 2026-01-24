@@ -10,6 +10,9 @@ import { AuthModule } from './auth/auth.module';
 
 import { StudentsModule } from './students/students.module';
 import { OrganizersModule } from './organizers/organizers.module';
+import { join } from 'path';
+import { MailerModule } from '@nestjs-modules/mailer';
+import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 
 @Module({
   imports: [
@@ -27,6 +30,27 @@ import { OrganizersModule } from './organizers/organizers.module';
         ssl: { rejectUnauthorized: false },
       }),
     }),
+    MailerModule.forRoot({
+      transport: {
+        host: process.env.MAIL_HOST,
+        port: Number(process.env.MAIL_PORT),
+        secure: false, // true pour 465, false pour les autres ports
+        auth: {
+          user: process.env.MAIL_USER,
+          pass: process.env.MAIL_PASSWORD,
+        },
+      },
+      defaults: {
+        from: `"Events Platform" <${process.env.MAIL_FROM}>`,
+      },
+      template: {
+        dir: join(__dirname, 'common/templates'), // Vérifie bien ce chemin !
+        adapter: new HandlebarsAdapter(),
+        options: {
+          strict: true,
+        },
+      },
+    }),
     AuthModule,
     EventsModule,
     UsersModule,
@@ -38,4 +62,4 @@ import { OrganizersModule } from './organizers/organizers.module';
   providers: [AppService],
 })
 
-export class AppModule {}
+export class AppModule { }

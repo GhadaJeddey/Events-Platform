@@ -5,100 +5,73 @@ import { Repository, In, DataSource } from 'typeorm';
 import { Registration } from '../entities/registration.entity';
 import { Event } from '../../events/entities/event.entity';
 import { RegistrationStatus } from '../../common/enums/registration-status.enum';
-import { Student } from 'src/students/entities/student.entity';
+import { Student } from '../../students/entities/student.entity';
 import { MailerService } from '@nestjs-modules/mailer';
+import { StudentsService } from '../../students/services/students.service';
+import { EventsService } from '../../events/services/events.service';
 
 @Injectable()
 export class RegistrationsService {
   constructor(
     @InjectRepository(Registration)
     private registrationRepository: Repository<Registration>,
-    @InjectRepository(Event)
-    private eventRepository: Repository<Event>,
-    @InjectRepository(Student)
-    private studentRepository: Repository<Student>,
+    private studentsService: StudentsService,
+    private eventsService: EventsService,
     private dataSource: DataSource, // Utilisé pour les transactions
     private mailerService: MailerService,
   ) { }
 
   async create(createRegistrationDto: CreateRegistrationDto, userId: string) {
-    const student = await this.studentRepository.findOne({ where: { user: { id: userId } }, relations: ['user'] });
+    // 1. Récupération via les services (sécurisé et modulaire)
+    const student = await this.studentsService.findOneByUserId(userId);
+    const event = await this.eventsService.findOne(createRegistrationDto.eventId);
 
-    if (!student) {
-      throw new NotFoundException('Student not found');
-    }
-    const event = await this.eventRepository.findOne({ where: { id: String(createRegistrationDto.eventId) } });
+    if (!event) throw new NotFoundException('Event not found');
 
-    if (!event) {
-      throw new NotFoundException('Event not found');
-    }
-
+    // 2. Vérification doublon
     const existingRegistration = await this.registrationRepository.findOne({
-      where: { student: { id: student.id }, event: { id: event.id } },
+      where: { 
+        student: { id: student.id }, 
+        event: { id: event.id } 
+      },
     });
 
     if (existingRegistration) {
       throw new ConflictException('You have already registered for this event');
     }
 
+    // 3. Détermination du statut
     let status = RegistrationStatus.CONFIRMED;
-
     if (event.currentRegistrations >= event.capacity) {
-      // user will be added to the waitlist
       status = RegistrationStatus.WAITLIST;
-      await this.mailerService.sendMail({
-        to: student.user.email,
-        subject: `Your are added to the waitlist for: ${event.title}`,
-        template: './waitlist-placement', // ou 'html:'
-        context: {
-          name: student.user.firstName,
-          eventTitle: event.title,
-        },
-      });
     }
 
+    // 4. Transaction SQL (Atomicité)
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
     try {
-      const newRegistration = this.registrationRepository.create({ student, event, status });
+      // Création de l'objet registration
+      const newRegistration = this.registrationRepository.create({
+        student,
+        event,
+        status,
+      });
+
+      // Sauvegarde de l'inscription
       await queryRunner.manager.save(newRegistration);
 
+      // Si confirmé, on incrémente le compteur de l'event de manière atomique
       if (status === RegistrationStatus.CONFIRMED) {
-        event.currentRegistrations += 1;
-        await queryRunner.manager.save(event);
+        await queryRunner.manager.increment(Event, { id: event.id }, 'currentRegistrations', 1);
       }
 
-      await queryRunner.commitTransaction();
-      try {
-        if (status === RegistrationStatus.CONFIRMED) {
-          await this.mailerService.sendMail({
-            to: student.user.email,
-            subject: `You are confirmed for: ${event.title}`,
-            template: './confirmation',
-            context: {
-              name: student.user.firstName,
-              eventTitle: event.title,
-            },
-          });
-        }
-        else {
-          await this.mailerService.sendMail({
-            to: student.user.email,
-            subject: `Your are added to the waitlist for: ${event.title}`,
-            template: './waitlist-placement',
-            context: {
-              name: student.user.firstName,
-              eventTitle: event.title,
-            },
-          });
-        }
+      await queryRunner.commitTransaction(); // ✅ On valide tout en base
 
-      }catch (mailError) {
-        console.error('Error sending email:', mailError);
-      }
-      
+      // 5. Envoi des emails (APRES la transaction réussie)
+      this.sendRegistrationEmail(student, event, status); // Async, on n'attend pas forcément
+
       return newRegistration;
 
     } catch (error) {
@@ -107,21 +80,39 @@ export class RegistrationsService {
     } finally {
       await queryRunner.release();
     }
+  }
 
+  private async sendRegistrationEmail(student: any, event: any, status: RegistrationStatus) {
+    try {
+      const template = status === RegistrationStatus.CONFIRMED ? './confirmation' : './waitlist-placement';
+      const subject = status === RegistrationStatus.CONFIRMED 
+        ? `You are confirmed for: ${event.title}` 
+        : `You are added to the waitlist for: ${event.title}`;
+
+      await this.mailerService.sendMail({
+        to: student.user.email,
+        subject,
+        template, 
+        context: {
+          name: student.user.firstName,
+          eventTitle: event.title,
+        },
+      });
+    } catch (e) {
+      console.error('Error sending email:', e);
+      // On ne throw pas d'erreur ici pour ne pas annuler l'inscription si le mail échoue
+    }
   }
 
   async findAll(userId: string) {
-    // find all registrations for a specific user
-
-    const student = await this.studentRepository.findOne({ where: { user: { id: userId } }, relations: ['user'] });
-    if (!student) return [];
-
+    const student = await this.studentsService.findOneByUserId(userId);
+    
     return await this.registrationRepository.find({
       where: {
         student: { id: student.id },
         status: In([RegistrationStatus.CONFIRMED, RegistrationStatus.WAITLIST])
       },
-      relations: ['event', 'event.organizer'], // Include event details and organizer
+      relations: ['event', 'event.organizer'],
       order: { createdAt: 'DESC' }
     });
   }
@@ -146,10 +137,7 @@ export class RegistrationsService {
   }
 
   async cancelRegistration(id: string, userId: string) {
-    const registration = await this.registrationRepository.findOne({
-      where: { id },
-      relations: ['event', 'student', 'student.user'],
-    });
+    const registration = await this.findOne(id, userId);
 
     if (!registration) throw new NotFoundException('Registration not found');
 
@@ -201,7 +189,7 @@ export class RegistrationsService {
           },
         });
       } else {
-        await this.eventRepository.decrement({ id: event.id }, 'currentRegistrations', 1);
+        await this.eventsService.decrementRegistrations(event.id);
 
       }
     }

@@ -11,7 +11,7 @@ import {
 
 import { ApprovalStatus, EventStatus } from '../../common/enums/event.enums';
 import { Registration } from '../../registrations/entities/registration.entity';
-import { Organizer } from 'src/organizers/entities/organizer.entity';
+import { Organizer } from '../../organizers/entities/organizer.entity';
 
 @Entity('events')
 export class Event {

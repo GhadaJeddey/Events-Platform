@@ -9,12 +9,14 @@ import { Event } from '../entities/event.entity';
 import { CreateEventDto } from '../dto/create-event.dto';
 import { UpdateEventDto } from '../dto/update-event.dto';
 import { ApprovalStatus, EventStatus } from '../../common/enums/event.enums';
+import { OrganizersService } from '../../organizers/services/organizers.service';
 
 @Injectable()
 export class EventsService {
   constructor(
     @InjectRepository(Event)
     private eventsRepository: Repository<Event>,
+    private organizersService: OrganizersService,
   ) { }
 
   // CREATE Event
@@ -34,9 +36,13 @@ export class EventsService {
         'La date de fin doit être après la date de début',
       );
     }
+
+    // ← Get the organizer profile from userId
+    const organizer = await this.organizersService.findOneByUserId(userId);
+
     const event = this.eventsRepository.create({
       ...createEventDto,
-      organizer: { id: userId },
+      organizer: { id: organizer.id },  // ← Use organizer.id, not userId
       approvalStatus: ApprovalStatus.PENDING,
       eventStatus: EventStatus.UPCOMING,
       currentRegistrations: 0,
@@ -44,7 +50,6 @@ export class EventsService {
 
     return await this.eventsRepository.save(event);
   }
-
   // READ ALL PUBLIC
   async findAllPublic(): Promise<Event[]> {
     return await this.eventsRepository.find({

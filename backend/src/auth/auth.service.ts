@@ -5,9 +5,9 @@ import { SignInDto } from "../users/dto/SignInDto";
 import * as bcrypt from 'bcrypt';
 import { JwtService } from "@nestjs/jwt";
 import { User } from "../users/entities/user.entity";
-import { StudentsService } from "src/students/services/students.service";
-import { OrganizersService } from "src/organizers/services/organizers.service";
-import { UserRole } from "src/common/enums/user.enums";
+import { StudentsService } from "../students/services/students.service";
+import { OrganizersService } from "../organizers/services/organizers.service";
+import { UserRole } from "../common/enums/user.enums";
 @Injectable()
 /**
  * Service for handling authentication logic.
