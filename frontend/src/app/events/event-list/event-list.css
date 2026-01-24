@@ -203,30 +203,3 @@
         font-size: 14px;
     }
 }
-
-/* Loading State */
-.loading-state {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 100px 20px;
-    color: #4a5568;
-    animation: fadeIn 0.5s ease-in;
-}
-
-.spinner {
-    width: 60px;
-    height: 60px;
-    border: 5px solid rgba(102, 126, 234, 0.1);
-    border-left-color: #667eea;
-    border-radius: 50%;
-    margin-bottom: 24px;
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
-}

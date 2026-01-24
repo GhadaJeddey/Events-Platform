@@ -6,10 +6,13 @@ import { switchMap } from 'rxjs';
 import { environment } from '../../../../Commun/environments/environment';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Event } from '../../Models/Event';
+import { HoverElevateDirective } from '../../directives/hover-elevate.directive';
+import { LoaderComponent } from '../../shared/components/loader/loader';
+import { StatusBadgeDirective } from '../../directives/status-badge.directive';
 
 @Component({
   selector: 'app-event-details',
-  imports: [DatePipe, RouterLink],
+  imports: [DatePipe, RouterLink, HoverElevateDirective, LoaderComponent, StatusBadgeDirective],
   templateUrl: './event-details.html',
   styleUrl: './event-details.css',
 })

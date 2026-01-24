@@ -10,11 +10,6 @@
     border: 1px solid rgba(0, 0, 0, 0.03);
 }
 
-.event-card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 20px 40px rgba(102, 126, 234, 0.15);
-    border-color: rgba(102, 126, 234, 0.2);
-}
 
 /* Image Section - Agrandie */
 .event-card-image {
@@ -41,19 +36,6 @@
     position: absolute;
     top: 20px;
     left: 20px;
-}
-
-.badge-status {
-    background: rgba(255, 255, 255, 0.9);
-    backdrop-filter: blur(8px);
-    padding: 6px 14px;
-    border-radius: 12px;
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: #667eea;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
 }
 
 /* Content Section - Épuré */
@@ -136,9 +118,4 @@
     border-radius: 10px;
     transition: all 0.3s ease;
     box-shadow: 0 4px 10px rgba(102, 126, 234, 0.2);
-}
-
-.link-register:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(102, 126, 234, 0.3);
 }
