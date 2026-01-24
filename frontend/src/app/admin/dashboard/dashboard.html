@@ -1,0 +1,52 @@
+<div class="dashboard-container fade-in-up">
+  <h2 class="text-gradient section-title">Admin Dashboard</h2>
+
+  @if (!stats()) {
+    <div class="loading-state">
+      <p>Chargement des statistiques...</p>
+    </div>
+  } 
+  
+  @else {
+    <div class="stats-grid">
+      
+      <div class="stat-card users-card" routerLink="/admin/users">
+        <div class="stat-icon">👥</div>
+        <div class="stat-content">
+          <h3>Total Users</h3>
+          <p class="stat-number">{{ stats()?.overview?.totalUsers }}</p>
+        </div>
+      </div>
+
+      <div class="stat-card events-card" routerLink="/events">
+        <div class="stat-icon">📅</div>
+        <div class="stat-content">
+          <h3>Total Events</h3>
+          <p class="stat-number">{{ stats()?.overview?.totalEvents }}</p>
+        </div>
+      </div>
+
+      <div class="stat-card pending-card" routerLink="/admin/approvals">
+        <div class="stat-icon">⏳</div>
+        <div class="stat-content">
+          <h3>Pending Reviews</h3>
+          <p class="stat-number">{{ stats()?.overview?.pendingEvents }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="charts-section">
+      <div class="chart-container">
+        <h3>Events Distribution</h3>
+        <div class="canvas-wrapper">
+          <canvas baseChart
+            [data]="pieChartData()"
+            [type]="'pie'"
+            [options]="pieChartOptions">
+          </canvas>
+        </div>
+      </div>
+      
+      </div>
+  }
+</div> 

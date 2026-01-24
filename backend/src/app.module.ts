@@ -13,6 +13,7 @@ import { OrganizersModule } from './organizers/organizers.module';
 import { join } from 'path';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
@@ -56,7 +57,8 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handleba
     UsersModule,
     RegistrationsModule,
     StudentsModule,
-    OrganizersModule
+    OrganizersModule,
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [AppService],
