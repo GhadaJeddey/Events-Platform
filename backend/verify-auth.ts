@@ -26,11 +26,17 @@ const mockRepository = {
 const mockJwtService = {
     sign: () => 'mock-jwt-token',
 };
+const mockStudentsService = {} as any;
+const mockOrganizersService = {} as any;
 
 async function test() {
     const usersService = new UsersService(mockRepository as any);
-    const authService = new AuthService(usersService, mockJwtService as any);
-
+    const authService = new AuthService(
+        usersService,
+        mockJwtService as any,
+        mockStudentsService,   
+        mockOrganizersService  
+    );
     console.log('Testing register...');
     try {
         const user = await authService.register({

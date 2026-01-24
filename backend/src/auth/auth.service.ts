@@ -5,6 +5,9 @@ import { SignInDto } from "../users/dto/SignInDto";
 import * as bcrypt from 'bcrypt';
 import { JwtService } from "@nestjs/jwt";
 import { User } from "../users/entities/user.entity";
+import { StudentsService } from "src/students/services/students.service";
+import { OrganizersService } from "src/organizers/services/organizers.service";
+import { UserRole } from "src/common/enums/user.enums";
 @Injectable()
 /**
  * Service for handling authentication logic.
@@ -13,6 +16,8 @@ export class AuthService {
     constructor(
         private usersService: UsersService,
         private jwtService: JwtService,
+        private studentsService: StudentsService,
+        private organizersService: OrganizersService,
     ) { }
 
     /**
@@ -20,9 +25,26 @@ export class AuthService {
      * @param {CreateUserDto} body - The user creation data.
      * @returns {Promise<User>} The created user entity.
      */
-    register(body: CreateUserDto) {
-        return this.usersService.create(body);
+    async register(body: any) {
+        const user = await this.usersService.create(body);
+
+        if (user.role === UserRole.STUDENT) {
+            await this.studentsService.create(user,{
+                major: body.major || 'Undeclared',
+                studentCardNumber: body.studentCardNumber || 'N/A',}
+            );
+
+        } else if (user.role === UserRole.ORGANIZER) {
+            await this.organizersService.create(user, {
+                name: body.organizationName || `${user.firstName} ${user.lastName}`,
+                description: body.description,
+                website: body.website,
+            });
+        }
+
+        return user;
     }
+
 
     /**
      * Validates user credentials and logs them in.

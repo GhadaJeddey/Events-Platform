@@ -10,6 +10,7 @@ import {
 
 import { ApiProperty } from '@nestjs/swagger';
 import { UserRole } from '../../common/enums/user.enums';
+import { Exclude } from 'class-transformer';
 
 export class CreateUserDto {
   @ApiProperty({ example: 'John', description: 'User first name' })

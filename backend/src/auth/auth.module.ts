@@ -7,10 +7,15 @@ import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '../users/entities/user.entity';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { Student } from 'src/students/entities/student.entity';
+import { StudentsModule } from 'src/students/students.module';
+import { OrganizersModule } from 'src/organizers/organizers.module';
 
 @Module({
     imports: [
         UsersModule,
+        StudentsModule,
+        OrganizersModule,
         PassportModule.register({ defaultStrategy: 'jwt' }),
         JwtModule.registerAsync({
             imports: [ConfigModule],

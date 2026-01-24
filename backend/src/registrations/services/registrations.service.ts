@@ -1,10 +1,10 @@
 import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
-import { CreateRegistrationDto } from './dto/create-registration.dto';
+import { CreateRegistrationDto } from '../dto/create-registration.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In, DataSource } from 'typeorm';
-import { Registration } from './entities/registration.entity';
-import { Event } from '../events/entities/event.entity';
-import { RegistrationStatus } from '../common/enums/registration-status.enum';
+import { Registration } from '../entities/registration.entity';
+import { Event } from '../../events/entities/event.entity';
+import { RegistrationStatus } from '../../common/enums/registration-status.enum';
 import { Student } from 'src/students/entities/student.entity';
 import { MailerService } from '@nestjs-modules/mailer';
 

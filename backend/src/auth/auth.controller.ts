@@ -10,10 +10,11 @@ import { Get } from "@nestjs/common";
 import { Request } from "@nestjs/common";
 import { RolesGuard } from "./guards/roles.guard";
 import { Roles } from "./decorators/roles.decorator";
+import { Role } from "src/common/enums/role.enum";
+
+
 @Controller('auth')
-/**
- * Controller for authentication endpoints.
- */
+
 export class AuthController {
     constructor(private authService: AuthService) { }
 
@@ -42,9 +43,9 @@ export class AuthController {
     getUserInfo(@Request() req) {
         return req.user;
     }
-    
+
     @Get('admin-only')
-    @Roles('admin')
+    @Roles(Role.ADMIN)
     @UseGuards(AuthGuard, RolesGuard)
     async adminOnly() {
         return 'Direct access for admins only';

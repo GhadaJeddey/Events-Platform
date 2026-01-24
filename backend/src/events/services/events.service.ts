@@ -36,7 +36,7 @@ export class EventsService {
     }
     const event = this.eventsRepository.create({
       ...createEventDto,
-      organizerId: userId,
+      organizer: { id: userId },
       approvalStatus: ApprovalStatus.PENDING,
       eventStatus: EventStatus.UPCOMING,
       currentRegistrations: 0,
@@ -162,16 +162,9 @@ export class EventsService {
   // Obtenir les événements d'un organisateur
   async findByOrganizer(organizerId: string): Promise<Event[]> {
     return await this.eventsRepository.find({
-      where: { organizerId },
+      where: { organizer: { id: organizerId } },
       order: { startDate: 'DESC' },
     });
   }
 
-  // Obtenir les événements d'un club
-  async findByClub(clubId: string): Promise<Event[]> {
-    return await this.eventsRepository.find({
-      where: { clubId },
-      order: { startDate: 'DESC' },
-    });
-  }
 }

@@ -7,8 +7,7 @@ import { EventsModule } from './events/events.module';
 import { UsersModule } from './users/users.module';
 import { RegistrationsModule } from './registrations/registrations.module';
 import { AuthModule } from './auth/auth.module';
-import { ClubsModule } from './clubs/clubs.module';
-import { ClubsModule } from './clubs/clubs.module';
+
 import { StudentsModule } from './students/students.module';
 import { OrganizersModule } from './organizers/organizers.module';
 
@@ -31,7 +30,6 @@ import { OrganizersModule } from './organizers/organizers.module';
     AuthModule,
     EventsModule,
     UsersModule,
-    ClubsModule,
     RegistrationsModule,
     StudentsModule,
     OrganizersModule
@@ -40,4 +38,4 @@ import { OrganizersModule } from './organizers/organizers.module';
   providers: [AppService],
 })
 
-export class AppModule { }
+export class AppModule {}
