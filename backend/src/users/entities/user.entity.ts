@@ -6,7 +6,7 @@ import {
   UpdateDateColumn,
   OneToMany,
 } from 'typeorm';
-import { UserRole } from '../../common/enums/user.enums';
+import { Role } from '../../auth/enums/role.enum';
 import { Registration } from '../../registrations/entities/registration.entity';
 
 @Entity('users')
@@ -26,8 +26,8 @@ export class User {
   @Column({ length: 255 })
   password: string;
 
-  @Column({ type: 'enum', enum: UserRole, default: UserRole.STUDENT })
-  role: UserRole;
+  @Column({ type: 'enum', enum: Role, default: Role.STUDENT })
+  role: Role;
 
   @Column({ default: true })
   isActive: boolean;

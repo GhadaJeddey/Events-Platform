@@ -30,7 +30,7 @@ export class EventsController {
 
   @Post('create')
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles(Role.ADMIN, Role.CLUB)
+  @Roles(Role.ADMIN,Role.ORGANISER)
   @UseInterceptors(
     FileInterceptor('image', {
       storage: diskStorage({
@@ -81,7 +81,7 @@ export class EventsController {
   // Mettre à jour un événement
   @Patch(':id')
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles(Role.ADMIN, Role.CLUB)
+  @Roles(Role.ADMIN, Role.ORGANISER)
   @UseInterceptors(
     FileInterceptor('image', {
       storage: diskStorage({
@@ -121,7 +121,7 @@ export class EventsController {
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles(Role.ADMIN, Role.CLUB)
+  @Roles(Role.ADMIN, Role.ORGANISER)
   remove(@Param('id') id: string) {
     return this.eventsService.remove(id);
   }

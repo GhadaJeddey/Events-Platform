@@ -1,8 +1,7 @@
 import { UsersService } from './src/users/services/users.service';
 import { AuthService } from './src/auth/auth.service';
 import { User } from './src/users/entities/user.entity';
-import { UserRole } from './src/common/enums/user.enums';
-
+import { Role } from './src/auth/enums/role.enum';
 // Stateful Mock Repository
 const mockRepository = {
     users: [] as User[],
@@ -38,7 +37,7 @@ async function test() {
             lastName: 'User',
             email: 'test@example.com',
             password: 'password123',
-            role: UserRole.STUDENT,
+            role: Role.STUDENT,
         });
         console.log('User registered:', { ...user, password: '[HASHED]' });
         console.log('Password hashed check:', user.password !== 'password123');
