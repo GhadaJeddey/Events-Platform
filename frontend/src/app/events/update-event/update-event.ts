@@ -8,10 +8,11 @@ import { InputDatePipe } from '../../../../Commun/pipes/input-date-pipe';
 import { ToastrService } from 'ngx-toastr';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map, switchMap, of, tap } from 'rxjs';
+import { LoaderComponent } from '../../shared/components/loader/loader';
 
 @Component({
   selector: 'app-update-event',
-  imports: [FormsModule, InputDatePipe],
+  imports: [FormsModule, InputDatePipe, LoaderComponent],
   templateUrl: './update-event.html',
   styleUrl: './update-event.css',
 })

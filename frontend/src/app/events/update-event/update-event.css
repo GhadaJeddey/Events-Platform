@@ -277,14 +277,6 @@
     transform: translateY(0);
 }
 
-.loading-state {
-    text-align: center;
-    padding: 40px;
-    color: #64748b;
-    font-size: 18px;
-    font-weight: 600;
-}
-
 @media (max-width: 768px) {
     .form-card {
         padding: 40px 20px;

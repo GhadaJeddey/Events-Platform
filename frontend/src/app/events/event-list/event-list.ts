@@ -5,10 +5,11 @@ import { FormsModule } from '@angular/forms';
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { map, switchMap } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
+import { LoaderComponent } from '../../shared/components/loader/loader';
 
 @Component({
   selector: 'app-event-list',
-  imports: [EventCard, FormsModule],
+  imports: [EventCard, FormsModule, LoaderComponent],
   templateUrl: './event-list.html',
   styleUrl: './event-list.css',
 })
