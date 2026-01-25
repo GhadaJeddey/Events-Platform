@@ -27,8 +27,7 @@ export class RegisterComponent {
     isLoading = signal(false);
     roles = [
         { value: UserRole.STUDENT, label: 'Étudiant' },
-        { value: UserRole.ORGANIZER, label: 'Organisateur' },
-        { value: UserRole.ADMIN, label: 'Administrateur' }
+        { value: UserRole.ORGANIZER, label: 'Organisateur' }
     ];
 
     constructor() {
