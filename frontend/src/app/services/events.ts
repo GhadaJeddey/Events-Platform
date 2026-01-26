@@ -17,6 +17,10 @@ export class EventsService {
   getEvents(): Observable<Event[]> {
     return this.http.get<Event[]>(`${this.apiUrl}/events/public`);
   }
+
+  getMyEvents(): Observable<Event[]> {
+    return this.http.get<Event[]>(`${this.apiUrl}/events/mine`);
+  }
   getEventById(id: string): Observable<Event> {
     return this.http.get<Event>(`${this.apiUrl}/events/${id}`);
   }
@@ -25,6 +29,10 @@ export class EventsService {
     return this.http.get<Event[]>(`${this.apiUrl}/events/search`, {
       params: { q: searchTerm }
     });
+  }
+
+  getEventsByOrganizerId(organizerId: string): Observable<Event[]> {
+    return this.http.get<Event[]>(`${this.apiUrl}/events/organizer/${organizerId}`);
   }
 
   createEvent(eventData: any, imageFile: File | null): Observable<any> {

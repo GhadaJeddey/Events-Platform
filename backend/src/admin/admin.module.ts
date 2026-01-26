@@ -9,8 +9,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Event]),
-    JwtModule.registerAsync({
+    TypeOrmModule.forFeature([User, Event]), 
+    JwtModule.registerAsync({ // Async to allow access to ConfigService before JwtModule is init . Dynamic load of config values 
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({

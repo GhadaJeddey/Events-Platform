@@ -31,7 +31,7 @@ export class EventsController {
 
   @Post('create')
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles(Role.ADMIN, Role.CLUB)
+  @Roles(Role.ADMIN, Role.ORGANIZER)
   @UseInterceptors(
     FileInterceptor('image', {
       storage: diskStorage({
@@ -67,6 +67,13 @@ export class EventsController {
     return this.eventsService.findAllPublic();
   }
 
+  @Get('mine')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(Role.ADMIN, Role.ORGANIZER)
+  findMine(@Req() req) {
+    return this.eventsService.findByOrganizerUser(req.user.id);
+  }
+
   // SEARCH - Rechercher des événements
   @Get('search')
   searchEvents(@Query('q') searchTerm: string) {
@@ -82,7 +89,7 @@ export class EventsController {
   // Mettre à jour un événement
   @Patch(':id')
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles(Role.ADMIN, Role.CLUB)
+  @Roles(Role.ADMIN, Role.ORGANIZER)
   @UseInterceptors(
     FileInterceptor('image', {
       storage: diskStorage({
@@ -122,7 +129,7 @@ export class EventsController {
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles(Role.ADMIN, Role.CLUB)
+  @Roles(Role.ADMIN, Role.ORGANIZER)
   remove(@Param('id') id: string) {
     return this.eventsService.remove(id);
   }

@@ -47,13 +47,22 @@ export class EventsService {
 
     const event = this.eventsRepository.create({
       ...createEventDto,
-      organizer: { id: organizer.id },  // ← Use organizer.id, not userId
+      organizer: { id: organizer.id },  
       approvalStatus: ApprovalStatus.PENDING,
       eventStatus: EventStatus.UPCOMING,
       currentRegistrations: 0,
     });
 
     return await this.eventsRepository.save(event);
+  }
+
+  async findByOrganizerUser(userId: string): Promise<Event[]> {
+    const organizer = await this.organizersService.findOneByUserId(userId);
+    return this.eventsRepository.find({
+      where: { organizer: { id: organizer.id } },
+      relations: ['organizer'],
+      order: { createdAt: 'DESC' },
+    });
   }
   // READ ALL PUBLIC
   async findAllPublic(): Promise<Event[]> {

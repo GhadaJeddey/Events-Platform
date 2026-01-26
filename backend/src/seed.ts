@@ -226,6 +226,7 @@ async function bootstrap() {
 
 bootstrap();
  */
+/*
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { EventsService } from './events/services/events.service';
@@ -326,12 +327,85 @@ async function bootstrap() {
       capacity: 100,
       imageUrl: 'https://i.ytimg.com/vi/0m0Jvcp76sE/maxresdefault.jpg',
     },
+    {
+      title: 'AI & ML Summit',
+      description: 'Talks and demos on the latest in machine learning and AI.',
+      startDate: '2026-04-05T09:30:00',
+      endDate: '2026-04-05T17:00:00',
+      location: 'Innovation Center, Auditorium',
+      capacity: 200,
+      imageUrl: 'https://images.unsplash.com/photo-1545239351-1141bd82e8a6',
+    },
+    {
+      title: 'Cloud Native Day',
+      description: 'Kubernetes, containers, and cloud-native best practices.',
+      startDate: '2026-04-20T10:00:00',
+      endDate: '2026-04-20T18:00:00',
+      location: 'Campus Center, Hall B',
+      capacity: 120,
+      imageUrl: 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d',
+    },
+    {
+      title: 'Design Systems Workshop',
+      description: 'Build consistent UI libraries and tokens for large teams.',
+      startDate: '2026-05-02T13:00:00',
+      endDate: '2026-05-02T17:30:00',
+      location: 'Design Lab, Room 204',
+      capacity: 60,
+      imageUrl: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d',
+    },
+    {
+      title: 'Data Science Hackathon',
+      description: '24h challenge around data cleaning, modeling, and visualization.',
+      startDate: '2026-05-15T09:00:00',
+      endDate: '2026-05-16T09:00:00',
+      location: 'Library Innovation Space',
+      capacity: 80,
+      imageUrl: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c',
+    },
+    {
+      title: 'Cybersecurity Capture the Flag',
+      description: 'Hands-on CTF with web, crypto, and forensics tracks.',
+      startDate: '2026-06-01T10:00:00',
+      endDate: '2026-06-01T22:00:00',
+      location: 'Security Lab',
+      capacity: 70,
+      imageUrl: 'https://images.unsplash.com/photo-1510511459019-5dda7724fd87',
+    },
+    {
+      title: 'Product Management Fundamentals',
+      description: 'From discovery to delivery: roadmaps, KPIs, and stakeholder alignment.',
+      startDate: '2026-06-10T14:00:00',
+      endDate: '2026-06-10T18:00:00',
+      location: 'Business School, Room 12',
+      capacity: 90,
+      imageUrl: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7',
+    },
+    {
+      title: 'VR/AR Demo Day',
+      description: 'Showcase of immersive experiences and student projects.',
+      startDate: '2026-07-05T11:00:00',
+      endDate: '2026-07-05T17:00:00',
+      location: 'Media Lab',
+      capacity: 150,
+      imageUrl: 'https://images.unsplash.com/photo-1516116216624-53e697fedbea',
+    },
+    {
+      title: 'Green Tech Forum',
+      description: 'Sustainability, clean energy, and climate tech innovations.',
+      startDate: '2026-07-20T09:00:00',
+      endDate: '2026-07-20T16:00:00',
+      location: 'Conference Hall C',
+      capacity: 180,
+      imageUrl: 'https://images.unsplash.com/photo-1501004318641-b39e6451bec6',
+    },
   ];
 
   for (let i = 0; i < events.length; i++) {
     try {
-      // On associe l'événement à l'ID de l'organisateur (User) créé juste avant
-      await eventsService.create(events[i], organizerIds[i]);
+      // On associe l'événement à un organisateur en répartissant la charge
+      const organizerId = organizerIds[i % organizerIds.length];
+      await eventsService.create(events[i], organizerId);
       console.log(`✅ Événement "${events[i].title}" créé avec succès`);
     } catch (error) {
       console.error(
@@ -346,3 +420,4 @@ async function bootstrap() {
 }
 
 bootstrap();
+*/

@@ -7,6 +7,7 @@ import { UpdateEventStatusDto } from './dto/update-event-status.dto';
 import { UpdateUserRoleDto } from './dto/update-user-role.dto';
 import { ApprovalStatus, EventStatus } from '../common/enums/event.enums';
 
+// recommendation : use the service instead of the repository directly. 
 
 @Injectable()
 export class AdminService {

@@ -11,6 +11,8 @@ import { authGuard } from './guards/auth.guard';
 import { Dashboard } from './admin/dashboard/dashboard';
 import { EventApproval } from './admin/event-approval/event-approval';
 import { UserManagement } from './admin/user-management/user-management';
+import { StudentDashboard } from './student/dashboard/dashboard';
+import { OrganizerDashboard } from './organizer/dashboard/dashboard';
 
 export const routes: Routes = [
 
@@ -42,6 +44,22 @@ export const routes: Routes = [
         ]
         // TODO: Plus tard, ajouter : canActivate: [AdminGuard]
     }, 
+
+    {
+        path: 'student',
+        children: [
+            { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+            { path: 'dashboard', component: StudentDashboard, canActivate: [authGuard] }
+        ]
+    },
+
+    {
+        path: 'organizer',
+        children: [
+            { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+            { path: 'dashboard', component: OrganizerDashboard, canActivate: [authGuard] }
+        ]
+    },
     
     {path: '**', redirectTo: 'events' }
 ];
