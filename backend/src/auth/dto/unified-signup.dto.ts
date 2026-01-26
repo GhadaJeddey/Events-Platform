@@ -3,7 +3,7 @@ import { Type } from 'class-transformer';
 import { CreateUserDto } from '../../users/dto/create-user.dto';
 import { CreateStudentDto } from '../../students/dto/create-student.dto';
 import { CreateOrganizerDto } from '../../organizers/dto/create-organizer.dto';
-import { UserRole } from '../../common/enums/user.enums';
+import { Role } from '../../common/enums/role.enum';
 
 export class UnifiedRegisterDto {
   @IsNotEmpty()
@@ -11,8 +11,8 @@ export class UnifiedRegisterDto {
   @Type(() => CreateUserDto)
   user: CreateUserDto; // Contient email, password, firstName, lastName
 
-  @IsEnum(UserRole)
-  role: UserRole;
+  @IsEnum(Role)
+  role: Role;
 
   @IsOptional()
   @ValidateNested()
@@ -24,5 +24,5 @@ export class UnifiedRegisterDto {
   @Type(() => CreateOrganizerDto)
   organizerProfile?: CreateOrganizerDto; // name, website, description
 
-  
+
 }

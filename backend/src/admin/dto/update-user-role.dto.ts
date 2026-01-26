@@ -1,17 +1,17 @@
 import { IsEnum, IsNotEmpty } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { UserRole } from '../../common/enums/user.enums';
+import { Role } from '../../common/enums/role.enum';
 
 
 export class UpdateUserRoleDto {
   @ApiProperty({
-    enum: UserRole,
+    enum: Role,
     description: 'Le nouveau rôle de l\'utilisateur',
-    example: UserRole.ORGANIZER,
+    example: Role.ORGANIZER,
   })
   @IsNotEmpty()
-  @IsEnum(UserRole, {
-    message: `Le rôle doit être l'une des valeurs suivantes : ${Object.values(UserRole).join(', ')}`,
+  @IsEnum(Role, {
+    message: `Le rôle doit être l'une des valeurs suivantes : ${Object.values(Role).join(', ')}`,
   })
-  role: UserRole;
+  role: Role;
 }

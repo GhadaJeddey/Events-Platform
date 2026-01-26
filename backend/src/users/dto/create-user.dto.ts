@@ -9,7 +9,7 @@ import {
 } from 'class-validator';
 
 import { ApiProperty } from '@nestjs/swagger';
-import { UserRole } from '../../common/enums/user.enums';
+import { Role } from '../../common/enums/role.enum';
 import { Exclude } from 'class-transformer';
 
 export class CreateUserDto {

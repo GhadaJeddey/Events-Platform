@@ -5,39 +5,39 @@ import { Repository } from 'typeorm';
 import { Student } from '../entities/student.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../../users/entities/user.entity';
-import { Roles } from 'src/auth/decorators/roles.decorator';
+import { Roles } from '../../auth/decorators/roles.decorator';
 
 @Injectable()
 export class StudentsService {
   constructor(
     @InjectRepository(Student)
     private readonly studentRepository: Repository<Student>,
-  ){}
+  ) { }
 
-  async create(user:User, createStudentDto: CreateStudentDto) : Promise<Student> {
-    
-    const existingStudentCardNumber = await this.studentRepository.findOne({ 
-      where: { studentCardNumber: createStudentDto.studentCardNumber } 
+  async create(user: User, createStudentDto: CreateStudentDto): Promise<Student> {
+
+    const existingStudentCardNumber = await this.studentRepository.findOne({
+      where: { studentCardNumber: createStudentDto.studentCardNumber }
     });
-    
+
     if (existingStudentCardNumber) {
       throw new Error('Student with this card number already exists');
     }
 
     const student = this.studentRepository.create({
       ...createStudentDto,
-      user: user 
+      user: user
     });
 
     return this.studentRepository.save(student);
   }
 
-  async findAll() : Promise<Student[]> {
+  async findAll(): Promise<Student[]> {
     return await this.studentRepository.find({
-      relations: ['user'], 
+      relations: ['user'],
     });
   }
-  
+
 
   async findOne(id: string): Promise<Student> {
     const student = await this.studentRepository.findOne({
@@ -70,7 +70,7 @@ export class StudentsService {
     });
     if (!student) {
       throw new NotFoundException('Student profile not found for this card number');
-    } 
+    }
     return student;
   }
 
@@ -80,8 +80,8 @@ export class StudentsService {
 
     // Si on modifie le numéro de carte, attention aux doublons
     if (updateStudentDto.studentCardNumber && updateStudentDto.studentCardNumber !== student.studentCardNumber) {
-        const existing = await this.studentRepository.findOne({ where: { studentCardNumber: updateStudentDto.studentCardNumber }});
-        if (existing) throw new ConflictException('Card number already taken');
+      const existing = await this.studentRepository.findOne({ where: { studentCardNumber: updateStudentDto.studentCardNumber } });
+      if (existing) throw new ConflictException('Card number already taken');
     }
 
     // Fusion et sauvegarde
@@ -89,5 +89,5 @@ export class StudentsService {
     return await this.studentRepository.save(student);
   }
 
-  
+
 }

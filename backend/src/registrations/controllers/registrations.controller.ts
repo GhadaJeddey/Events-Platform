@@ -4,7 +4,7 @@ import { Roles } from '../../auth/decorators/roles.decorator';
 import { RolesGuard } from '../../auth/Guards/roles.guard';
 import { AuthGuard } from '../../auth/Guards/auth.guard';
 import { Role } from '../../common/enums/role.enum';
-
+import { Controller, UseGuards, Post, Get, Delete, Body, Param, Req, ParseUUIDPipe } from '@nestjs/common';
 
 @Controller('registrations')
 @UseGuards(AuthGuard, RolesGuard)

@@ -231,7 +231,7 @@ import { AppModule } from './app.module';
 import { EventsService } from './events/services/events.service';
 import { CreateEventDto } from './events/dto/create-event.dto';
 import { UsersService } from './users/services/users.service'; // Vérifie le chemin
-import { UserRole } from './common/enums/user.enums'; // Vérifie le chemin
+import { Role } from './common/enums/role.enum'; // Vérifie le chemin
 
 async function bootstrap() {
   const app = await NestFactory.createApplicationContext(AppModule);
@@ -261,7 +261,7 @@ async function bootstrap() {
       lastName: 'Admin',
       email: 'alice@admin.com',
       password: 'password123', // Pas de hashage demandé
-      role: UserRole.ADMIN,
+      role: Role.ADMIN,
     },
     {
       id: organizerIds[1], // On force l'ID
@@ -269,7 +269,7 @@ async function bootstrap() {
       lastName: 'student',
       email: 'bob@school.com',
       password: 'password123',
-      role: UserRole.STUDENT, // Assure-toi que ce rôle existe dans ton Enum
+      role: Role.STUDENT, // Assure-toi que ce rôle existe dans ton Enum
     },
     {
       id: organizerIds[2], // On force l'ID
@@ -277,14 +277,14 @@ async function bootstrap() {
       lastName: 'Organizer',
       email: 'charlie@club.com',
       password: 'password123',
-      role: UserRole.ORGANIZER,
+      role: Role.ORGANIZER,
     },
   ];
 
   for (const user of users) {
     try {
       // Attention: Il faut que ta méthode create accepte l'objet complet ou que tu passes par le repository si le DTO bloque l'ID
-      await usersService.create(user as any); 
+      await usersService.create(user as any);
       console.log(`✅ Utilisateur "${user.firstName}" créé (ID: ${user.id})`);
     } catch (error) {
       console.log(`⚠️ Info: Utilisateur "${user.email}" déjà existant ou erreur: ${error.message}`);

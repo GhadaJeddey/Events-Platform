@@ -6,7 +6,7 @@ import {
   UpdateDateColumn,
   OneToOne,
 } from 'typeorm';
-import { UserRole } from '../../common/enums/user.enums';
+import { Role } from '../../common/enums/role.enum';
 import { Student } from '../../students/entities/student.entity';
 import { Organizer } from '../../organizers/entities/organizer.entity';
 import { Exclude } from 'class-transformer';
@@ -17,7 +17,7 @@ export class User {
   id: string;
 
   @Column({ length: 255 })
-  firstName: string;  
+  firstName: string;
 
   @Column({ length: 255 })
   lastName: string;
