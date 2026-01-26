@@ -2,19 +2,25 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../../Commun/environments/environment';
-import { AuthResponse, LoginRequest, RegisterRequest, User } from '../Models/auth.models';
-
+import { AuthResponse, LoginRequest, RegisterRequest, User, UserRole } from '../Models/auth.models';
+import { jwtDecode } from 'jwt-decode';
 @Injectable({
     providedIn: 'root'
 })
 export class AuthService {
     private http = inject(HttpClient);
     private apiUrl = `${environment.apiUrl}/auth`;
+    private logouttimer:any;
 
     // State management using Signals
     private _currentUser = signal<User | null>(null);
     readonly currentUser = this._currentUser.asReadonly();
-    readonly isAuthenticated = computed(() => !!this._currentUser());
+    readonly isAuthenticated = computed(() => {
+        const user = this._currentUser();
+        return !!user && !this.isTokenExpired();
+    });
+    readonly isAdmin = computed(() => this._currentUser()?.role === UserRole.ADMIN);
+    readonly isOrganizer = computed(() => this._currentUser()?.role === UserRole.ORGANIZER);
 
     constructor() {
         this.checkAuth();
@@ -51,18 +57,21 @@ export class AuthService {
         localStorage.removeItem('access_token');
         localStorage.removeItem('user');
         this._currentUser.set(null);
+        if (this.logouttimer)
+        {
+            clearTimeout(this.logouttimer);
+        }
     }
 
     /**
      * Private helper to set session data
      */
     private setSession(token: string, user: User): void {
-        console.log('🔐 Storing JWT token:', token);
-        console.log('👤 Storing user:', user);
         localStorage.setItem('access_token', token);
         localStorage.setItem('user', JSON.stringify(user));
         this._currentUser.set(user);
-        console.log('✅ Token and user stored in localStorage');
+        const decodedToken :any=jwtDecode(token);
+        this.autoLogout(decodedToken.exp*1000);
     }
 
     /**
@@ -72,13 +81,18 @@ export class AuthService {
         const token = localStorage.getItem('access_token');
         const userStr = localStorage.getItem('user');
 
-        if (token && userStr) {
+        if (token && userStr && !this.isTokenExpired()) {
             try {
                 const user = JSON.parse(userStr);
                 this._currentUser.set(user);
+                const decodedToken :any=jwtDecode(token);
+                this.autoLogout(decodedToken.exp*1000);
             } catch (e) {
                 this.logout();
             }
+        }
+        else {
+            this.logout();
         }
     }
 
@@ -88,4 +102,37 @@ export class AuthService {
     getToken(): string | null {
         return localStorage.getItem('access_token');
     }
+
+    isTokenExpired(): boolean {
+    const token = this.getToken();
+    if (!token) return true;
+    try {
+        const decoded: any = jwtDecode(token);
+        const currentTime = Math.floor(Date.now() / 1000);
+        return decoded.exp < currentTime;
+    } catch {
+        return true; 
+    }
+
 }
+    private autoLogout(ExpirationDate:number) : void{
+        const now=Date.now();
+        const delay=ExpirationDate-now;
+        if (this.logouttimer)
+        {
+            clearTimeout(this.logouttimer);
+        }
+        if (delay>0) {
+            this.logouttimer=setTimeout(()=>{
+                this.logout();
+            },delay);
+        } 
+        else {
+            this.logout();
+        }
+
+
+    }
+}
+
+

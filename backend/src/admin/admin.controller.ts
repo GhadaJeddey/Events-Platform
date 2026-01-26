@@ -5,7 +5,7 @@ import {
     Param,
     Body,
     ParseIntPipe,
-    ParseUUIDPipe, 
+    ParseUUIDPipe,
     UseGuards
 } from '@nestjs/common';
 import { AdminService } from './admin.service';
@@ -14,10 +14,10 @@ import { UpdateUserRoleDto } from './dto/update-user-role.dto';
 
 
 
-import { AuthGuard } from '../auth/guards/auth.guard';
-import { RolesGuard } from '../auth/guards/roles.guard';
+import { AuthGuard } from '../auth/Guards/auth.guard';
+import { RolesGuard } from '../auth/Guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
-import { Role } from 'src/common/enums/role.enum';
+import { Role } from '../common/enums/role.enum';
 
 @Controller('admin')
 @UseGuards(AuthGuard, RolesGuard)

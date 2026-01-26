@@ -6,7 +6,7 @@ import {
   UpdateDateColumn,
   OneToOne,
 } from 'typeorm';
-import { UserRole } from '../../common/enums/user.enums';
+import { Role } from '../../common/enums/role.enum';
 import { Student } from '../../students/entities/student.entity';
 import { Organizer } from '../../organizers/entities/organizer.entity';
 import { Exclude } from 'class-transformer';
@@ -17,7 +17,7 @@ export class User {
   id: string;
 
   @Column({ length: 255 })
-  firstName: string;  
+  firstName: string;
 
   @Column({ length: 255 })
   lastName: string;
@@ -29,8 +29,8 @@ export class User {
   @Exclude()
   password: string;
 
-  @Column({ type: 'enum', enum: UserRole, default: UserRole.STUDENT })
-  role: UserRole;
+  @Column({ type: 'enum', enum: Role, default: Role.STUDENT })
+  role: Role;
 
   @Column({ default: true })
   isActive: boolean;

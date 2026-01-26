@@ -7,7 +7,7 @@ import { JwtService } from "@nestjs/jwt";
 import { User } from "../users/entities/user.entity";
 import { StudentsService } from "../students/services/students.service";
 import { OrganizersService } from "../organizers/services/organizers.service";
-import { UserRole } from "../common/enums/user.enums";
+import { Role } from "../common/enums/role.enum";
 import { UnifiedRegisterDto } from "./dto/unified-signup.dto";
 @Injectable()
 /**
@@ -29,13 +29,14 @@ export class AuthService {
     async register(dto: UnifiedRegisterDto) {
         const user = await this.usersService.create(dto.user);
 
-        if (user.role === UserRole.STUDENT) {
-            await this.studentsService.create(user,{
+        if (user.role === Role.STUDENT) {
+            await this.studentsService.create(user, {
                 major: dto.studentProfile?.major || 'Undeclared',
-                studentCardNumber: dto.studentProfile?.studentCardNumber || 'N/A',}
+                studentCardNumber: dto.studentProfile?.studentCardNumber || 'N/A',
+            }
             );
 
-        } else if (user.role === UserRole.ORGANIZER) {
+        } else if (user.role === Role.ORGANIZER) {
             await this.organizersService.create(user, {
                 name: dto.organizerProfile?.name || `${user.firstName} ${user.lastName}`,
                 description: dto.organizerProfile?.description,

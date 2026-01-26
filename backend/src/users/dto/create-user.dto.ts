@@ -9,7 +9,7 @@ import {
 } from 'class-validator';
 
 import { ApiProperty } from '@nestjs/swagger';
-import { UserRole } from '../../common/enums/user.enums';
+import { Role } from '../../common/enums/role.enum';
 import { Exclude } from 'class-transformer';
 
 export class CreateUserDto {
@@ -42,12 +42,12 @@ export class CreateUserDto {
   password: string;
 
   @ApiProperty({
-    enum: UserRole,
+    enum: Role,
     required: false,
-    default: UserRole.STUDENT,
+    default: Role.STUDENT,
     description: 'User role'
   })
-  @IsEnum(UserRole)
+  @IsEnum(Role)
   @IsOptional()
-  role?: UserRole;
+  role?: Role;
 }
