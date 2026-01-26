@@ -38,6 +38,5 @@ async function bootstrap() {
     credentials: true,
   });
   await app.listen(3000);
-  console.log('🚀 Server successfully started on http://localhost:3000');
 }
 bootstrap();
