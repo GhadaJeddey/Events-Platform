@@ -6,24 +6,18 @@ import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { map, switchMap } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { LoaderComponent } from '../../shared/components/loader/loader';
+import { SearchComponent } from '../../shared/components/search/search';
 
 @Component({
   selector: 'app-event-list',
-  imports: [EventCard, FormsModule, LoaderComponent],
+  imports: [EventCard, FormsModule, LoaderComponent, SearchComponent],
   templateUrl: './event-list.html',
   styleUrl: './event-list.css',
 })
 export class EventList {
-  constructor() {
-    effect(() => {
-      this.searchTerm = this.searchQuery();
-    });
-  }
-
   private eventsService = inject(EventsService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
-
 
   searchQuery = toSignal(
     this.route.queryParams.pipe(
@@ -31,7 +25,6 @@ export class EventList {
     ),
     { initialValue: '' }
   );
-  searchTerm = '';
 
   events = toSignal(
     toObservable(this.searchQuery).pipe(
@@ -43,10 +36,10 @@ export class EventList {
     { initialValue: null }
   );
 
-  onSearch() {
+  onSearch(term: string) {
     this.router.navigate([], {
       relativeTo: this.route,
-      queryParams: { q: this.searchTerm || null },
+      queryParams: { q: term || null },
     });
   }
 }

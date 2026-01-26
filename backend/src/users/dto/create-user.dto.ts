@@ -7,8 +7,10 @@ import {
   MinLength,
   MaxLength,
 } from 'class-validator';
+
 import { ApiProperty } from '@nestjs/swagger';
-import { Role } from '../../auth/enums/role.enum';
+import { UserRole } from '../../common/enums/user.enums';
+import { Exclude } from 'class-transformer';
 
 export class CreateUserDto {
   @ApiProperty({ example: 'John', description: 'User first name' })

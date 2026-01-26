@@ -66,6 +66,6 @@ export class CreateEventDto {
   })
   @IsOptional()
   @IsUUID('4', { message: 'ID du club invalide' })
-  clubId?: string;
-  // organizerId sera extrait du JWT (utilisateur connecté)
+  organizerId?: string;
+  
 }

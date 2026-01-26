@@ -8,21 +8,21 @@ import { LoginComponent } from './auth/login/login';
 import { RegisterComponent } from './auth/register/register';
 import { ForgotPasswordComponent } from './auth/forgot-password/forgot-password';
 import { authGuard } from './guards/auth.guard';
-import { adminOrOrganizerGuard } from './guards/adminororganizer.guard';
+
+import { Dashboard } from './admin/dashboard/dashboard';
+import { EventApproval } from './admin/event-approval/event-approval';
+import { UserManagement } from './admin/user-management/user-management';
 
 export const routes: Routes = [
-    { path: '', redirectTo: 'events', pathMatch: 'full' },
-    { path: 'events', component: EventList },
+
     {
-        path: 'events/create',
-        component: CreateEventForm,
-        canActivate: [authGuard, adminOrOrganizerGuard]
-    },
-    { path: 'event/details/:id', component: EventDetails },
-    {
-        path: 'event/update/:id',
-        component: UpdateEvent,
-        canActivate: [authGuard, adminOrOrganizerGuard]
+        path: 'events',
+        children: [
+            { path: '', component: EventList },
+            { path: 'create', component: CreateEventForm, canActivate: [authGuard] },
+            { path: ':id', component: EventDetails },
+            { path: ':id/edit', component: UpdateEvent, canActivate: [authGuard] }
+        ]
     },
     {
         path: 'auth',
@@ -31,5 +31,18 @@ export const routes: Routes = [
             { path: 'register', component: RegisterComponent },
             { path: 'forgot-password', component: ForgotPasswordComponent },
         ]
-    }
+    },
+
+    {
+        path: 'admin',
+        children: [
+            { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+            { path: 'dashboard', component: Dashboard },
+            { path: 'approvals', component: EventApproval },
+            { path: 'users', component: UserManagement }
+        ]
+        // TODO: Plus tard, ajouter : canActivate: [AdminGuard]
+    },
+
+    { path: '**', redirectTo: 'events' }
 ];

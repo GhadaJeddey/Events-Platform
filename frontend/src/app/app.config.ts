@@ -5,11 +5,13 @@ import { provideAnimations } from '@angular/platform-browser/animations';
 import { routes } from './app.routes';
 import { provideToastr } from 'ngx-toastr';
 import { authInterceptor } from './interceptors/auth.interceptor';
+import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
+    provideHttpClient(),
     provideHttpClient(withInterceptors([authInterceptor])),
     provideAnimations(),
     provideToastr({
@@ -17,5 +19,6 @@ export const appConfig: ApplicationConfig = {
       positionClass: 'toast-bottom-right',
       preventDuplicates: true,
     }),
+    provideCharts(withDefaultRegisterables())
   ]
 };

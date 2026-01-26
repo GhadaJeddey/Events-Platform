@@ -1,16 +1,17 @@
 import { Entity, Unique, PrimaryGeneratedColumn, CreateDateColumn, ManyToOne, Column } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import { Event } from '../../events/entities/event.entity';
-import { RegistrationStatus } from '../enums/registration-status.enum';
+import { RegistrationStatus } from '../../common/enums/registration-status.enum';
+import { Student } from '../../students/entities/student.entity';
 
 @Entity()
-@Unique(['user', 'event']) // Prevents multiple registrations to the same event by same user 
+@Unique(['student', 'event']) // Prevents multiple registrations to the same event by same user 
 export class Registration {
     @PrimaryGeneratedColumn('uuid')
     id: string;
 
-    @ManyToOne(() => User, (user) => user.registrations, { onDelete: 'CASCADE' })
-    user: User;
+    @ManyToOne(() => Student, (student) => student.registrations, { onDelete: 'CASCADE' })
+    student: Student;
 
     @ManyToOne(() => Event, (event) => event.registrations, { onDelete: 'CASCADE' })
     event: Event;

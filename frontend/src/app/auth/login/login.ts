@@ -4,6 +4,7 @@ import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { ToastrService } from 'ngx-toastr';
 import { CommonModule } from '@angular/common';
+import { UserRole } from '../../Models/auth.models';
 
 import { ButtonComponent } from '../../shared/components/button/button';
 import { InputComponent } from '../../shared/components/input/input';
@@ -38,7 +39,22 @@ export class LoginComponent {
             this.authService.login(this.loginForm.value).subscribe({
                 next: () => {
                     this.toastr.success('Connexion réussie !');
-                    this.router.navigate(['/events']);
+                    // Get current user from AuthService
+                    const user = this.authService.currentUser();
+                    if (user) {
+                        // Redirect based on role
+                        switch (user.role) {
+                            case UserRole.STUDENT:
+                                this.router.navigate(['/student/dashboard']);
+                                break;
+                            case UserRole.ORGANIZER:
+                                this.router.navigate(['/organizer/dashboard']);
+                                break;
+                            case UserRole.ADMIN:
+                                this.router.navigate(['/admin/dashboard']);
+                                break;
+                        }
+                    }
                     this.isLoading.set(false);
                 },
                 error: (err) => {

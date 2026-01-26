@@ -2,7 +2,6 @@ import { Controller } from "@nestjs/common";
 import { Post } from "@nestjs/common";
 import { Body } from "@nestjs/common";
 import { AuthService } from "./auth.service";
-import { CreateUserDto } from "../users/dto/create-user.dto";
 import { SignInDto } from "../users/dto/SignInDto";
 import { UseGuards } from "@nestjs/common";
 import { AuthGuard } from "./Guards/auth.guard";
@@ -10,11 +9,12 @@ import { Get } from "@nestjs/common";
 import { Request } from "@nestjs/common";
 import { RolesGuard } from "./Guards/roles.guard";
 import { Roles } from "./decorators/roles.decorator";
-import { Role } from "./enums/role.enum";
+import { Role } from "src/common/enums/role.enum";
+import { UnifiedRegisterDto } from "./dto/unified-signup.dto";
+
+
 @Controller('auth')
-/**
- * Controller for authentication endpoints.
- */
+
 export class AuthController {
     constructor(private authService: AuthService) { }
 
@@ -24,7 +24,8 @@ export class AuthController {
      * @returns {Promise<UserEntity>} The created user.
      */
     @Post('register')
-    async register(@Body() body: CreateUserDto) {
+    async register(@Body() body: UnifiedRegisterDto) {
+        console.log('📥 Received registration body:', JSON.stringify(body, null, 2));
         return this.authService.register(body);
     }
 
@@ -43,7 +44,7 @@ export class AuthController {
     getUserInfo(@Request() req) {
         return req.user;
     }
-    
+
     @Get('admin-only')
     @Roles(Role.ADMIN)
     @UseGuards(AuthGuard, RolesGuard)

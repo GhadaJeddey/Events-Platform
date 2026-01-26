@@ -8,7 +8,8 @@
             <div class="navbar-links">
                 <a routerLink="/events" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"
                     class="nav-link">Évènements</a>
-                <a href="#" class="nav-link">Nos Clubs</a>
+                <a routerLink="/organizations" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"
+                    class="nav-link">Organisations</a>
                 <a href="#" class="nav-link">Contact</a>
             </div>
 
@@ -27,6 +28,11 @@
                 </div>
                 }
             </div>
-        </div>
+            <div class="profile-icon" >
+                <a [routerLink]="getProfilePath()">
+                    <mat-icon [style.color]="'#007bff'" [style.fontSize]="'28px'">person</mat-icon>
+                </a>
+            </div>
     </div>
-</nav>
+
+    

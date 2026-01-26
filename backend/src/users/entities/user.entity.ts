@@ -4,10 +4,12 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
-  OneToMany,
+  OneToOne,
 } from 'typeorm';
-import { Role } from '../../auth/enums/role.enum';
-import { Registration } from '../../registrations/entities/registration.entity';
+import { UserRole } from '../../common/enums/user.enums';
+import { Student } from '../../students/entities/student.entity';
+import { Organizer } from '../../organizers/entities/organizer.entity';
+import { Exclude } from 'class-transformer';
 
 @Entity('users')
 export class User {
@@ -15,7 +17,7 @@ export class User {
   id: string;
 
   @Column({ length: 255 })
-  firstName: string;
+  firstName: string;  
 
   @Column({ length: 255 })
   lastName: string;
@@ -24,6 +26,7 @@ export class User {
   email: string;
 
   @Column({ length: 255 })
+  @Exclude()
   password: string;
 
   @Column({ type: 'enum', enum: Role, default: Role.STUDENT })
@@ -38,6 +41,12 @@ export class User {
   @UpdateDateColumn({ type: 'timestamp' })
   updatedAt: Date;
 
-  @OneToMany(() => Registration, (registration) => registration.user)
-  registrations: Registration[];
+  // Lien vers le profil Étudiant
+  @OneToOne(() => Student, (student) => student.user)
+  studentProfile: Student;
+
+  // Lien vers le profil Club (Organizer)
+  @OneToOne(() => Organizer, (organizer) => organizer.user)
+  organizerProfile: Organizer;
+
 }

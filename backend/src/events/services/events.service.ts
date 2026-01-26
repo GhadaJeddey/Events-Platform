@@ -2,6 +2,8 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  Inject,
+  forwardRef
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, MoreThanOrEqual, LessThan, Between, In, ILike, Or, And, Brackets } from 'typeorm';
@@ -9,12 +11,17 @@ import { Event } from '../entities/event.entity';
 import { CreateEventDto } from '../dto/create-event.dto';
 import { UpdateEventDto } from '../dto/update-event.dto';
 import { ApprovalStatus, EventStatus } from '../../common/enums/event.enums';
+import { OrganizersService } from '../../organizers/services/organizers.service';
+import { RegistrationsService } from '../../registrations/services/registrations.service';
 
 @Injectable()
 export class EventsService {
   constructor(
     @InjectRepository(Event)
     private eventsRepository: Repository<Event>,
+    private organizersService: OrganizersService,
+    @Inject(forwardRef(() => RegistrationsService))
+    private registrationsService: RegistrationsService,
   ) { }
 
   // CREATE Event
@@ -34,9 +41,13 @@ export class EventsService {
         'La date de fin doit être après la date de début',
       );
     }
+
+    // ← Get the organizer profile from userId
+    const organizer = await this.organizersService.findOneByUserId(userId);
+
     const event = this.eventsRepository.create({
       ...createEventDto,
-      organizerId: userId,
+      organizer: { id: organizer.id },  // ← Use organizer.id, not userId
       approvalStatus: ApprovalStatus.PENDING,
       eventStatus: EventStatus.UPCOMING,
       currentRegistrations: 0,
@@ -44,7 +55,6 @@ export class EventsService {
 
     return await this.eventsRepository.save(event);
   }
-
   // READ ALL PUBLIC
   async findAllPublic(): Promise<Event[]> {
     const now = new Date();
@@ -193,16 +203,9 @@ export class EventsService {
   // Obtenir les événements d'un organisateur
   async findByOrganizer(organizerId: string): Promise<Event[]> {
     return await this.eventsRepository.find({
-      where: { organizerId },
+      where: { organizer: { id: organizerId } },
       order: { startDate: 'DESC' },
     });
   }
 
-  // Obtenir les événements d'un club
-  async findByClub(clubId: string): Promise<Event[]> {
-    return await this.eventsRepository.find({
-      where: { clubId },
-      order: { startDate: 'DESC' },
-    });
-  }
 }

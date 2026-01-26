@@ -11,6 +11,7 @@ import {
 
 import { ApprovalStatus, EventStatus } from '../../common/enums/event.enums';
 import { Registration } from '../../registrations/entities/registration.entity';
+import { Organizer } from '../../organizers/entities/organizer.entity';
 
 @Entity('events')
 export class Event {
@@ -38,7 +39,7 @@ export class Event {
   @Column({ type: 'int', default: 0 })
   currentRegistrations: number;
 
-  @Column({ nullable: true, length: 500 })
+  @Column({ nullable: true, length: 500, default: 'uploads/events/default.jpg' })
   imageUrl?: string;
 
   @Column({
@@ -55,30 +56,18 @@ export class Event {
   })
   eventStatus: EventStatus;
 
-  // Relations
-
-  // @ManyToOne(() => Club, (club) => club.events, { eager: true })
-  // @JoinColumn({ name: 'clubId' })
-  // club: Club;
-
-  @Column({ type: 'uuid', nullable: true })
-  clubId?: string;
-
-  // @ManyToOne(() => User, (user) => user.createdEvents, { eager: true })
-  // @JoinColumn({ name: 'organizerId' })
-  // organizer: User;
-
-  @Column({ type: 'uuid', nullable: true })
-  organizerId?: string;
-
-  @OneToMany(() => Registration, (registration) => registration.event)
-  registrations: Registration[];
-
   @CreateDateColumn()
   createdAt: Date;
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @OneToMany(() => Registration, (registration) => registration.event)
+  registrations: Registration[];
+
+  @ManyToOne(() => Organizer, (organizer) => organizer.events, {onDelete : 'CASCADE'})
+  @JoinColumn({ name: 'organizerId' })
+  organizer: Organizer;
 
   // getters
   /* a utiliser pour interdire l'inscription si l'evenement est plein */

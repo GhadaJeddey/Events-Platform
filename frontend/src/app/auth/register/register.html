@@ -3,18 +3,21 @@
         shadow="lg">
         <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
             <div class="row">
-                <div class="col-md-6">
-                    <app-input label="Prénom" formControlName="firstName" placeholder="Jean"
-                        [error]="registerForm.get('firstName')?.invalid && registerForm.get('firstName')?.touched ? 'Le prénom est requis.' : null"></app-input>
+                <div class="row">
+                    <div class="col-md-6">
+                        <app-input [label]="fieldLabels().firstName" formControlName="firstName" placeholder="Jean"
+                            [error]="registerForm.get('firstName')?.invalid && registerForm.get('firstName')?.touched ? 'Le prénom est requis.' : null"></app-input>
+                    </div>
+                    <div class="col-md-6">
+                        <app-input [label]="fieldLabels().lastName" formControlName="lastName" placeholder="Dupont"
+                            [error]="registerForm.get('lastName')?.invalid && registerForm.get('lastName')?.touched ? 'Le nom est requis.' : null"></app-input>
+                    </div>
                 </div>
-                <div class="col-md-6">
-                    <app-input label="Nom" formControlName="lastName" placeholder="Dupont"
-                        [error]="registerForm.get('lastName')?.invalid && registerForm.get('lastName')?.touched ? 'Le nom est requis.' : null"></app-input>
-                </div>
-            </div>
 
-            <app-input label="Adresse email" type="email" formControlName="email" placeholder="nom@exemple.com"
-                [error]="registerForm.get('email')?.invalid && registerForm.get('email')?.touched ? 'Veuillez entrer une adresse email valide.' : null"></app-input>
+                <app-input [label]="fieldLabels().email" type="email" formControlName="email"
+                    placeholder="nom@exemple.com"
+                    [error]="registerForm.get('email')?.invalid && registerForm.get('email')?.touched ? 'Veuillez entrer une adresse email valide.' : null"></app-input>
+            </div>
 
             <div class="mb-3">
                 <label class="form-label d-block text-muted small fw-bold text-uppercase">Je suis un...</label>
@@ -28,6 +31,33 @@
                     }
                 </div>
             </div>
+
+            @if (roleSignal() === UserRole.STUDENT) {
+            <div class="row">
+                <div class="col-md-6">
+                    <app-input label="Filière" formControlName="major" placeholder="RT"
+                        [error]="registerForm.get('major')?.invalid && registerForm.get('major')?.touched ? 'La filière est requise.' : null"></app-input>
+                </div>
+                <div class="col-md-6">
+                    <app-input label="Numéro de carte étudiant" formControlName="studentCardNumber"
+                        placeholder="12345678"
+                        [error]="registerForm.get('studentCardNumber')?.invalid && registerForm.get('studentCardNumber')?.touched ? 'Le numéro de carte est requis.' : null"></app-input>
+                </div>
+            </div>
+            }
+
+            @if (roleSignal() === UserRole.ORGANIZER) {
+            <div class="row">
+                <div class="col-md-6">
+                    <app-input label="Nom du club / organisation" formControlName="name" placeholder="IEEE INSAT"
+                        [error]="registerForm.get('name')?.invalid && registerForm.get('name')?.touched ? 'Le nom est requis.' : null"></app-input>
+                </div>
+                <div class="col-md-6">
+                    <app-input label="Site web (optionnel)" formControlName="website" placeholder="https://exemple.com"></app-input>
+                </div>
+            </div>
+            <app-input label="Description (optionnel)" formControlName="description" placeholder="Présentez votre club..."></app-input>
+            }
 
             <div class="row">
                 <div class="col-md-6">
