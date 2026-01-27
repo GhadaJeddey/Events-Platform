@@ -3,5 +3,5 @@ export enum Role {
     CLUB = 'club',
     ADMIN = 'admin',
     USER = 'user',
-    ORGANIZER = "organizer",
+    ORGANIZER = 'organizer',
 }
