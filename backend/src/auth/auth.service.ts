@@ -5,6 +5,10 @@ import { SignInDto } from "../users/dto/SignInDto";
 import * as bcrypt from 'bcrypt';
 import { JwtService } from "@nestjs/jwt";
 import { User } from "../users/entities/user.entity";
+import { StudentsService } from "../students/services/students.service";
+import { OrganizersService } from "../organizers/services/organizers.service";
+import { Role } from "../common/enums/role.enum";
+import { UnifiedRegisterDto } from "./dto/unified-signup.dto";
 @Injectable()
 /**
  * Service for handling authentication logic.
@@ -13,6 +17,8 @@ export class AuthService {
     constructor(
         private usersService: UsersService,
         private jwtService: JwtService,
+        private studentsService: StudentsService,
+        private organizersService: OrganizersService,
     ) { }
 
     /**
@@ -20,9 +26,27 @@ export class AuthService {
      * @param {CreateUserDto} body - The user creation data.
      * @returns {Promise<User>} The created user entity.
      */
-    register(body: CreateUserDto) {
-        return this.usersService.create(body);
+    async register(dto: UnifiedRegisterDto) {
+        const user = await this.usersService.create(dto.user);
+
+        if (user.role === Role.STUDENT) {
+            await this.studentsService.create(user, {
+                major: dto.studentProfile?.major || 'Undeclared',
+                studentCardNumber: dto.studentProfile?.studentCardNumber || 'N/A',
+            }
+            );
+
+        } else if (user.role === Role.ORGANIZER) {
+            await this.organizersService.create(user, {
+                name: dto.organizerProfile?.name || `${user.firstName} ${user.lastName}`,
+                description: dto.organizerProfile?.description,
+                website: dto.organizerProfile?.website,
+            });
+        }
+
+        return user;
     }
+
 
     /**
      * Validates user credentials and logs them in.
@@ -30,10 +54,6 @@ export class AuthService {
      * @returns {Promise<Omit<User, 'password'>>} The user entity without password.
      * @throws {UnauthorizedException} If credentials are invalid.
      */
-
-
-
-
     async validateUser(input: SignInDto) {
         const user = await this.usersService.findByEmail(input.email);
         if (user && await bcrypt.compare(input.password, user.password)) {
@@ -41,12 +61,6 @@ export class AuthService {
             return result;
         }
         throw new UnauthorizedException();
-
-    }
-
-    async authenticate(input: SignInDto) {
-        const user = await this.validateUser(input);
-        return this.SignIn(user);
     }
 
     async SignIn(input: Omit<User, 'password'>) {
@@ -60,5 +74,10 @@ export class AuthService {
             input,
             accesstoken,
         };
+    }
+
+    async authenticate(input: SignInDto) {
+        const user = await this.validateUser(input);
+        return this.SignIn(user);
     }
 }

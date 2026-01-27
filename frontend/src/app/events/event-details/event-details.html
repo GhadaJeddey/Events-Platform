@@ -17,7 +17,7 @@
                 </a>
                 <h1 class="event-title">{{ event.title }}</h1>
                 <div class="event-quick-info">
-                    <span class="info-badge">{{ event.eventStatus }}</span>
+                    <span [appStatusBadge]="event.eventStatus">{{ event.eventStatus }}</span>
                     <span class="info-location">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
                             stroke="currentColor" stroke-width="2">
@@ -90,7 +90,8 @@
                         </div>
                     </div>
 
-                    <button class="btn-register-primary" [disabled]="event.currentRegistrations >= event.capacity">
+                    <button class="btn-register-primary" appHoverElevate elevateAmount="-3px"
+                        [disabled]="event.currentRegistrations >= event.capacity">
                         {{ event.currentRegistrations >= event.capacity ? 'Évènement complet' : 'S\'inscrire maintenant'
                         }}
                     </button>
@@ -105,9 +106,8 @@
     </main>
 </div>
 } @else {
-<div class="loading-state">
-    <div class="spinner"></div>
-    <p>Chargement de l'évènement...</p>
+<app-loader message="Chargement de l'évènement..."></app-loader>
+<div style="text-align: center; margin-top: -20px; padding-bottom: 40px;">
     <a routerLink="/events" class="btn-secondary">Retour à la liste</a>
 </div>
 }

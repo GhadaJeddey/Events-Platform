@@ -29,6 +29,106 @@
     font-weight: 400;
 }
 
+/* Modern & Elegant Search Bar (Restored) */
+.search-wrapper {
+    margin: 2.5rem auto 0;
+    max-width: 550px;
+    padding: 0 20px;
+}
+
+.search-box {
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+    border-radius: 50px;
+    padding: 8px 12px 8px 24px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 8px 32px rgba(31, 38, 135, 0.1);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.search-box:focus-within {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(102, 126, 234, 0.18);
+    border-color: #667eea;
+}
+
+.search-input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 10px 0;
+    font-size: 1.05rem;
+    color: #2d3748;
+    outline: none;
+    font-weight: 400;
+}
+
+.search-input::placeholder {
+    color: #a0aec0;
+    font-weight: 300;
+}
+
+.search-icon-btn {
+    background: transparent;
+    color: #667eea;
+    border: none;
+    padding: 10px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: auto;
+}
+
+.search-icon-btn:hover {
+    color: #764ba2;
+    background: rgba(102, 126, 234, 0.1);
+    transform: rotate(15deg) scale(1.1);
+}
+
+.search-icon-btn svg {
+    stroke: currentColor;
+    width: 24px;
+    height: 24px;
+    transition: all 0.3s ease;
+}
+
+/* No Results Message*/
+.no-results-message {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 6rem 2rem;
+    color: #4a5568;
+}
+
+.main-text {
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    letter-spacing: -0.5px;
+}
+
+.sub-text {
+    font-size: 1rem;
+    color: #718096;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 /* Events Grid */
 .events-grid {
     display: grid;
@@ -64,7 +164,6 @@
     }
 }
 
-/* Responsive Design */
 @media (max-width: 1200px) {
     .events-grid {
         grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -103,15 +202,4 @@
     .events-subtitle {
         font-size: 14px;
     }
-}
-
-/* Loading State (optionnel) */
-.events-grid:empty::after {
-    content: "Chargement des événements...";
-    display: block;
-    text-align: center;
-    padding: 60px 20px;
-    color: #718096;
-    font-size: 16px;
-    grid-column: 1 / -1;
 }

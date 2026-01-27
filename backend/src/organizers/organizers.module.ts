@@ -1,0 +1,20 @@
+import { Module, forwardRef } from '@nestjs/common';
+import { OrganizersService } from './services/organizers.service';
+import { OrganizersController } from './controllers/organizers.controller';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Organizer } from './entities/organizer.entity';
+import { AuthModule } from '../auth/auth.module';
+
+console.log('OrganizersService:', OrganizersService);
+
+
+@Module({
+  imports: [
+    TypeOrmModule.forFeature([Organizer]),
+    forwardRef(() => AuthModule),
+  ],
+  controllers: [OrganizersController],
+  providers: [OrganizersService],
+  exports: [OrganizersService],
+})
+export class OrganizersModule {}

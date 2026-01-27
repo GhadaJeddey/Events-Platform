@@ -1,0 +1,22 @@
+# Dependency directories
+node_modules/
+
+# IDE files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Build outputs
+dist/
+build/
+
+# Frontend specific
+frontend/node_modules/
+frontend/.angular/
+
+# Backend specific
+backend/node_modules/
+backend/dist/

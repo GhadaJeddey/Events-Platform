@@ -11,38 +11,55 @@
                 <!-- Titre -->
                 <div class="form-group full-width">
                     <label for="title">Titre de l'évènement</label>
-                    <input type="text" id="title" name="title" [ngModel]="currentEvent()?.title" required minlength="5"
-                        #titleInput="ngModel">
+                    <input type="text" id="title" name="title" [ngModel]="currentEvent()?.title" required minlength="3"
+                        #titleInput="ngModel"
+                        [class.invalid]="titleInput.invalid && (titleInput.dirty || titleInput.touched)">
+                    @if(titleInput.invalid && (titleInput.dirty || titleInput.touched)) {
+                    <div class="error-message">Le titre est requis (min. 3 caractères).</div>
+                    }
                 </div>
 
                 <!-- Description -->
                 <div class="form-group full-width">
                     <label for="description">Description</label>
                     <textarea id="description" name="description" [ngModel]="currentEvent()?.description" rows="4"
+                        required minlength="10" #descInput="ngModel"
+                        [class.invalid]="descInput.invalid && (descInput.dirty || descInput.touched)"
                         placeholder="Décrivez votre évènement..."></textarea>
+                    @if(descInput.invalid && (descInput.dirty || descInput.touched)) {
+                    <div class="error-message">La description est obligatoire (min. 10 caractères).</div>
+                    }
                 </div>
 
                 <!-- Dates -->
                 <div class="form-group">
                     <label for="startDate">Date de début</label>
-                    <input type="datetime-local" id="startDate" name="startDate"
-                        [ngModel]="currentEvent()?.startDate | inputDate">
+                    <input [min]="minDate()" type="datetime-local" id="startDate" name="startDate"
+                        [ngModel]="currentEvent()?.startDate | inputDate" required #startInput="ngModel"
+                        [class.invalid]="startInput.invalid && (startInput.dirty || startInput.touched)">
                 </div>
 
                 <div class="form-group">
                     <label for="endDate">Date de fin</label>
-                    <input type="datetime-local" id="endDate" name="endDate"
-                        [ngModel]="currentEvent()?.endDate | inputDate">
+                    <input [min]="minDate()" type="datetime-local" id="endDate" name="endDate"
+                        [ngModel]="currentEvent()?.endDate | inputDate" required #endInput="ngModel"
+                        [class.invalid]="endInput.invalid && (endInput.dirty || endInput.touched)">
                 </div>
 
                 <div class="form-group">
                     <label for="location">Lieu</label>
-                    <input type="text" id="location" name="location" [ngModel]="currentEvent()?.location">
+                    <input type="text" id="location" name="location" [ngModel]="currentEvent()?.location" required
+                        #locInput="ngModel" [class.invalid]="locInput.invalid && (locInput.dirty || locInput.touched)">
                 </div>
 
                 <div class="form-group">
                     <label for="capacity">Capacité (participants)</label>
-                    <input type="number" id="capacity" name="capacity" [ngModel]="currentEvent()?.capacity">
+                    <input type="number" id="capacity" name="capacity" [ngModel]="currentEvent()?.capacity" required
+                        min="1" #capInput="ngModel"
+                        [class.invalid]="capInput.invalid && (capInput.dirty || capInput.touched)">
+                    @if(capInput.invalid && (capInput.dirty || capInput.touched)) {
+                    <div class="error-message">Minimum 1 participant.</div>
+                    }
                 </div>
 
                 <div class="form-group full-width">
@@ -78,15 +95,13 @@
 
             <div class="form-actions">
                 <button type="button" class="btn-cancel" (click)="updateForm.reset()">Annuler les modifs</button>
-                <button type="submit" class="btn-submit">
+                <button type="submit" class="btn-submit" [disabled]="updateForm.invalid">
                     Enregistrer les modifications
                 </button>
             </div>
         </form>
         } @else {
-        <div class="loading-state">
-            <p>Chargement des données de l'événement...</p>
-        </div>
+        <app-loader message="Chargement des données de l'événement..."></app-loader>
         }
     </div>
 </div>

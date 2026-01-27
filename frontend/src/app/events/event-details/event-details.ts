@@ -6,10 +6,13 @@ import { switchMap } from 'rxjs';
 import { environment } from '../../../../Commun/environments/environment';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Event } from '../../Models/Event';
+import { HoverElevateDirective } from '../../directives/hover-elevate.directive';
+import { LoaderComponent } from '../../shared/components/loader/loader';
+import { StatusBadgeDirective } from '../../directives/status-badge.directive';
 
 @Component({
   selector: 'app-event-details',
-  imports: [DatePipe, RouterLink],
+  imports: [DatePipe, RouterLink, HoverElevateDirective, LoaderComponent, StatusBadgeDirective],
   templateUrl: './event-details.html',
   styleUrl: './event-details.css',
 })
@@ -17,7 +20,7 @@ export class EventDetails {
   private route = inject(ActivatedRoute);
   private eventsService = inject(EventsService);
 
-  // On récupère l'ID de la route et on demande l'événement au service
+
   event = toSignal(this.route.paramMap.pipe(
     switchMap(params => {
       const id = params.get('id');
@@ -25,14 +28,13 @@ export class EventDetails {
     })
   ));
 
-  //personalisation du affichage du poucentage d'inscription
+
   getFillPercentage(event: Event): number {
     return (event.currentRegistrations / event.capacity) * 100;
   }
 
-  //construire l'URL complète de l'image
   getImageUrl(imageUrl: string | undefined): string {
-    if (!imageUrl) return '';
+    if (!imageUrl) return 'assets/images/default-event.png';
     return environment.apiUrl + imageUrl;
   }
 }

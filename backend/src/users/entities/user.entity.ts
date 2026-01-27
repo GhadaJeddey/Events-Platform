@@ -4,9 +4,12 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToOne,
 } from 'typeorm';
-// ✅ We keep this import because 'UserRole' is used below
-import { UserRole } from '../../common/enums/user.enums';
+import { Role } from '../../common/enums/role.enum';
+import { Student } from '../../students/entities/student.entity';
+import { Organizer } from '../../organizers/entities/organizer.entity';
+import { Exclude } from 'class-transformer';
 
 @Entity('users')
 export class User {
@@ -23,11 +26,11 @@ export class User {
   email: string;
 
   @Column({ length: 255 })
+  @Exclude()
   password: string;
 
-  // This relies on the import we saved above 👆
-  @Column({ type: 'enum', enum: UserRole, default: UserRole.STUDENT })
-  role: UserRole;
+  @Column({ type: 'enum', enum: Role, default: Role.STUDENT })
+  role: Role;
 
   @Column({ default: true })
   isActive: boolean;
@@ -37,4 +40,13 @@ export class User {
 
   @UpdateDateColumn({ type: 'timestamp' })
   updatedAt: Date;
+
+  // Lien vers le profil Étudiant
+  @OneToOne(() => Student, (student) => student.user)
+  studentProfile: Student;
+
+  // Lien vers le profil Club (Organizer)
+  @OneToOne(() => Organizer, (organizer) => organizer.user)
+  organizerProfile: Organizer;
+
 }

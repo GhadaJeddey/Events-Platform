@@ -6,41 +6,43 @@ import { Event } from '../../Models/Event';
 import { environment } from '../../../../Commun/environments/environment';
 import { InputDatePipe } from '../../../../Commun/pipes/input-date-pipe';
 import { ToastrService } from 'ngx-toastr';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { map, switchMap, of, tap } from 'rxjs';
+import { LoaderComponent } from '../../shared/components/loader/loader';
 
 @Component({
   selector: 'app-update-event',
-  imports: [FormsModule, InputDatePipe],
+  imports: [FormsModule, InputDatePipe, LoaderComponent],
   templateUrl: './update-event.html',
   styleUrl: './update-event.css',
 })
-export class UpdateEvent implements OnInit {
+export class UpdateEvent {
   private eventsService = inject(EventsService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private toastr = inject(ToastrService);
 
   eventId: string | null = null;
-  currentEvent = signal<Event | null>(null);
   selectedFile = signal<File | null>(null);
   imagePreview = signal<string | null>(null);
 
-  ngOnInit() {
-    this.eventId = this.route.snapshot.paramMap.get('id');
-    if (this.eventId) {
-      this.eventsService.getEventById(this.eventId).subscribe({
-        next: (data) => {
-          this.currentEvent.set(data);
-
-          if (data.imageUrl) {
-            this.imagePreview.set(environment.apiUrl + data.imageUrl);
-          }
-        },
-        error: (err) => {
-          alert('Impossible de charger l\'événement. Vérifiez que l\'ID est correct.');
-        }
-      });
-    }
-  }
+  currentEvent = toSignal(
+    this.route.paramMap.pipe(
+      map(params => params.get('id')),
+      tap(id => this.eventId = id),
+      switchMap(id => {
+        if (!id) return of(null);
+        return this.eventsService.getEventById(id).pipe(
+          tap(event => {
+            if (event?.imageUrl) {
+              this.imagePreview.set(environment.apiUrl + event.imageUrl);
+            }
+          })
+        );
+      })
+    ),
+    { initialValue: null }
+  );
 
   onFileSelected(event: any) {
     const file = event.target.files[0];
@@ -70,5 +72,9 @@ export class UpdateEvent implements OnInit {
         }
       });
     }
+  }
+
+  minDate() {
+    return new Date().toISOString().slice(0, 16);
   }
 }

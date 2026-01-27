@@ -1,7 +1,7 @@
 export enum UserRole {
-    STUDENT = 'Student',
-    ORGANIZER = 'Organizer',
-    ADMIN = 'Admin'
+    STUDENT = 'student',
+    ORGANIZER = 'organizer',
+    ADMIN = 'admin'
 }
 
 export interface User {
@@ -24,10 +24,21 @@ export interface LoginRequest {
 }
 
 export interface RegisterRequest {
-    email: string;
-    password?: string;
-    firstName?: string;
-    lastName?: string;
     role: UserRole;
-    clubName?: string;
+    user: {
+        email: string;
+        password: string;
+        firstName: string;
+        lastName: string;
+        role?: UserRole;
+    };
+    studentProfile?: {
+        major: string;
+        studentCardNumber: string;
+    };
+    organizerProfile?: {
+        name: string;
+        description?: string;
+        website?: string;
+    };
 }
