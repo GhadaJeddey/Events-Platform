@@ -19,6 +19,43 @@ export class CreateEventForm {
   imagePreview = signal<string | null>(null);
   minDate = signal<string>(new Date().toISOString().slice(0, 16));
 
+  // Gestion des salles
+  availableRooms = signal<string[]>([]);
+  isLoadingRooms = signal<boolean>(false);
+
+  // Variables liées aux inputs pour détecter les changements facilement
+  startDateValue: string = '';
+  endDateValue: string = '';
+
+  // Appelé à chaque fois qu'une date change
+  onDateChange() {
+    if (this.startDateValue && this.endDateValue) {
+      // Validation basique
+      if (this.startDateValue >= this.endDateValue) {
+        this.availableRooms.set([]); // Reset si dates invalides
+        return;
+      }
+
+      this.isLoadingRooms.set(true);
+      
+      // Appel au service (Assure-toi que cette méthode existe dans ton service !)
+      this.eventsService.getAvailableRooms(this.startDateValue, this.endDateValue).subscribe({
+        next: (rooms) => {
+          this.availableRooms.set(rooms);
+          this.isLoadingRooms.set(false);
+          
+          // Petit feedback si aucune salle n'est dispo
+          if (rooms.length === 0) {
+            this.toastr.info('Aucune salle disponible pour ce créneau.');
+          }
+        },
+        error: (err) => {
+          console.error(err);
+          this.isLoadingRooms.set(false);
+        }
+      });
+    }
+  }
   onFileSelected(event: any) {
     const file = event.target.files[0];
     if (file) {
@@ -31,6 +68,7 @@ export class CreateEventForm {
     }
   }
 
+  
   onSubmit(form: NgForm) {
     if (form.valid) {
       const eventData = {
@@ -42,19 +80,23 @@ export class CreateEventForm {
         capacity: form.value.capacity
       };
 
-      // Envoyer au backend avec l'image
       this.eventsService.createEvent(eventData, this.selectedFile()).subscribe({
         next: (response) => {
           this.toastr.success('Événement créé avec succès !');
           this.router.navigate(['/events']);
         },
         error: (err) => {
-          const errorMessage = err.error?.message || 'Erreur lors de la création de l\'événement';
-          this.toastr.error(errorMessage);
+          //  Gestion spécifique erreur 409 (Salle prise) 
+          if (err.status === 409) {
+            this.toastr.error("La salle sélectionnée n'est plus disponible. Veuillez réactualiser.");
+            this.onDateChange(); // On recharge la liste
+          } else {
+            const errorMessage = err.error?.message || 'Erreur lors de la création de l\'événement';
+            this.toastr.error(errorMessage);
+          }
         }
       });
     } else {
-      // Marquer tous les champs comme touchés pour afficher les erreurs
       form.form.markAllAsTouched();
     }
   }

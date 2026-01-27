@@ -9,9 +9,11 @@ import {
   MaxLength,
   MinLength,
   IsUUID,
+  IsEnum,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
+import { RoomLocation } from 'src/common/enums/room-location.enum';
 
 export class CreateEventDto {
   @ApiProperty({
@@ -43,11 +45,16 @@ export class CreateEventDto {
   @IsDateString({}, { message: 'La date de fin doit être valide' })
   endDate: string;
 
-  @ApiProperty({ example: 'Amphi A, ISIM', description: "Lieu de l'évènement" })
-  @IsString()
+  @ApiProperty({
+    enum: RoomLocation,
+    example: RoomLocation.AUDITORIUM,
+    description: "Lieu de l'évènement (choisir parmi la liste)",
+  })
   @IsNotEmpty({ message: 'Le lieu est obligatoire' })
-  @MaxLength(255)
-  location: string;
+  @IsEnum(RoomLocation, {
+    message: `Le lieu doit être valide (ex: ${Object.values(RoomLocation).join(', ')})`,
+  })
+  location: RoomLocation;
 
   @ApiProperty({ example: 100, description: 'Nombre maximum de participants' })
   @IsInt({ message: 'La capacité doit être un nombre entier' })

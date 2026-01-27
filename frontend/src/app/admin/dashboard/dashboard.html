@@ -6,10 +6,8 @@
       <p>Chargement des statistiques...</p>
     </div>
   } 
-  
   @else {
     <div class="stats-grid">
-      
       <div class="stat-card users-card" routerLink="/admin/users">
         <div class="stat-icon">👥</div>
         <div class="stat-content">
@@ -36,9 +34,10 @@
     </div>
 
     <div class="charts-section">
+      
       <div class="chart-container">
-        <h3>Events Distribution</h3>
-        <div class="canvas-wrapper">
+        <h3>Statuts d'approbation</h3>
+        <div class="canvas-wrapper pie-wrapper">
           <canvas baseChart
             [data]="pieChartData()"
             [type]="'pie'"
@@ -46,7 +45,54 @@
           </canvas>
         </div>
       </div>
-      
+
+      <div class="chart-container">
+        <h3>Top des Salles</h3>
+        <div class="canvas-wrapper bar-wrapper">
+          @if (roomChartData().labels && roomChartData().labels!.length > 0) {
+            <canvas baseChart 
+                [data]="roomChartData()" 
+                [options]="barChartOptions" 
+                [type]="'bar'">
+            </canvas>
+          } @else {
+            <p class="no-data">Aucune donnée de salle.</p>
+          }
+        </div>
       </div>
+    </div>
+  <div class="recent-activity-container">
+  <h3>🕑 Activité Récente</h3>
+  
+  <div class="activity-list">
+    @for (event of recentActivity(); track event.id) {
+      <div class="activity-item">
+        
+        <div class="activity-icon" [ngClass]="event.approvalStatus">
+          @if(event.approvalStatus === 'approved') { <i class="fas fa-check"></i> }
+          @else if(event.approvalStatus === 'rejected') { <i class="fas fa-times"></i> }
+          @else { <i class="fas fa-clock"></i> }
+        </div>
+
+        <div class="activity-details">
+          <p class="activity-text">
+            <strong>{{ event.organizer?.user?.firstName || 'Un utilisateur' }} {{event.organizer?.user?.lastName}}</strong> 
+            a demandé :
+            <strong>{{ event.location }}</strong>
+          </p>
+          <p class="activity-subtext">
+            {{ event.title }} • {{ event.createdAt | date:'dd/MM/yyyy à HH:mm' }}
+          </p>
+        </div>
+
+        <div class="status-badge-mini" [ngClass]="event.approvalStatus">
+          {{ event.approvalStatus }}
+        </div>
+      </div>
+    } @empty {
+      <p class="no-data">Aucune activité récente.</p>
+    }
+  </div>
+</div>
   }
-</div> 
+</div>

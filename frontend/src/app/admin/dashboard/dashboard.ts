@@ -17,7 +17,8 @@ export class Dashboard {
   private adminService = inject(AdminService);
 
   stats = toSignal(this.adminService.getDashboardStats(), { initialValue: null });
-
+  recentActivity = toSignal(this.adminService.getRecentEvents(), { initialValue: [] });
+  
   public pieChartOptions: ChartOptions<'pie'> = {
     responsive: true,
     plugins: {
@@ -51,6 +52,40 @@ export class Dashboard {
         hoverBackgroundColor: bgColors,
         borderColor: '#ffffff',
         borderWidth: 2
+      }]
+    };
+  });
+
+  // Options pour le Bar Chart (Salles)
+  public barChartOptions: ChartConfiguration<'bar'>['options'] = {
+    responsive: true,
+    scales: {
+      y: { beginAtZero: true, ticks: { stepSize: 1 } }, 
+      x: { grid: { display: false } }
+    },
+    plugins: {
+      legend: { display: false }, 
+      title: { display: true, text: 'Occupation des Salles (Top 10)' }
+    }
+  };
+
+  // Computed pour transformer les données du backend en Graphique
+  roomChartData = computed<ChartConfiguration<'bar'>['data']>(() => {
+    const data = this.stats();
+    if (!data || !data.details.eventsByLocation) return { labels: [], datasets: [] };
+
+    // On trie pour avoir les salles les plus utilisées en premier
+    const sortedLocs = [...data.details.eventsByLocation]
+        .sort((a, b) => parseInt(b.count) - parseInt(a.count))
+        .slice(0, 10); 
+
+    return {
+      labels: sortedLocs.map(l => l.location),
+      datasets: [{
+        data: sortedLocs.map(l => parseInt(l.count)),
+        backgroundColor: '#667eea', 
+        borderRadius: 5,
+        barThickness: 30
       }]
     };
   });

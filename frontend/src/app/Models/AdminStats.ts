@@ -6,5 +6,6 @@ export interface DashboardStats {
   };
   details: {
     eventsByApprovalStatus: { approvalStatus: string; count: string }[];
+    eventsByLocation: { location: string; count: string }[];
   };
 }

@@ -1,3 +1,18 @@
+import { Organizer } from './organizer';
+export enum RoomLocation {
+  A1 = 'A1',
+  A2 = 'A2',
+  A3 = 'A3',
+  A4 = 'A4',
+  A5 = 'A5',
+  A6 = 'A6',
+  A7 = 'A7',
+  A8 = 'A8',
+  A9 = 'A9',
+  SAMSUNG = 'Salle Samsung',
+  ORANGE = 'Salle Orange',
+  AUDITORIUM = 'Auditorium',
+}
 // Interface qui correspond à l'entité Event du backend
 export interface Event {
     id: string;
@@ -5,7 +20,7 @@ export interface Event {
     description: string;
     startDate: Date | string;
     endDate: Date | string;
-    location: string;
+    location: RoomLocation;
     capacity: number;
     currentRegistrations: number;
     imageUrl?: string;
@@ -13,6 +28,8 @@ export interface Event {
     eventStatus: 'upcoming' | 'ongoing' | 'completed';
     clubId?: string;
     organizerId?: string;
+    organizer?: Organizer;
     createdAt?: Date | string;
     updatedAt?: Date | string;
 }
+

@@ -3,7 +3,8 @@ import {
   NotFoundException,
   BadRequestException,
   Inject,
-  forwardRef
+  forwardRef,
+  ConflictException
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, MoreThanOrEqual, LessThan, Between, In, ILike, Or, And, Brackets } from 'typeorm';
@@ -13,6 +14,7 @@ import { UpdateEventDto } from '../dto/update-event.dto';
 import { ApprovalStatus, EventStatus } from '../../common/enums/event.enums';
 import { OrganizersService } from '../../organizers/services/organizers.service';
 import { RegistrationsService } from '../../registrations/services/registrations.service';
+import { ALL_ROOMS, RoomLocation } from 'src/common/enums/room-location.enum';
 
 @Injectable()
 export class EventsService {
@@ -24,30 +26,78 @@ export class EventsService {
     private registrationsService: RegistrationsService,
   ) { }
 
-  // CREATE Event
+  //  LOGIQUE DE DISPONIBILITÉ DES SALLES 
+
+  /**
+   * Retourne la liste des salles libres pour un créneau donné.
+   * Une salle est exclue si un événement (PENDING ou APPROVED) occupe déjà ce créneau.
+   */
+  async getAvailableRooms(startStr: string, endStr: string): Promise<RoomLocation[]> {
+    const startDate = new Date(startStr);
+    const endDate = new Date(endStr);
+
+    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+      throw new BadRequestException('Dates invalides');
+    }
+
+    // On cherche les événements qui chevauchent ce créneau
+    const conflictingEvents = await this.eventsRepository
+      .createQueryBuilder('event')
+      .select('event.location')
+      .where('event.approvalStatus IN (:...statuses)', { 
+          statuses: [ApprovalStatus.PENDING, ApprovalStatus.APPROVED] 
+      })
+      .andWhere('event.startDate < :endDate', { endDate }) 
+      .andWhere('event.endDate > :startDate', { startDate }) 
+      .getMany();
+
+    const occupiedRooms = conflictingEvents.map((e) => e.location);
+    return ALL_ROOMS.filter((room) => !occupiedRooms.includes(room));
+  }
+
+  async checkRoomAvailability(
+    location: RoomLocation, 
+    start: Date, 
+    end: Date, 
+    excludeEventId?: string
+  ): Promise<boolean> {
+    const query = this.eventsRepository.createQueryBuilder('event')
+      .where('event.location = :location', { location })
+      .andWhere('event.approvalStatus IN (:...statuses)', { statuses: [ApprovalStatus.PENDING, ApprovalStatus.APPROVED] })
+      .andWhere('event.startDate < :end', { end })
+      .andWhere('event.endDate > :start', { start });
+
+    if (excludeEventId) {
+      query.andWhere('event.id != :id', { id: excludeEventId });
+    }
+
+    const count = await query.getCount();
+    return count === 0;
+  }
+
+
+  // CREATE 
+
   async create(createEventDto: CreateEventDto, userId: string): Promise<Event> {
     const startDate = new Date(createEventDto.startDate);
     const endDate = new Date(createEventDto.endDate);
     const now = new Date();
 
-    if (startDate < now) {
-      throw new BadRequestException(
-        'La date de début ne peut pas être dans le passé',
-      );
+    // Validations de dates basiques
+    if (startDate < now) throw new BadRequestException('La date de début ne peut pas être dans le passé');
+    if (endDate <= startDate) throw new BadRequestException('La date de fin doit être après la date de début');
+
+    // VÉRIFICATION DE LA SALLE 
+    const isFree = await this.checkRoomAvailability(createEventDto.location, startDate, endDate);
+    if (!isFree) {
+      throw new ConflictException(`La salle ${createEventDto.location} est déjà réservée pour ce créneau.`);
     }
 
-    if (endDate <= startDate) {
-      throw new BadRequestException(
-        'La date de fin doit être après la date de début',
-      );
-    }
-
-    // ← Get the organizer profile from userId
     const organizer = await this.organizersService.findOneByUserId(userId);
 
     const event = this.eventsRepository.create({
       ...createEventDto,
-      organizer: { id: organizer.id },  // ← Use organizer.id, not userId
+      organizer: { id: organizer.id },
       approvalStatus: ApprovalStatus.PENDING,
       eventStatus: EventStatus.UPCOMING,
       currentRegistrations: 0,
@@ -55,6 +105,50 @@ export class EventsService {
 
     return await this.eventsRepository.save(event);
   }
+
+  // UPDATE 
+
+  async update(id: string, updateEventDto: UpdateEventDto) {
+    const event = await this.findOne(id); 
+    const now = new Date();
+    // On fusionne les nouvelles dates/lieux avec les anciennes si elles ne sont pas fournies
+    const newStart = updateEventDto.startDate ? new Date(updateEventDto.startDate) : event.startDate;
+    const newEnd = updateEventDto.endDate ? new Date(updateEventDto.endDate) : event.endDate;
+    const newLocation = updateEventDto.location || event.location;
+
+    // Si on modifie la date ou le lieu, on doit revérifier la disponibilité
+    if (updateEventDto.startDate || updateEventDto.endDate || updateEventDto.location) {
+        // on passe l'ID de l'événement actuel pour ne pas qu'il "entre en conflit avec lui-même"
+        const isFree = await this.checkRoomAvailability(newLocation, newStart, newEnd, id);
+        
+        if (!isFree) {
+            throw new ConflictException(`La salle ${newLocation} n'est pas disponible pour les nouvelles dates choisies.`);
+        }
+    }
+
+    if (updateEventDto.startDate) {
+      const startDate = new Date(updateEventDto.startDate);
+      if (startDate < now) {
+        throw new BadRequestException(
+          'La date de début ne peut pas être dans le passé',
+        );
+      }
+    }
+
+    if (updateEventDto.startDate && updateEventDto.endDate) {
+      const startDate = new Date(updateEventDto.startDate);
+      const endDate = new Date(updateEventDto.endDate);
+      if (endDate <= startDate) {
+        throw new BadRequestException(
+          'La date de fin doit être après la date de début',
+        );
+      }
+    }
+    
+    await this.eventsRepository.update(id, updateEventDto);
+    return this.findOne(id);
+  }
+  
   // READ ALL PUBLIC
   async findAllPublic(): Promise<Event[]> {
     const now = new Date();
@@ -134,30 +228,6 @@ export class EventsService {
     return event;
   }
 
-  // UPDATE
-  async update(id: string, updateEventDto: UpdateEventDto) {
-    const now = new Date();
-
-    if (updateEventDto.startDate) {
-      const startDate = new Date(updateEventDto.startDate);
-      if (startDate < now) {
-        throw new BadRequestException(
-          'La date de début ne peut pas être dans le passé',
-        );
-      }
-    }
-
-    if (updateEventDto.startDate && updateEventDto.endDate) {
-      const startDate = new Date(updateEventDto.startDate);
-      const endDate = new Date(updateEventDto.endDate);
-      if (endDate <= startDate) {
-        throw new BadRequestException(
-          'La date de fin doit être après la date de début',
-        );
-      }
-    }
-    await this.eventsRepository.update(id, updateEventDto);
-  }
 
   // DELETE
   async remove(id: string): Promise<void> {
