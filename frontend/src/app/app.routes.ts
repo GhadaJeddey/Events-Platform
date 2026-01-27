@@ -3,22 +3,16 @@ import { EventList } from './events/event-list/event-list';
 import { EventDetails } from './events/event-details/event-details';
 import { CreateEventForm } from './events/create-event-form/create-event-form';
 import { UpdateEvent } from './events/update-event/update-event';
-// 👇 His Auth Imports
 import { LoginComponent } from './auth/login/login';
 import { RegisterComponent } from './auth/register/register';
 import { ForgotPasswordComponent } from './auth/forgot-password/forgot-password';
 import { authGuard } from './guards/auth.guard';
-// 👇 YOUR Profile Import (Make sure this path is correct!)
 import { Profile } from  './profile/profile';
 
 export const routes: Routes = [
     { path: '', redirectTo: 'events', pathMatch: 'full' },
-
-    // 🌍 Public Event Routes
     { path: 'events', component: EventList },
     { path: 'event/details/:id', component: EventDetails },
-
-    // 🔒 Protected Event Routes (Only logged-in users)
     {
         path: 'events/create',
         component: CreateEventForm,
@@ -29,15 +23,11 @@ export const routes: Routes = [
         component: UpdateEvent,
         canActivate: [authGuard]
     },
-
-    // 👤 YOUR Profile Route (Protected)
     {
         path: 'profile',
         component: Profile,
-        canActivate: [authGuard] // Only logged in users can see profile
+        canActivate: [authGuard]
     },
-
-    // 🔑 Auth Routes
     {
         path: 'auth',
         children: [
