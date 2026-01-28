@@ -24,7 +24,9 @@ export class RolesGuard implements CanActivate {
             return false;
         }
 
-        const hasRole = requiredRoles.some((role) => user.role === role);
+        // Case-insensitive role comparison
+        const userRoleLower = user.role.toLowerCase();
+        const hasRole = requiredRoles.some((role) => role.toLowerCase() === userRoleLower);
         console.log('Has Required Role:', hasRole);
         return hasRole;
     }

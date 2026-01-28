@@ -27,7 +27,7 @@ import { AdminModule } from './admin/admin.module';
         type: 'postgres',
         url: configService.get<string>('DATABASE_URL'), //checks process.env.DATABASE_URL
         autoLoadEntities: true,
-        synchronize: true, //DEV
+        synchronize: false,
         ssl: { rejectUnauthorized: false },
       }),
     }),

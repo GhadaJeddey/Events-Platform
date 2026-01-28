@@ -1,4 +1,4 @@
-@if (event(); as event) {
+@if (!isLoading() && event(); as event) {
 <div class="details-container">
     <header class="event-hero">
         <div class="hero-image">
@@ -71,6 +71,20 @@
                                 <p>{{ event.location }}</p>
                             </div>
                         </div>
+
+                        <div class="info-item">
+                            <div class="icon-box">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                                </svg>
+                            </div>
+                            <div class="info-text">
+                                <label>Organisateur</label>
+                                <p>{{ event.organizer?.name  }}</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -90,16 +104,31 @@
                         </div>
                     </div>
 
-                    <button class="btn-register-primary" appHoverElevate elevateAmount="-3px"
-                        [disabled]="event.currentRegistrations >= event.capacity">
-                        {{ event.currentRegistrations >= event.capacity ? 'Évènement complet' : 'S\'inscrire maintenant'
-                        }}
+                    <button 
+                        [class.btn-cancel]="isUserRegistered()"
+                        class="btn-register-primary" 
+                        appHoverElevate 
+                        elevateAmount="-3px"
+                        (click)="isUserRegistered() ? cancelRegistration() : registerForEvent()"
+                        [disabled]="isUserRegistered() ? isCancelling() : isRegistering()">
+                        @if (isUserRegistered()) {
+                            {{ isCancelling() ? 'Annulation en cours...' : 'Annuler mon inscription' }}
+                        } @else {
+                            {{ isRegistering() ? 'Inscription en cours...' : 
+                               (event.currentRegistrations >= event.capacity ? 'Rejoindre la liste d\'attente' : 'S\'inscrire maintenant')
+                            }}
+                        }
                     </button>
 
-                    @if (event.currentRegistrations < event.capacity) { <p class="signup-guarantee">
-                        Rejoignez-nous pour une expérience inoubliable !
+                    @if (event.currentRegistrations < event.capacity) {
+                        <p class="signup-guarantee">
+                            Rejoignez-nous pour une expérience inoubliable !
                         </p>
-                        }
+                    } @else {
+                        <p class="signup-guarantee">
+                            Vous serez notifié lorsque des places se libéreront !
+                        </p>
+                    }
                 </div>
             </aside>
         </div>

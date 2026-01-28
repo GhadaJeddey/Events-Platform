@@ -1,11 +1,11 @@
 <div class="container fade-in-up">
-  <h2 class="text-gradient section-title">Pending Events</h2>
+  <h2 class="text-gradient section-title">Événements en Attente</h2>
   
   <div class="table-container">
     <table mat-table [dataSource]="pendingEvents()" class="custom-table">
       
       <ng-container matColumnDef="title">
-        <th mat-header-cell *matHeaderCellDef> Title </th>
+        <th mat-header-cell *matHeaderCellDef> Titre </th>
         <td mat-cell *matCellDef="let event" class="font-medium"> {{event.title}} </td>
       </ng-container>
 
@@ -17,22 +17,22 @@
       </ng-container>
 
       <ng-container matColumnDef="location">
-        <th mat-header-cell *matHeaderCellDef> Location </th>
+        <th mat-header-cell *matHeaderCellDef> Lieu </th>
         <td mat-cell *matCellDef="let event"> {{event.location}} </td>
       </ng-container>
 
       <ng-container matColumnDef="startDate">
-        <th mat-header-cell *matHeaderCellDef> Start </th>
+        <th mat-header-cell *matHeaderCellDef> Début </th>
         <td mat-cell *matCellDef="let event"> {{event.startDate | date:'short'}} </td>
       </ng-container>
 
       <ng-container matColumnDef="endDate">
-        <th mat-header-cell *matHeaderCellDef> End </th>
+        <th mat-header-cell *matHeaderCellDef> Fin </th>
         <td mat-cell *matCellDef="let event"> {{event.endDate | date:'short'}} </td>
       </ng-container>
 
       <ng-container matColumnDef="capacity">
-        <th mat-header-cell *matHeaderCellDef> Registrations </th>
+        <th mat-header-cell *matHeaderCellDef> Inscriptions </th>
         <td mat-cell *matCellDef="let event"> 
           {{event.currentRegistrations}} / {{event.capacity}} 
         </td>
@@ -43,8 +43,8 @@
         <td mat-cell *matCellDef="let event">
       
           <div class="action-buttons">
-            <button class="btn-action approve" (click)="decide(event.id, 'approved')">Approve</button>
-            <button class="btn-action reject" (click)="decide(event.id, 'rejected')">Reject</button>
+            <button class="btn-action approve" (click)="decide(event.id, 'approved')">Approuver</button>
+            <button class="btn-action reject" (click)="decide(event.id, 'rejected')">Rejeter</button>
           </div>
       
         </td>
@@ -56,7 +56,7 @@
 
     @if (pendingEvents().length === 0) {
       <div class="empty-state">
-        No pending events to review.
+        Aucun événement en attente d'approbation.
       </div>
     }
   </div>

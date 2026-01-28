@@ -1,3 +1,5 @@
+import { Organizer } from './Organizer';
+
 // Interface qui correspond à l'entité Event du backend
 export interface Event {
     id: string;
@@ -13,6 +15,7 @@ export interface Event {
     eventStatus: 'upcoming' | 'ongoing' | 'completed';
     clubId?: string;
     organizerId?: string;
+    organizer?: Organizer;
     createdAt?: Date | string;
     updatedAt?: Date | string;
 }

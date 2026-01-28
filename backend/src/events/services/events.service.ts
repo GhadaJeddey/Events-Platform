@@ -13,12 +13,16 @@ import { UpdateEventDto } from '../dto/update-event.dto';
 import { ApprovalStatus, EventStatus } from '../../common/enums/event.enums';
 import { OrganizersService } from '../../organizers/services/organizers.service';
 import { RegistrationsService } from '../../registrations/services/registrations.service';
+import { Registration } from '../../registrations/entities/registration.entity';
+import { RegistrationStatus } from '../../common/enums/registration-status.enum';
 
 @Injectable()
 export class EventsService {
   constructor(
     @InjectRepository(Event)
     private eventsRepository: Repository<Event>,
+    @InjectRepository(Registration)
+    private registrationRepository: Repository<Registration>,
     private organizersService: OrganizersService,
     @Inject(forwardRef(() => RegistrationsService))
     private registrationsService: RegistrationsService,
@@ -57,12 +61,17 @@ export class EventsService {
   }
 
   async findByOrganizerUser(userId: string): Promise<Event[]> {
+    console.log('🔍 findByOrganizerUser called with userId:', userId);
     const organizer = await this.organizersService.findOneByUserId(userId);
-    return this.eventsRepository.find({
+    console.log('👤 Found organizer:', organizer.id, organizer.name);
+    const events = await this.eventsRepository.find({
       where: { organizer: { id: organizer.id } },
       relations: ['organizer'],
       order: { createdAt: 'DESC' },
     });
+    console.log('📊 Found events count:', events.length);
+    console.log('📋 Events:', events.map(e => ({ id: e.id, title: e.title, organizerId: (e as any).organizerId })));
+    return events;
   }
   // READ ALL PUBLIC
   async findAllPublic(): Promise<Event[]> {
@@ -72,6 +81,7 @@ export class EventsService {
         approvalStatus: ApprovalStatus.APPROVED,
         eventStatus: In([EventStatus.UPCOMING, EventStatus.ONGOING]),
       },
+      relations: ['organizer'],
       order: {
         startDate: 'ASC',
       },
@@ -103,7 +113,11 @@ export class EventsService {
     });
 
     if (eventsToUpdate.length > 0) {
-      this.eventsRepository.save(eventsToUpdate);
+      for (const event of eventsToUpdate) {
+        await this.eventsRepository.update(event.id, { 
+          eventStatus: event.eventStatus 
+        });
+      }
     }
     return events.filter((e) => e.eventStatus !== EventStatus.COMPLETED);
   }
@@ -115,6 +129,7 @@ export class EventsService {
     }
 
     return await this.eventsRepository.createQueryBuilder('event')
+      .leftJoinAndSelect('event.organizer', 'organizer')
       .where('event.approvalStatus = :status', { status: ApprovalStatus.APPROVED })
       .andWhere('event.eventStatus IN (:...statuses)', {
         statuses: [EventStatus.UPCOMING, EventStatus.ONGOING],
@@ -134,6 +149,7 @@ export class EventsService {
   async findOne(id: string): Promise<Event> {
     const event = await this.eventsRepository.findOne({
       where: { id },
+      relations: ['organizer'],
     });
 
     if (!event) {
@@ -213,8 +229,112 @@ export class EventsService {
   async findByOrganizer(organizerId: string): Promise<Event[]> {
     return await this.eventsRepository.find({
       where: { organizer: { id: organizerId } },
+      relations: ['organizer'],
       order: { startDate: 'DESC' },
     });
+  }
+
+  // Obtenir les statistiques d'un événement
+  async getEventStatistics(eventId: string) {
+    const event = await this.eventsRepository.findOne({
+      where: { id: eventId },
+      relations: ['registrations', 'registrations.student'],
+    });
+
+    if (!event) {
+      throw new NotFoundException(`Event with ID ${eventId} not found`);
+    }
+
+    // Compter les inscriptions par statut
+    const confirmed = await this.registrationRepository.count({
+      where: { 
+        event: { id: eventId },
+        status: RegistrationStatus.CONFIRMED 
+      },
+    });
+
+    const waitlist = await this.registrationRepository.count({
+      where: { 
+        event: { id: eventId },
+        status: RegistrationStatus.WAITLIST 
+      },
+    });
+
+    const cancelled = await this.registrationRepository.count({
+      where: { 
+        event: { id: eventId },
+        status: RegistrationStatus.CANCELLED 
+      },
+    });
+
+    // Répartition par filière (confirmés uniquement)
+    const majors = ['IIA', 'IMI', 'GL', 'RT'];
+    const majorsRaw = await this.registrationRepository
+      .createQueryBuilder('registration')
+      .leftJoin('registration.student', 'student')
+      .select('UPPER(student.major)', 'major')
+      .addSelect('COUNT(*)', 'count')
+      .where('registration.eventId = :eventId', { eventId })
+      .andWhere('registration.status = :status', { status: RegistrationStatus.CONFIRMED })
+      .groupBy('UPPER(student.major)')
+      .getRawMany();
+
+    const majorDistribution = majors.map((major) => {
+      const entry = majorsRaw.find((m) => (m.major || '').toUpperCase() === major);
+      return { major, count: entry ? Number(entry.count) : 0 };
+    });
+
+    // Inscriptions par jour (confirmés)
+    const registrationsByDayRaw = await this.registrationRepository
+      .createQueryBuilder('registration')
+      .select('DATE(registration.createdAt)', 'date')
+      .addSelect('COUNT(*)', 'count')
+      .where('registration.eventId = :eventId', { eventId })
+      .andWhere('registration.status = :status', { status: RegistrationStatus.CONFIRMED })
+      .groupBy('DATE(registration.createdAt)')
+      .orderBy('DATE(registration.createdAt)', 'ASC')
+      .getRawMany();
+
+    const registrationsByDay = registrationsByDayRaw.map((row) => ({
+      date: row.date instanceof Date ? row.date.toISOString().split('T')[0] : row.date,
+      count: Number(row.count),
+    }));
+
+    // Inscriptions par heure (confirmés)
+    const registrationsByHourRaw = await this.registrationRepository
+      .createQueryBuilder('registration')
+      .select('EXTRACT(HOUR FROM registration.createdAt)', 'hour')
+      .addSelect('COUNT(*)', 'count')
+      .where('registration.eventId = :eventId', { eventId })
+      .andWhere('registration.status = :status', { status: RegistrationStatus.CONFIRMED })
+      .groupBy('EXTRACT(HOUR FROM registration.createdAt)')
+      .orderBy('EXTRACT(HOUR FROM registration.createdAt)', 'ASC')
+      .getRawMany();
+
+    const registrationsByHour = registrationsByHourRaw.map((row) => ({
+      hour: Number(row.hour),
+      count: Number(row.count),
+    }));
+
+    return {
+      eventId: event.id,
+      title: event.title,
+      description: event.description,
+      startDate: event.startDate,
+      endDate: event.endDate,
+      location: event.location,
+      capacity: event.capacity,
+      participants: confirmed,
+      waitlist,
+      cancelled,
+      fillRate: event.capacity > 0 ? Math.round((confirmed / event.capacity) * 100) : 0,
+      availableSpots: Math.max(0, event.capacity - confirmed),
+      approvalStatus: event.approvalStatus,
+      eventStatus: event.eventStatus,
+      majorDistribution,
+      registrationsByDay,
+      registrationsByHour,
+    };
   }
 
 }

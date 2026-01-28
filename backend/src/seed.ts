@@ -7,7 +7,7 @@ import { EventsService } from './events/services/events.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Event } from './events/entities/event.entity';
 import { Repository } from 'typeorm';
-import { UserRole } from './common/enums/user.enums';
+import { Role } from './common/enums/role.enum';
 import { ApprovalStatus, EventStatus } from './common/enums/event.enums';
 import { Registration } from './registrations/entities/registration.entity';
 import { RegistrationStatus } from './common/enums/registration-status.enum';
@@ -33,28 +33,28 @@ async function bootstrap() {
       lastName: 'Admin',
       email: 'alice.admin@example.com',
       password: 'Admin@123',
-      role: UserRole.ADMIN,
+      role: Role.ADMIN,
     },
     {
       firstName: 'Oscar',
       lastName: 'Organizer',
       email: 'oscar.organizer@example.com',
       password: 'Organizer@123',
-      role: UserRole.ORGANIZER,
+      role: Role.ORGANIZER,
     },
     {
       firstName: 'Sam',
       lastName: 'Student',
       email: 'sam.student@example.com',
       password: 'Student@123',
-      role: UserRole.STUDENT,
+      role: Role.STUDENT,
     },
     {
       firstName: 'Sara',
       lastName: 'Scholar',
       email: 'sara.scholar@example.com',
       password: 'Student@123',
-      role: UserRole.STUDENT,
+      role: Role.STUDENT,
     },
   ];
 

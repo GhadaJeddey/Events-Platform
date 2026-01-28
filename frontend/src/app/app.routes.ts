@@ -21,6 +21,7 @@ import { OrganizersList } from './organizer/organizers-list/organizers-list';
 import { OrganizerDetails } from './organizer/organizer-details/organizer-details';
 import { AllMyEvents } from './organizer/all-my-events/all-my-events';
 
+
 export const routes: Routes = [
 
     {
@@ -30,6 +31,13 @@ export const routes: Routes = [
             { path: 'create', component: CreateEventForm, canActivate: [authGuard,adminOrOrganizerGuard] },
             { path: ':id', component: EventDetails },
             { path: ':id/edit', component: UpdateEvent, canActivate: [authGuard,adminOrOrganizerGuard] }
+        ]
+    },
+    {
+        path: 'organisations',
+        children: [
+            { path: '', component: OrganizersList },
+            { path: ':id', component: OrganizerDetails }
         ]
     },
     {
@@ -65,6 +73,7 @@ export const routes: Routes = [
         children: [
             { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
             { path: 'dashboard', component: StudentDashboard, canActivate: [authGuard] }
+            
         ]
     },
 
@@ -74,9 +83,13 @@ export const routes: Routes = [
             { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
             { path: 'dashboard', component: OrganizerDashboard, canActivate: [authGuard] },
             { path: 'dashboard/tous', component: AllMyEvents, canActivate: [authGuard] },
-            { path: 'events/:id/statistics', component: EventStatisticsComponent, canActivate: [authGuard] }
+            { path: 'events/:id/statistics', component: EventStatisticsComponent, canActivate: [authGuard] },
+            { path: 'events/create', component: CreateEventForm, canActivate: [authGuard,adminOrOrganizerGuard] },
+            { path: 'events/:id/edit', component: UpdateEvent, canActivate: [authGuard,adminOrOrganizerGuard] }
+
         ]
     },
     
-    { path: '**', redirectTo: 'events' }
+    {path: '**', redirectTo: 'events' }
+
 ];

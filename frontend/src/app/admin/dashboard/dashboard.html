@@ -1,5 +1,5 @@
 <div class="dashboard-container fade-in-up">
-  <h2 class="text-gradient section-title">Admin Dashboard</h2>
+  <h2 class="text-gradient section-title">Tableau de Bord Admin</h2>
 
   @if (!stats()) {
     <div class="loading-state">
@@ -13,7 +13,7 @@
       <div class="stat-card users-card" routerLink="/admin/users">
         <div class="stat-icon">👥</div>
         <div class="stat-content">
-          <h3>Total Users</h3>
+          <h3>Utilisateurs</h3>
           <p class="stat-number">{{ stats()?.overview?.totalUsers }}</p>
         </div>
       </div>
@@ -21,7 +21,7 @@
       <div class="stat-card events-card" routerLink="/events">
         <div class="stat-icon">📅</div>
         <div class="stat-content">
-          <h3>Total Events</h3>
+          <h3>Événements</h3>
           <p class="stat-number">{{ stats()?.overview?.totalEvents }}</p>
         </div>
       </div>
@@ -29,7 +29,7 @@
       <div class="stat-card pending-card" routerLink="/admin/approvals">
         <div class="stat-icon">⏳</div>
         <div class="stat-content">
-          <h3>Pending Reviews</h3>
+          <h3>En Attente</h3>
           <p class="stat-number">{{ stats()?.overview?.pendingEvents }}</p>
         </div>
       </div>
@@ -37,7 +37,7 @@
 
     <div class="charts-section">
       <div class="chart-container">
-        <h3>Events Distribution</h3>
+        <h3>Répartition des Événements</h3>
         <div class="canvas-wrapper">
           <canvas baseChart
             [data]="pieChartData()"

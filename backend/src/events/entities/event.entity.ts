@@ -30,7 +30,7 @@ export class Event {
   @Column({ type: 'timestamp' })
   endDate: Date;
 
-  @Column({ length: 255 })
+  @Column({ length: 255})
   location: string;
 
   @Column({ type: 'int' })
@@ -39,7 +39,7 @@ export class Event {
   @Column({ type: 'int', default: 0 })
   currentRegistrations: number;
 
-  @Column({ nullable: true, length: 500, default: 'uploads/events/default.jpg' })
+  @Column({ nullable: true, length: 500, default: '/uploads/events/default.jpg' })
   imageUrl?: string;
 
   @Column({

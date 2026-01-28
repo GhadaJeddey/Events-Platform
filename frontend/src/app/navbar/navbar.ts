@@ -14,25 +14,27 @@ import { MatIconModule } from '@angular/material/icon';
 })
 export class Navbar {
   authService = inject(AuthService);
-  
+  router = inject(Router);
 
   logout(): void {
     this.authService.logout();
+    this.router.navigate(['/login']);
   }
 
-  getProfilePath(): string {
+  getPath(dest : string): string {
     const user = this.authService.currentUser();
-    if (!user) return ''; 
+    if (!user) return '/events';
 
     switch (user.role) {
       case UserRole.STUDENT:
-        return '/student/profile';
+        return '/student/' + dest;
       case UserRole.ORGANIZER:
-        return '/organizer/profile';
+        return '/organizer/' + dest;
       case UserRole.ADMIN:
-        return '/admin/profile';
+        return '/admin/' + dest;
       default:
         return '';
     }
   }
+
 }

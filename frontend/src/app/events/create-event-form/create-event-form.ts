@@ -46,7 +46,7 @@ export class CreateEventForm {
       this.eventsService.createEvent(eventData, this.selectedFile()).subscribe({
         next: (response) => {
           this.toastr.success('Événement créé avec succès !');
-          this.router.navigate(['/events']);
+          this.router.navigate(['/organizer/dashboard']);
         },
         error: (err) => {
           const errorMessage = err.error?.message || 'Erreur lors de la création de l\'événement';
@@ -57,5 +57,8 @@ export class CreateEventForm {
       // Marquer tous les champs comme touchés pour afficher les erreurs
       form.form.markAllAsTouched();
     }
+  }
+  return() {
+    this.router.navigate(['/organizer/dashboard']);
   }
 }

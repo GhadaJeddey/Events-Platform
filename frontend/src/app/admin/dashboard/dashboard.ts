@@ -30,12 +30,19 @@ export class Dashboard {
     
     if (!data) return { labels: [], datasets: [] };
 
-   
+    // Traduction des statuts en français
+    const statusTranslations: Record<string, string> = {
+      'approved': 'Approuvés',
+      'pending': 'En attente',
+      'rejected': 'Rejetés',
+      'cancelled': 'Annulés',
+    };
+
     const colorMap: Record<string, string> = {
-      'approved': '#667eea',  
-      'pending': '#764ba2',   
-      'rejected': '#3f5f95',  
-      'cancelled': '#cbd5e0',
+      'approved': '#43e97b',  
+      'pending': '#fa709a',   
+      'rejected': '#f5576c',  
+      'cancelled': '#6c757d',
     };
 
     const labels = data.details.eventsByApprovalStatus.map(d => d.approvalStatus);
@@ -44,7 +51,7 @@ export class Dashboard {
     const bgColors = labels.map(label => colorMap[label] || '#cbd5e0');
 
     return {
-      labels: labels.map(l => l.toUpperCase()), // Mettre en majuscule pour l'affichage
+      labels: labels.map(l => statusTranslations[l] || l),
       datasets: [{ 
         data: counts, 
         backgroundColor: bgColors,

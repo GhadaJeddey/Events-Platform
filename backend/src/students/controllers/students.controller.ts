@@ -13,8 +13,8 @@ import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { StudentsService } from '../services/students.service';
 import { UpdateStudentDto } from '../dto/update-student.dto';
 
-import { AuthGuard } from '../../auth/Guards/auth.guard';
-import { RolesGuard } from '../../auth/Guards/roles.guard';
+import { AuthGuard } from '../../auth/guards/auth.guard';
+import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Roles } from '../../auth/decorators/roles.decorator';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator'; // Ton décorateur perso
 import { Role } from '../../common/enums/role.enum';
