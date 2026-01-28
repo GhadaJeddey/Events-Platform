@@ -12,13 +12,10 @@ import { authGuard } from './guards/auth.guard';
 import { Dashboard } from './admin/dashboard/dashboard';
 import { EventApproval } from './admin/event-approval/event-approval';
 import { UserManagement } from './admin/user-management/user-management';
-<<<<<<< HEAD
 import { StudentDashboard } from './student/dashboard/dashboard';
 import { OrganizerDashboard } from './organizer/dashboard/dashboard';
-=======
 import { adminOrOrganizerGuard } from './guards/adminororganizer.guard';
 import { adminGuard } from './guards/admin.guard';
->>>>>>> f6736b268481e4e221fbafbd1d4be75dfbbb8e8e
 
 export const routes: Routes = [
 
@@ -68,7 +65,5 @@ export const routes: Routes = [
     },
     
     {path: '**', redirectTo: 'events' }
-    },
 
-    { path: '**', redirectTo: 'events' }
 ];
