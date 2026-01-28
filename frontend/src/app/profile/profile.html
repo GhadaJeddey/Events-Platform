@@ -33,9 +33,11 @@
                formControlName="firstName"
                [readonly]="!isEditing"
                [class.editable]="isEditing">
-        <small *ngIf="profileForm.get('firstName')?.invalid && isEditing" class="error">
-          Name is required (min 2 chars).
-        </small>
+        @if (profileForm.get('firstName')?.invalid && isEditing) {
+          <small class="error">
+            Name is required (min 2 chars).
+          </small>
+        }
       </div>
 
       <div class="form-group">
@@ -52,17 +54,96 @@
                formControlName="email"
                [readonly]="!isEditing"
                [class.editable]="isEditing">
-         <small *ngIf="profileForm.get('email')?.invalid && isEditing" class="error">
-          Valid email is required.
-        </small>
+        @if (profileForm.get('email')?.invalid && isEditing) {
+          <small class="error">
+            Valid email is required.
+          </small>
+        }
       </div>
+      @if (userRole === 'student') {
+        <div style="margin-top: 1.5rem; border-top: 1px solid #dee2e6; padding-top: 1rem;">
+            <h3 style="font-size: 1.1rem; color: #764ba2; margin-bottom: 1rem;">Student Information</h3>
 
-      <button *ngIf="isEditing"
-              type="submit"
-              class="btn-primary"
-              [disabled]="profileForm.invalid">
-        Save Changes
-      </button>
+            <div class="form-group">
+                <label>Major</label>
+                <input type="text"
+                       formControlName="major"
+                       [readonly]="!isEditing"
+                       [class.editable]="isEditing">
+            </div>
+
+            <div class="form-group">
+                <label>Student Card Number</label>
+                <input type="text"
+                       formControlName="studentCardNumber"
+                       [readonly]="!isEditing"
+                       [class.editable]="isEditing">
+            </div>
+        </div>
+      }
+
+      @if (userRole === 'organizer' || userRole === 'club') {
+        <div style="margin-top: 1.5rem; border-top: 1px solid #dee2e6; padding-top: 1rem;">
+            <h3 style="font-size: 1.1rem; color: #764ba2; margin-bottom: 1rem;">Club / Organizer Details</h3>
+
+            <div class="form-group">
+                <label>Club Name</label>
+                <input type="text"
+                       formControlName="organizerName"
+                       [readonly]="!isEditing"
+                       [class.editable]="isEditing">
+            </div>
+
+            <div class="form-group">
+                <label>Description</label>
+                <input type="text"
+                       formControlName="description"
+                       [readonly]="!isEditing"
+                       [class.editable]="isEditing">
+            </div>
+
+            <div class="form-group">
+                <label>Website</label>
+                <input type="text"
+                       formControlName="website"
+                       [readonly]="!isEditing"
+                       [class.editable]="isEditing">
+            </div>
+        </div>
+      }
+      @if (isEditing) {
+        <div style="margin-top: 1.5rem; border-top: 1px solid #dee2e6; padding-top: 1rem;">
+          <h3 style="font-size: 1.1rem; color: #764ba2; margin-bottom: 1rem;">Change Password</h3>
+
+          <div class="form-group">
+            <label>New Password</label>
+            <input type="password"
+                   formControlName="password"
+                   class="editable"
+                   placeholder="Leave empty to keep current">
+          </div>
+
+          <div class="form-group">
+            <label>Confirm Password</label>
+            <input type="password"
+                   formControlName="confirmPassword"
+                   class="editable"
+                   placeholder="Confirm new password">
+
+            @if (profileForm.hasError('mismatch') && profileForm.get('confirmPassword')?.touched) {
+              <small class="error">Passwords do not match!</small>
+            }
+          </div>
+        </div>
+      }
+
+      @if (isEditing) {
+        <button type="submit"
+                class="btn-primary"
+                [disabled]="profileForm.invalid">
+          Save Changes
+        </button>
+      }
     </form>
   </div>
 

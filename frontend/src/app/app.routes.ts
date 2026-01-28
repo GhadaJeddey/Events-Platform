@@ -14,7 +14,7 @@ import { EventApproval } from './admin/event-approval/event-approval';
 import { UserManagement } from './admin/user-management/user-management';
 import { adminOrOrganizerGuard } from './guards/adminororganizer.guard';
 import { adminGuard } from './guards/admin.guard';
-
+import { Profile } from './profile/profile';
 export const routes: Routes = [
 
     {
@@ -44,6 +44,11 @@ export const routes: Routes = [
             { path: 'users', component: UserManagement,canActivate:[authGuard,adminGuard] }
         ]
         // TODO: Plus tard, ajouter : canActivate: [AdminGuard]
+    },
+    {
+        path: 'profile',
+        component: Profile,
+        canActivate: [authGuard]
     },
 
     { path: '**', redirectTo: 'events' }
