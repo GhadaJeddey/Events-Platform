@@ -14,7 +14,11 @@ import { MatIconModule } from '@angular/material/icon';
 })
 export class Navbar {
   authService = inject(AuthService);
-  
+  private router = inject(Router);
+
+  isAuthPage(): boolean {
+    return this.router.url.startsWith('/auth');
+  }
 
   logout(): void {
     this.authService.logout();
@@ -22,7 +26,7 @@ export class Navbar {
 
   getProfilePath(): string {
     const user = this.authService.currentUser();
-    if (!user) return ''; 
+    if (!user) return '';
 
     switch (user.role) {
       case UserRole.STUDENT:

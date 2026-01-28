@@ -1,4 +1,4 @@
-<nav class="navbar">
+<nav class="navbar" [class.auth-page]="isAuthPage()">
     <div class="navbar-container">
         <div class="navbar-logo" routerLink="/">
             <span class="logo-text">Event<span class="logo-accent">Time</span></span>
@@ -20,7 +20,7 @@
                 } @else {
                 <div class="user-info d-flex align-items-center gap-3">
                     @if (authService.currentUser(); as user) {
-                    <span class="text-muted small d-none d-md-inline">
+                    <span class="text small d-none d-md-inline">
                         Bonjour, <strong>{{ user.firstName }}</strong>
                     </span>
                     }
@@ -28,11 +28,9 @@
                 </div>
                 }
             </div>
-            <div class="profile-icon" >
+            <div class="profile-icon">
                 <a [routerLink]="getProfilePath()">
                     <mat-icon [style.color]="'#007bff'" [style.fontSize]="'28px'">person</mat-icon>
                 </a>
             </div>
-    </div>
-
-    
+        </div>
