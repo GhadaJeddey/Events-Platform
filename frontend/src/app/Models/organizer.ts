@@ -1,11 +1,11 @@
-import { User } from './User'; 
+import { User } from '../Models/auth.models';
 
 export interface Organizer {
   id: string;
-  name: string;        
+  name: string;
   description?: string;
   website?: string;
   isVerified: boolean;
-  
-  user?: User;          
+
+  user?: User;
 }

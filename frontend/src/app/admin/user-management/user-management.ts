@@ -1,15 +1,15 @@
-import { Component, inject, computed, signal } from '@angular/core'; 
+import { Component, inject, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { MatTableModule } from '@angular/material/table';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input'; 
-import { MatIconModule } from '@angular/material/icon';   
+import { MatInputModule } from '@angular/material/input';
+import { MatIconModule } from '@angular/material/icon';
 import { ToastrService } from 'ngx-toastr';
 import { AdminService } from '../../services/admin.service';
-import { UserRole, User } from '../../Models/User';
+import { UserRole, User } from '../../Models/auth.models';
 import { catchError, of } from 'rxjs';
 
 @Component({
@@ -32,22 +32,22 @@ export class UserManagement {
     this.adminService.getAllUsers().pipe(
       catchError(err => {
         this.toastr.error('Erreur chargement users');
-        return of([]); 
+        return of([]);
       })
-    ), 
-    { initialValue: [] } 
+    ),
+    { initialValue: [] }
   );
 
-  filteredUsers = computed(() => {
+filteredUsers = computed(() => {
     const term = this.searchTerm().toLowerCase();
     const allUsers = this.users();
 
     if (!term) return allUsers;
 
-    return allUsers.filter(u => 
+    return allUsers.filter(u =>
       u.email.toLowerCase().includes(term) ||
-      u.firstName.toLowerCase().includes(term) ||
-      u.lastName.toLowerCase().includes(term) ||
+      (u.firstName || '').toLowerCase().includes(term) || // 👈 Fixed: defaults to empty string
+      (u.lastName || '').toLowerCase().includes(term) ||  // 👈 Fixed: defaults to empty string
       u.role.toLowerCase().includes(term)
     );
   });

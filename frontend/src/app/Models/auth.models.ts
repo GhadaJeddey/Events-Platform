@@ -1,7 +1,9 @@
 export enum UserRole {
     STUDENT = 'student',
     ORGANIZER = 'organizer',
-    ADMIN = 'admin'
+    ADMIN = 'admin',
+    CLUB = 'club',
+    USER = 'user'
 }
 
 export interface User {
@@ -10,7 +12,10 @@ export interface User {
     firstName?: string;
     lastName?: string;
     role: UserRole;
-    clubName?: string; // Optional for Club users
+    isActive: boolean;
+    createdAt: Date;
+    updatedAt: Date;
+    clubName?: string; 
 }
 
 export interface AuthResponse {
