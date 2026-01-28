@@ -32,7 +32,8 @@
                 </div>
             </div>
 
-            @if (roleSignal() === UserRole.STUDENT) {
+
+            @if (roleSignal() === 'student') {
             <div class="row">
                 <div class="col-md-6">
                     <app-input label="Filière" formControlName="major" placeholder="RT"
@@ -44,20 +45,21 @@
                         [error]="registerForm.get('studentCardNumber')?.invalid && registerForm.get('studentCardNumber')?.touched ? 'Le numéro de carte est requis.' : null"></app-input>
                 </div>
             </div>
-            }
-
-            @if (roleSignal() === UserRole.ORGANIZER) {
+            } @else if (roleSignal() === 'organizer') {
             <div class="row">
                 <div class="col-md-6">
                     <app-input label="Nom du club / organisation" formControlName="name" placeholder="IEEE INSAT"
                         [error]="registerForm.get('name')?.invalid && registerForm.get('name')?.touched ? 'Le nom est requis.' : null"></app-input>
                 </div>
                 <div class="col-md-6">
-                    <app-input label="Site web (optionnel)" formControlName="website" placeholder="https://exemple.com"></app-input>
+                    <app-input label="Site web (optionnel)" formControlName="website"
+                        placeholder="https://exemple.com"></app-input>
                 </div>
             </div>
-            <app-input label="Description (optionnel)" formControlName="description" placeholder="Présentez votre club..."></app-input>
+            <app-input label="Description (optionnel)" formControlName="description"
+                placeholder="Présentez votre club..."></app-input>
             }
+
 
             <div class="row">
                 <div class="col-md-6">

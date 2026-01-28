@@ -34,4 +34,7 @@ export class AdminService {
   getDashboardStats(): Observable<DashboardStats> {
     return this.http.get<DashboardStats>(`${this.apiUrl}/reports`);
   }
+  getRecentEvents(limit: number = 5) {
+  return this.http.get<Event[]>(`${this.apiUrl}/recent-activity`);
+}
 }

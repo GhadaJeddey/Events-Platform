@@ -4,20 +4,20 @@ import {
     Patch,
     Param,
     Body,
-    ParseIntPipe,
     ParseUUIDPipe,
     UseGuards
 } from '@nestjs/common';
-import { AdminService } from './admin.service';
-import { UpdateEventStatusDto } from './dto/update-event-status.dto';
-import { UpdateUserRoleDto } from './dto/update-user-role.dto';
+import { AdminService } from '../services/admin.service';
+import { UpdateEventStatusDto } from '../dto/update-event-status.dto';
+import { UpdateUserRoleDto } from '../dto/update-user-role.dto';
 
 
 
-import { AuthGuard } from '../auth/Guards/auth.guard';
-import { RolesGuard } from '../auth/Guards/roles.guard';
-import { Roles } from '../auth/decorators/roles.decorator';
-import { Role } from '../common/enums/role.enum';
+import { AuthGuard } from '../../auth/Guards/auth.guard';
+import { RolesGuard } from '../../auth/Guards/roles.guard';
+import { Roles } from '../../auth/decorators/roles.decorator';
+import { Role } from '../../common/enums/role.enum';
+
 
 @Controller('admin')
 @UseGuards(AuthGuard, RolesGuard)
@@ -26,7 +26,6 @@ export class AdminController {
     constructor(private readonly adminService: AdminService) { }
 
     // --- EVENTS ROUTES ---
-
     @Get('events/pending')
     getPendingEvents() {
         return this.adminService.getPendingEvents();
@@ -55,9 +54,13 @@ export class AdminController {
     }
 
     // --- REPORTS ROUTES ---
-
     @Get('reports')
     getReports() {
         return this.adminService.getDashboardStats();
+    }
+    
+    @Get('recent-activity')
+    async getRecentActivity() {
+        return this.adminService.getRecentActivity();
     }
 }

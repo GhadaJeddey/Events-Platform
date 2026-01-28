@@ -9,6 +9,64 @@
     box-shadow: 0 2px 15px rgba(0, 0, 0, 0.03);
 }
 
+
+.navbar::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 1px;
+
+    background: linear-gradient(to right,
+            transparent,
+            rgba(0, 0, 0, 0.08),
+            transparent);
+}
+
+/* Auth page variant - make navbar fully transparent */
+.navbar.auth-page {
+    background: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border-bottom: none !important;
+    box-shadow: none !important;
+}
+
+.navbar.auth-page::after {
+    background: linear-gradient(to right,
+            transparent,
+            rgba(255, 255, 255, 0.1),
+            transparent);
+}
+
+/* Auth page text colors */
+.navbar.auth-page .logo-text {
+    color: #ffffff;
+}
+
+.navbar.auth-page .nav-link {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.navbar.auth-page .nav-link:hover {
+    color: #ffffff;
+}
+
+.navbar.auth-page .btn-login,
+.navbar.auth-page .btn-signup {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+}
+
+.navbar.auth-page .btn-login:hover,
+.navbar.auth-page .btn-signup:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: #ffffff;
+}
+
 .navbar-container {
     width: 100%;
     max-width: 1400px;
@@ -19,6 +77,17 @@
     align-items: center;
 }
 
+.text {
+    color: #1a202c; /* dark, elegant */
+}
+
+.text strong {
+    color: #1a202c;
+}
+.navbar.auth-page .text,
+.navbar.auth-page .text strong {
+    color: #ffffff;
+}
 /* Logo Styles */
 .navbar-logo {
     cursor: pointer;

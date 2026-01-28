@@ -1,4 +1,5 @@
-/* import { NestFactory } from '@nestjs/core';
+/*
+import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { UsersService } from './users/services/users.service';
 import { StudentsService } from './students/services/students.service';
@@ -7,12 +8,12 @@ import { EventsService } from './events/services/events.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Event } from './events/entities/event.entity';
 import { Repository } from 'typeorm';
-import { UserRole } from './common/enums/user.enums';
+import { Role } from './common/enums/role.enum';
 import { ApprovalStatus, EventStatus } from './common/enums/event.enums';
 import { Registration } from './registrations/entities/registration.entity';
 import { RegistrationStatus } from './common/enums/registration-status.enum';
 import { Student } from './students/entities/student.entity';
-
+import {RoomLocation} from './common/enums/room-location.enum';
 async function bootstrap() {
   const app = await NestFactory.createApplicationContext(AppModule);
 
@@ -33,28 +34,28 @@ async function bootstrap() {
       lastName: 'Admin',
       email: 'alice.admin@example.com',
       password: 'Admin@123',
-      role: UserRole.ADMIN,
+      role: Role.ADMIN,
     },
     {
       firstName: 'Oscar',
       lastName: 'Organizer',
       email: 'oscar.organizer@example.com',
       password: 'Organizer@123',
-      role: UserRole.ORGANIZER,
+      role: Role.ORGANIZER,
     },
     {
       firstName: 'Sam',
       lastName: 'Student',
       email: 'sam.student@example.com',
       password: 'Student@123',
-      role: UserRole.STUDENT,
+      role: Role.STUDENT,
     },
     {
       firstName: 'Sara',
       lastName: 'Scholar',
       email: 'sara.scholar@example.com',
       password: 'Student@123',
-      role: UserRole.STUDENT,
+      role: Role.STUDENT,
     },
   ];
 
@@ -130,7 +131,7 @@ async function bootstrap() {
       description: 'Hands-on Angular workshop with live coding.',
       startDate: '2026-02-15T10:00:00Z',
       endDate: '2026-02-15T16:00:00Z',
-      location: 'Tech Hub, Building A, Room 101',
+      location: RoomLocation.AUDITORIUM,
       capacity: 50,
       imageUrl: 'https://images.stockcake.com/public/2/e/e/2ee809d0-2c47-4406-9ed6-da53d72f0e0b_large/hackathon-event-buzz-stockcake.jpg',
     },
@@ -139,7 +140,7 @@ async function bootstrap() {
       description: 'Intensive bootcamp covering HTML, CSS, JS, and frameworks.',
       startDate: '2026-03-01T09:00:00Z',
       endDate: '2026-03-05T18:00:00Z',
-      location: 'Innovation Center, Floor 3',
+      location: RoomLocation.A1,
       capacity: 30,
       imageUrl: 'https://miro.medium.com/v2/resize:fit:1200/1*5akpxEAq4fjVmd5pDtqDig.jpeg',
     },
@@ -148,7 +149,7 @@ async function bootstrap() {
       description: 'Monthly meetup for tech enthusiasts to network and share.',
       startDate: '2026-04-10T18:00:00Z',
       endDate: '2026-04-10T21:00:00Z',
-      location: 'Coffee & Code Café',
+      location: RoomLocation.ORANGE,
       capacity: 100,
       imageUrl: 'https://i.ytimg.com/vi/0m0Jvcp76sE/maxresdefault.jpg',
     },
@@ -225,8 +226,8 @@ async function bootstrap() {
 }
 
 bootstrap();
- */
-/*
+ 
+
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { EventsService } from './events/services/events.service';
@@ -234,12 +235,7 @@ import { CreateEventDto } from './events/dto/create-event.dto';
 import { UsersService } from './users/services/users.service'; // Vérifie le chemin
 import { Role } from './common/enums/role.enum'; // Vérifie le chemin
 
-async function bootstrap() {
-  const app = await NestFactory.createApplicationContext(AppModule);
 
-  // 1. Récupération des services nécessaires
-  const eventsService = app.get(EventsService);
-  const usersService = app.get(UsersService);
 
   console.log('🌱 Début du seeding...');
 

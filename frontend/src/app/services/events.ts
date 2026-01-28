@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Event } from '../Models/Event';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from '../../../Commun/environments/environment';
 import { AuthService } from './auth.service';
 
@@ -74,5 +74,13 @@ export class EventsService {
     }
 
     return this.http.patch(`${this.apiUrl}/events/${id}`, formData);
+  }
+
+  getAvailableRooms(start: string, end: string): Observable<string[]> {
+    const params = new HttpParams()
+      .set('start', new Date(start).toISOString())
+      .set('end', new Date(end).toISOString());
+
+    return this.http.get<string[]>(`${this.apiUrl}/events/availability`, { params });
   }
 }

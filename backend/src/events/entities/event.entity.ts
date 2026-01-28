@@ -12,6 +12,7 @@ import {
 import { ApprovalStatus, EventStatus } from '../../common/enums/event.enums';
 import { Registration } from '../../registrations/entities/registration.entity';
 import { Organizer } from '../../organizers/entities/organizer.entity';
+import { RoomLocation } from 'src/common/enums/room-location.enum';
 
 @Entity('events')
 export class Event {
@@ -30,8 +31,12 @@ export class Event {
   @Column({ type: 'timestamp' })
   endDate: Date;
 
-  @Column({ length: 255 })
-  location: string;
+  @Column({
+    type: 'enum',
+    enum: RoomLocation,
+    nullable: true 
+  })
+  location: RoomLocation;
 
   @Column({ type: 'int' })
   capacity: number;

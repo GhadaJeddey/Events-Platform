@@ -79,7 +79,14 @@ export class EventsController {
   searchEvents(@Query('q') searchTerm: string) {
     return this.eventsService.searchEvents(searchTerm);
   }
-
+  
+  @Get('availability')
+  getAvailableRooms(
+    @Query('start') start: string,
+    @Query('end') end: string
+  ) {
+    return this.eventsService.getAvailableRooms(start, end);
+  }
   // retourner un événement par ID
   @Get(':id')
   findOne(@Param('id') id: string) {

@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
-import { AdminController } from './admin.controller';
-import { AdminService } from './admin.service';
+import { AdminController } from './controllers/admin.controller';
+import { AdminService } from './services/admin.service';
 import { User } from '../users/entities/user.entity';
 import { Event } from '../events/entities/event.entity'; 
 import { TypeOrmModule } from '@nestjs/typeorm';

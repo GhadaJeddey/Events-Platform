@@ -49,6 +49,10 @@ export class RegisterComponent {
         initialValue: this.registerForm.get('role')!.value as UserRole
     });
 
+    // Computed signals for conditional rendering
+    isStudent = computed(() => this.roleSignal() === UserRole.STUDENT);
+    isOrganizer = computed(() => this.roleSignal() === UserRole.ORGANIZER);
+
     roles = [
         { value: UserRole.STUDENT, label: 'Étudiant' },
         { value: UserRole.ORGANIZER, label: 'Organisateur' }
