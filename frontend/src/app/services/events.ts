@@ -70,10 +70,14 @@ export class EventsService {
     // Note: Le backend attend du JSON pour Patch, .
     // Si pas d'image, on pourrait envoyer du JSON pur.
     if (!imageFile) {
-      return this.http.patch(`${this.apiUrl}/events/${id}`, eventData);
+      return this.http.patch(`${this.apiUrl}/events/${id}/edit`, eventData);
     }
 
-    return this.http.patch(`${this.apiUrl}/events/${id}`, formData);
+    return this.http.patch(`${this.apiUrl}/events/${id}/edit`, formData);
+  }
+
+  getEventStatistics(id: string): Observable<any> {
+    return this.http.get(`${this.apiUrl}/events/${id}/statistics`);
   }
 
   getAvailableRooms(start: string, end: string): Observable<string[]> {

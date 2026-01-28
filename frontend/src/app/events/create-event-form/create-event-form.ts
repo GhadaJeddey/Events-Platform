@@ -83,7 +83,7 @@ export class CreateEventForm {
       this.eventsService.createEvent(eventData, this.selectedFile()).subscribe({
         next: (response) => {
           this.toastr.success('Événement créé avec succès !');
-          this.router.navigate(['/events']);
+          this.router.navigate(['/organizer/dashboard']);
         },
         error: (err) => {
           //  Gestion spécifique erreur 409 (Salle prise) 
@@ -99,5 +99,8 @@ export class CreateEventForm {
     } else {
       form.form.markAllAsTouched();
     }
+  }
+  return() {
+    this.router.navigate(['/organizer/dashboard']);
   }
 }

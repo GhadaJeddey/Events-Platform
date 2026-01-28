@@ -20,14 +20,13 @@
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-    border: none;
+    background: #667eea;
     color: white;
 }
 
 .btn-primary:hover:not(:disabled) {
-    background: linear-gradient(135deg, #5b52ec 0%, #8b46f5 100%);
-    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+    background: #4c5fb7;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
 .btn-secondary {

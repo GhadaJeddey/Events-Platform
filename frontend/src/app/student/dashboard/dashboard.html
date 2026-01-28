@@ -16,7 +16,11 @@
         @if (myEvents() && myEvents()!.length > 0) {
         <div class="events-grid">
             @for(event of myEvents()!; track event.id) {
-                <app-event-card [event]="event" [isRegistered]="true"></app-event-card>
+                <app-event-card 
+                    [event]="event" 
+                    [isRegistered]="true"
+                    (registrationCancelled)="onRegistrationCancelled()">
+                </app-event-card>
             }
         </div>
     } @else {
@@ -38,7 +42,11 @@
         @if (thisWeekEvents().length > 0) {
         <div class="events-grid">
             @for(event of thisWeekEvents(); track event.id) {
-                <app-event-card [event]="event"></app-event-card>
+                <app-event-card 
+                    [event]="event"
+                    [isRegistered]="myEventIds().has(event.id)"
+                    (registrationCancelled)="onRegistrationCancelled()">
+                </app-event-card>
             }
         </div>
         } 
@@ -49,23 +57,5 @@
     </div>
     
 
-    <!-- Section 3: Tous les Événements -->
-    @if (allEvents() !== null) {
-    <div class="section-wrapper all-events-section">
-        <div class="section-header">
-            <h2 class="section-title">Tous les Événements</h2>
-            <p class="section-subtitle">Découvrez tous les événements disponibles</p>
-        </div>
-        <div class="events-grid">
-            @for(event of allEvents()!; track event.id) {
-                <app-event-card [event]="event"></app-event-card>
-            }
-            @empty {
-            <div class="no-results-message">
-                <p class="main-text">Aucun événement disponible pour le moment.</p>
-            </div>
-            }
-        </div>
-    </div>
-    }
+    
 </div>

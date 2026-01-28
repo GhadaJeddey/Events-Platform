@@ -77,4 +77,7 @@ export class UpdateEvent {
   minDate() {
     return new Date().toISOString().slice(0, 16);
   }
+  return() {
+    this.router.navigate(['/organizer/dashboard']);
+  }
 }

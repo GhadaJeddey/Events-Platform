@@ -87,14 +87,27 @@ export class EventsController {
   ) {
     return this.eventsService.getAvailableRooms(start, end);
   }
+
+  // Get events by organizer ID
+  @Get('organizer/:organizerId')
+  findByOrganizer(@Param('organizerId') organizerId: string) {
+    return this.eventsService.findByOrganizer(organizerId);
+  }
+
   // retourner un événement par ID
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.eventsService.findOne(id);
   }
 
+  // Obtenir les statistiques d'un événement
+  @Get(':id/statistics')
+  getEventStatistics(@Param('id') id: string) {
+    return this.eventsService.getEventStatistics(id);
+  }
+
   // Mettre à jour un événement
-  @Patch(':id')
+  @Patch(':id/edit')
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(Role.ADMIN, Role.ORGANIZER)
   @UseInterceptors(

@@ -22,6 +22,10 @@ export class StudentDashboard implements OnInit {
     currentUser = this.authService.currentUser;
     allEvents = signal<Event[] | null>(null);
     myEvents = signal<Event[] | null>(null);
+    myEventIds = computed(() => {
+        const events = this.myEvents();
+        return events ? new Set(events.map(e => e.id)) : new Set();
+    });
 
     // Événements de cette semaine
     thisWeekEvents = computed(() => {
@@ -42,7 +46,7 @@ export class StudentDashboard implements OnInit {
     limitedAllEvents = computed(() => {
         const events = this.allEvents();
         if (!events) return null;
-        return events.slice(0, 6);
+        return events.slice(0, 5);
     });
 
     // Vérifier s'il y a plus d'événements
@@ -70,5 +74,10 @@ export class StudentDashboard implements OnInit {
             },
             error: (err) => console.error('Erreur registrations', err)
         });
+       
+    }
+
+    onRegistrationCancelled() {
+        this.loadData();
     }
 }

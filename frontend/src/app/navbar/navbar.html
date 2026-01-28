@@ -6,11 +6,15 @@
 
         <div class="navbar-right-group">
             <div class="navbar-links">
+                @if(authService.isAuthenticated()){
+                <a [routerLink]="getPath('dashboard')" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"
+                    class="nav-link">Tableau de bord</a>
+                }
                 <a routerLink="/events" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"
                     class="nav-link">Évènements</a>
-                <a routerLink="/organizations" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"
+                <a routerLink="/organisations" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"
                     class="nav-link">Organisations</a>
-                <a href="#" class="nav-link">Contact</a>
+                
             </div>
 
             <div class="navbar-actions">
@@ -28,8 +32,8 @@
                 </div>
                 }
             </div>
-            <div class="profile-icon">
-                <a [routerLink]="getProfilePath()">
+            <div class="profile-icon" >
+                <a [routerLink]="getPath('profile')">
                     <mat-icon [style.color]="'#007bff'" [style.fontSize]="'28px'">person</mat-icon>
                 </a>
             </div>
