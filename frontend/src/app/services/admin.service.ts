@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Event } from '../Models/Event';
-import { User, UserRole } from '../Models/User';
+import { User, UserRole } from '../Models/auth.models';
 import { DashboardStats } from '../Models/AdminStats';
 
 @Injectable({
@@ -10,7 +10,7 @@ import { DashboardStats } from '../Models/AdminStats';
 })
 export class AdminService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:3000/admin'; 
+  private apiUrl = 'http://localhost:3000/admin';
 
   // --- EVENTS ---
   getPendingEvents(): Observable<Event[]> {

@@ -42,11 +42,11 @@ export class User {
   updatedAt: Date;
 
   // Lien vers le profil Étudiant
-  @OneToOne(() => Student, (student) => student.user)
+  @OneToOne(() => Student, (student) => student.user, { cascade: true })
   studentProfile: Student;
 
   // Lien vers le profil Club (Organizer)
-  @OneToOne(() => Organizer, (organizer) => organizer.user)
+  @OneToOne(() => Organizer, (organizer) => organizer.user, { cascade: true })
   organizerProfile: Organizer;
 
 }

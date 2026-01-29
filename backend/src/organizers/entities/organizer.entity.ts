@@ -21,7 +21,7 @@ export class Organizer {
     @Column({ default: false })
     isVerified: boolean // validé ou pas par un admin
 
-    @OneToOne(() => User, (user) => user.organizerProfile)
+    @OneToOne(() => User, (user) => user.organizerProfile, { onDelete: 'CASCADE' })
     @JoinColumn()
     user: User;
 

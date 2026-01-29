@@ -19,8 +19,7 @@ import { EventStatisticsComponent } from './organizer/event-statistics/event-sta
 import { OrganizersList } from './organizer/organizers-list/organizers-list';
 import { OrganizerDetails } from './organizer/organizer-details/organizer-details';
 import { AllMyEvents } from './organizer/all-my-events/all-my-events';
-
-
+import { Profile } from './profile/profile';
 export const routes: Routes = [
     {
         path: 'events',
@@ -73,6 +72,11 @@ export const routes: Routes = [
             { path: 'dashboard', component: StudentDashboard, canActivate: [authGuard] }
             
         ]
+    },
+    {
+        path: 'profile',
+        component: Profile,
+        canActivate: [authGuard]
     },
 
     {

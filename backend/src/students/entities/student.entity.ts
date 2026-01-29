@@ -13,7 +13,7 @@ export class Student {
     @Column()
     major: string; // Exemple : 'RT'
 
-    @OneToOne(() => User, (user) => user.studentProfile)
+    @OneToOne(() => User, (user) => user.studentProfile, { onDelete: 'CASCADE' })
     @JoinColumn()
     user: User;
 
