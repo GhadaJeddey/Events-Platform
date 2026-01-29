@@ -90,7 +90,7 @@
                         </div>
                     </div>
 
-                    <button class="btn-register-primary" appHoverElevate elevateAmount="-3px"
+                    <button class="btn-register-primary" appHoverElevate elevateAmount="-3px" (click)="onRegister()"
                         [disabled]="event.currentRegistrations >= event.capacity">
                         {{ event.currentRegistrations >= event.capacity ? 'Évènement complet' : 'S\'inscrire maintenant'
                         }}

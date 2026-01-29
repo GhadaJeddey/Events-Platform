@@ -72,7 +72,7 @@ export class EventsController {
   searchEvents(@Query('q') searchTerm: string) {
     return this.eventsService.searchEvents(searchTerm);
   }
-  
+
   @Get('availability')
   getAvailableRooms(
     @Query('start') start: string,

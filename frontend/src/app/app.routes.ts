@@ -21,9 +21,9 @@ export const routes: Routes = [
         path: 'events',
         children: [
             { path: '', component: EventList },
-            { path: 'create', component: CreateEventForm, canActivate: [authGuard,adminOrOrganizerGuard] },
-            { path: ':id', component: EventDetails },
-            { path: ':id/edit', component: UpdateEvent, canActivate: [authGuard,adminOrOrganizerGuard] }
+            { path: 'create', component: CreateEventForm, canActivate: [authGuard, adminOrOrganizerGuard] },
+            { path: 'details/:id', component: EventDetails },
+            { path: ':id/edit', component: UpdateEvent, canActivate: [authGuard, adminOrOrganizerGuard] }
         ]
     },
     {
@@ -38,10 +38,10 @@ export const routes: Routes = [
     {
         path: 'admin',
         children: [
-            { path: '', redirectTo: 'dashboard', pathMatch: 'full'},
-            { path: 'dashboard', component: Dashboard,canActivate:[authGuard,adminGuard] },
-            { path: 'approvals', component: EventApproval,canActivate:[authGuard,adminGuard] },
-            { path: 'users', component: UserManagement,canActivate:[authGuard,adminGuard] }
+            { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+            { path: 'dashboard', component: Dashboard, canActivate: [authGuard, adminGuard] },
+            { path: 'approvals', component: EventApproval, canActivate: [authGuard, adminGuard] },
+            { path: 'users', component: UserManagement, canActivate: [authGuard, adminGuard] }
         ]
         // TODO: Plus tard, ajouter : canActivate: [AdminGuard]
     },
