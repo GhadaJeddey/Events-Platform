@@ -30,11 +30,11 @@ export class Navbar {
 
     switch (user.role) {
       case UserRole.STUDENT:
-        return '/student/profile';
+        return '/profile/student';
       case UserRole.ORGANIZER:
-        return '/organizer/profile';
+        return '/profile/organizer';
       case UserRole.ADMIN:
-        return '/admin/profile';
+        return '/profile/admin';
       default:
         return '';
     }

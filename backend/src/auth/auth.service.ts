@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from "@nestjs/common";
+import { Injectable, UnauthorizedException, BadRequestException } from "@nestjs/common";
 import { UsersService } from "../users/services/users.service";
 import { CreateUserDto } from "../users/dto/create-user.dto";
 import { SignInDto } from "../users/dto/SignInDto";
@@ -9,6 +9,10 @@ import { StudentsService } from "../students/services/students.service";
 import { OrganizersService } from "../organizers/services/organizers.service";
 import { Role } from "../common/enums/role.enum";
 import { UnifiedRegisterDto } from "./dto/unified-signup.dto";
+import { ForgotPassDto } from "src/users/dto/forgot-password.dto";
+import { ResetPasswordDto } from "src/users/dto/reset-password.dto";
+import { nanoid } from "nanoid";
+import { MailService } from "src/mail/mail.service";
 @Injectable()
 /**
  * Service for handling authentication logic.
@@ -19,6 +23,7 @@ export class AuthService {
         private jwtService: JwtService,
         private studentsService: StudentsService,
         private organizersService: OrganizersService,
+        private mailService: MailService,
     ) { }
 
     /**
@@ -79,5 +84,43 @@ export class AuthService {
     async authenticate(input: SignInDto) {
         const user = await this.validateUser(input);
         return this.SignIn(user);
+    }
+    async forgotPassword(input: ForgotPassDto) {
+        const user = await this.usersService.findByEmail(input.email);
+        if (!user) {
+            return ("if user exists , an email will be sent");
+        }
+
+        const resetToken = nanoid(64);
+        user.resetToken = resetToken;
+        user.resetTokenExpiry = new Date(Date.now() + 3600000);
+        await this.usersService.update(user.id, user);
+        await this.mailService.sendPasswordResetEmail(user.email, resetToken);
+
+        return { message: "If user exists, an email will be sent" };
+    }
+
+    async resetPassword(input: ResetPasswordDto) {
+        const users = await this.usersService.findAll();
+        const user = users.find(u => u.resetToken === input.token);
+
+        if (!user) {
+            throw new BadRequestException("Invalid or expired reset token");
+        }
+
+        if (!user.resetTokenExpiry || user.resetTokenExpiry < new Date()) {
+            throw new BadRequestException("Reset token has expired");
+        }
+
+        // Pass plain password to usersService.update, it handles hashing
+        // We also pass resetToken and resetTokenExpiry as null to clear them
+        // We cast to any to bypass DTO strict typing for these internal fields
+        await this.usersService.update(user.id, {
+            password: input.newPassword,
+            resetToken: null,
+            resetTokenExpiry: null
+        } as any);
+
+        return { message: "Password successfully reset" };
     }
 }

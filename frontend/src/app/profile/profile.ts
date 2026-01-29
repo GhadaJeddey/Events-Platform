@@ -1,9 +1,10 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl } from '@angular/forms';
 import { UserService } from '../services/user.service';
 import { User } from '../Models/auth.models';
 import { ToastrService } from 'ngx-toastr';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-profile',
@@ -17,6 +18,7 @@ export class Profile implements OnInit {
   isEditing = false;
   userRole: string = '';
   userId: string = '';
+  private router = inject(Router);
 
   constructor(
     private fb: FormBuilder,

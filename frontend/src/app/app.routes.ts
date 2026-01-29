@@ -15,15 +15,16 @@ import { UserManagement } from './admin/user-management/user-management';
 import { adminOrOrganizerGuard } from './guards/adminororganizer.guard';
 import { adminGuard } from './guards/admin.guard';
 import { Profile } from './profile/profile';
+import { organizerGuard } from './guards/organizer.guard';
 export const routes: Routes = [
 
     {
         path: 'events',
         children: [
             { path: '', component: EventList },
-            { path: 'create', component: CreateEventForm, canActivate: [authGuard,adminOrOrganizerGuard] },
+            { path: 'create', component: CreateEventForm, canActivate: [authGuard, adminOrOrganizerGuard] },
             { path: ':id', component: EventDetails },
-            { path: ':id/edit', component: UpdateEvent, canActivate: [authGuard,adminOrOrganizerGuard] }
+            { path: ':id/edit', component: UpdateEvent, canActivate: [authGuard, adminOrOrganizerGuard] }
         ]
     },
     {
@@ -34,21 +35,27 @@ export const routes: Routes = [
             { path: 'forgot-password', component: ForgotPasswordComponent },
         ]
     },
+    { path: 'reset-password', loadComponent: () => import('./auth/reset-password/reset-password').then(m => m.ResetPassword) },
+
 
     {
         path: 'admin',
         children: [
-            { path: '', redirectTo: 'dashboard', pathMatch: 'full'},
-            { path: 'dashboard', component: Dashboard,canActivate:[authGuard,adminGuard] },
-            { path: 'approvals', component: EventApproval,canActivate:[authGuard,adminGuard] },
-            { path: 'users', component: UserManagement,canActivate:[authGuard,adminGuard] }
+            { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+            { path: 'dashboard', component: Dashboard, canActivate: [authGuard, adminGuard] },
+            { path: 'approvals', component: EventApproval, canActivate: [authGuard, adminGuard] },
+            { path: 'users', component: UserManagement, canActivate: [authGuard, adminGuard] }
         ]
         // TODO: Plus tard, ajouter : canActivate: [AdminGuard]
     },
     {
         path: 'profile',
-        component: Profile,
-        canActivate: [authGuard]
+        children: [
+            { path: 'student', component: Profile, canActivate: [authGuard] },
+            { path: 'organizer', component: Profile, canActivate: [authGuard, organizerGuard] },
+            { path: 'admin', component: Profile, canActivate: [authGuard, adminGuard] }
+        ]
+
     },
 
     { path: '**', redirectTo: 'events' }
