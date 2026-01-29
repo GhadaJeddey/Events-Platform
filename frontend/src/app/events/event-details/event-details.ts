@@ -1,9 +1,10 @@
-import { Component, inject, OnInit, effect } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { DatePipe, CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { EventsService } from '../../services/events';
 import { RegistrationsService } from '../../services/registrations';
 import { AuthService } from '../../services/auth.service';
+import { ToastrService } from 'ngx-toastr';
 import { environment } from '../../../../Commun/environments/environment';
 import { Event } from '../../Models/Event';
 import { HoverElevateDirective } from '../../directives/hover-elevate.directive';
@@ -23,6 +24,7 @@ export class EventDetails implements OnInit {
   private eventsService = inject(EventsService);
   private registrationsService = inject(RegistrationsService);
   private authService = inject(AuthService);
+  private toastr = inject(ToastrService);
 
   isRegistering = signal(false);
   isCancelling = signal(false);
@@ -57,6 +59,43 @@ export class EventDetails implements OnInit {
     });
   }
 
+  constructor() {
+    this.fetchEventData();
+  }
+
+  fetchEventData() {
+    const id = this.route.snapshot.paramMap.get('id');
+    if (!id) return;
+
+    this.eventsService.getEventById(id).subscribe({
+      next: (data) => this.event.set(data),
+      error: (err) => {
+        this.toastr.error('Impossible de charger les détails de l\'évènement');
+      }
+    });
+  }
+
+  onRegister() {
+    if (!this.authService.isAuthenticated()) {
+      this.router.navigate(['/auth/login']);
+      return;
+    }
+
+    const currentEvent = this.event();
+    if (!currentEvent) return;
+
+    this.registrationsService.register(currentEvent.id).subscribe({
+      next: () => {
+        this.toastr.success('Vous êtes maintenant inscrit à cet évènement !', 'Succès');
+
+        this.fetchEventData();
+      },
+      error: (err) => {
+        const errorMessage = err.error?.message || 'Une erreur est survenue lors de l\'inscription.';
+        this.toastr.error(errorMessage, 'Erreur');
+      }
+    });
+  }
 
   getFillPercentage(event: Event): number {
     return (event.currentRegistrations / event.capacity) * 100;

@@ -20,14 +20,15 @@ import { OrganizersList } from './organizer/organizers-list/organizers-list';
 import { OrganizerDetails } from './organizer/organizer-details/organizer-details';
 import { AllMyEvents } from './organizer/all-my-events/all-my-events';
 import { Profile } from './profile/profile';
+import { organizerGuard } from './guards/organizer.guard';
 export const routes: Routes = [
     {
         path: 'events',
         children: [
             { path: '', component: EventList },
-            { path: 'create', component: CreateEventForm, canActivate: [authGuard,adminOrOrganizerGuard] },
-            { path: ':id', component: EventDetails },
-            { path: ':id/edit', component: UpdateEvent, canActivate: [authGuard,adminOrOrganizerGuard] }
+            { path: 'create', component: CreateEventForm, canActivate: [authGuard, adminOrOrganizerGuard] },
+            { path: 'details/:id', component: EventDetails },
+            { path: ':id/edit', component: UpdateEvent, canActivate: [authGuard, adminOrOrganizerGuard] }
         ]
     },
     {
@@ -45,6 +46,8 @@ export const routes: Routes = [
             { path: 'forgot-password', component: ForgotPasswordComponent },
         ]
     },
+    { path: 'reset-password', loadComponent: () => import('./auth/reset-password/reset-password').then(m => m.ResetPassword) },
+
 
     {
         path: 'organisations',
@@ -63,7 +66,6 @@ export const routes: Routes = [
             { path: 'approvals', component: EventApproval,canActivate:[authGuard,adminGuard] },
             { path: 'users', component: UserManagement,canActivate:[authGuard,adminGuard] }
         ]
-        // TODO: Plus tard, ajouter : canActivate: [AdminGuard]
     }, 
 
     {

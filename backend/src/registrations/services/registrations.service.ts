@@ -30,14 +30,14 @@ export class RegistrationsService {
 
     // 2. Vérification doublon
     const existingRegistration = await this.registrationRepository.findOne({
-      where: { 
-        student: { id: student.id }, 
-        event: { id: event.id } 
+      where: {
+        student: { id: student.id },
+        event: { id: event.id }
       },
     });
 
     if (existingRegistration) {
-      throw new ConflictException('You have already registered for this event');
+      throw new ConflictException('Vous êtes déjà inscrit à cet évènement');
     }
 
     // 3. Détermination du statut
@@ -85,14 +85,14 @@ export class RegistrationsService {
   private async sendRegistrationEmail(student: any, event: any, status: RegistrationStatus) {
     try {
       const template = status === RegistrationStatus.CONFIRMED ? './confirmation' : './waitlist-placement';
-      const subject = status === RegistrationStatus.CONFIRMED 
-        ? `You are confirmed for: ${event.title}` 
+      const subject = status === RegistrationStatus.CONFIRMED
+        ? `You are confirmed for: ${event.title}`
         : `You are added to the waitlist for: ${event.title}`;
 
       await this.mailerService.sendMail({
         to: student.user.email,
         subject,
-        template, 
+        template,
         context: {
           name: student.user.firstName,
           eventTitle: event.title,
@@ -106,7 +106,7 @@ export class RegistrationsService {
 
   async findAll(userId: string) {
     const student = await this.studentsService.findOneByUserId(userId);
-    
+
     return await this.registrationRepository.find({
       where: {
         student: { id: student.id },

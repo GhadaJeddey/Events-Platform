@@ -10,7 +10,7 @@ import { jwtDecode } from 'jwt-decode';
 export class AuthService {
     private http = inject(HttpClient);
     private apiUrl = `${environment.apiUrl}/auth`;
-    private logouttimer:any;
+    private logouttimer: any;
 
     // State management using Signals
     private _currentUser = signal<User | null>(null);
@@ -57,8 +57,7 @@ export class AuthService {
         localStorage.removeItem('access_token');
         localStorage.removeItem('user');
         this._currentUser.set(null);
-        if (this.logouttimer)
-        {
+        if (this.logouttimer) {
             clearTimeout(this.logouttimer);
         }
     }
@@ -70,8 +69,8 @@ export class AuthService {
         localStorage.setItem('access_token', token);
         localStorage.setItem('user', JSON.stringify(user));
         this._currentUser.set(user);
-        const decodedToken :any=jwtDecode(token);
-        this.autoLogout(decodedToken.exp*1000);
+        const decodedToken: any = jwtDecode(token);
+        this.autoLogout(decodedToken.exp * 1000);
     }
 
     /**
@@ -85,8 +84,8 @@ export class AuthService {
             try {
                 const user = JSON.parse(userStr);
                 this._currentUser.set(user);
-                const decodedToken :any=jwtDecode(token);
-                this.autoLogout(decodedToken.exp*1000);
+                const decodedToken: any = jwtDecode(token);
+                this.autoLogout(decodedToken.exp * 1000);
             } catch (e) {
                 this.logout();
             }
@@ -104,34 +103,40 @@ export class AuthService {
     }
 
     isTokenExpired(): boolean {
-    const token = this.getToken();
-    if (!token) return true;
-    try {
-        const decoded: any = jwtDecode(token);
-        const currentTime = Math.floor(Date.now() / 1000);
-        return decoded.exp < currentTime;
-    } catch {
-        return true; 
-    }
+        const token = this.getToken();
+        if (!token) return true;
+        try {
+            const decoded: any = jwtDecode(token);
+            const currentTime = Math.floor(Date.now() / 1000);
+            return decoded.exp < currentTime;
+        } catch {
+            return true;
+        }
 
-}
-    private autoLogout(ExpirationDate:number) : void{
-        const now=Date.now();
-        const delay=ExpirationDate-now;
-        if (this.logouttimer)
-        {
+    }
+    private autoLogout(ExpirationDate: number): void {
+        const now = Date.now();
+        const delay = ExpirationDate - now;
+        if (this.logouttimer) {
             clearTimeout(this.logouttimer);
         }
-        if (delay>0) {
-            this.logouttimer=setTimeout(()=>{
+        if (delay > 0) {
+            this.logouttimer = setTimeout(() => {
                 this.logout();
-            },delay);
-        } 
+            }, delay);
+        }
         else {
             this.logout();
         }
 
 
+    }
+    forgotPassword(email: string): Observable<any> {
+        return this.http.post(`${this.apiUrl}/forgot-password`, { email });
+    }
+
+    resetPassword(token: string, newPassword: string): Observable<any> {
+        return this.http.post(`${this.apiUrl}/reset-password`, { token, newPassword });
     }
 }
 
