@@ -19,8 +19,8 @@ export interface User {
         website?: string;
         isVerified: boolean;
     };
-    studentProfile?: any; // Optional for Student users
-    clubName?: string; // Optional for Club users
+    studentProfile?: any; 
+    clubName?: string; 
     createdAt?: string;
     updatedAt?: string;
     isActive?: boolean;

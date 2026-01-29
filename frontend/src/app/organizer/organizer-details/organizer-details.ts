@@ -5,8 +5,6 @@ import { OrganizersService } from '../../services/organizers.service';
 import { EventsService } from '../../services/events';
 import { switchMap } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { Organizer } from '../../Models/Organizer';
-import { Event } from '../../Models/Event';
 import { LoaderComponent } from '../../shared/components/loader/loader';
 import { EventCard } from '../../events/event-card/event-card';
 

@@ -2,7 +2,6 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl } from '@angular/forms';
 import { UserService } from '../services/user.service';
-import { User } from '../Models/auth.models';
 import { ToastrService } from 'ngx-toastr';
 
 @Component({

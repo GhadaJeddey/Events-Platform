@@ -58,6 +58,7 @@ export const routes: Routes = [
         path: 'admin',
         children: [
             { path: '', redirectTo: 'dashboard', pathMatch: 'full'},
+            { path: 'profile', component: Profile, canActivate:[authGuard] },
             { path: 'dashboard', component: Dashboard,canActivate:[authGuard,adminGuard] },
             { path: 'approvals', component: EventApproval,canActivate:[authGuard,adminGuard] },
             { path: 'users', component: UserManagement,canActivate:[authGuard,adminGuard] }
@@ -69,20 +70,17 @@ export const routes: Routes = [
         path: 'student',
         children: [
             { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-            { path: 'dashboard', component: StudentDashboard, canActivate: [authGuard] }
-            
+            { path: 'dashboard', component: StudentDashboard, canActivate: [authGuard] },
+            { path: 'profile', component: Profile, canActivate: [authGuard] }
         ]
     },
-    {
-        path: 'profile',
-        component: Profile,
-        canActivate: [authGuard]
-    },
+
 
     {
         path: 'organizer',
         children: [
             { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+            {path: 'profile', component: Profile, canActivate: [authGuard] },
             { path: 'dashboard', component: OrganizerDashboard, canActivate: [authGuard] },
             { path: 'dashboard/tous', component: AllMyEvents, canActivate: [authGuard] },
             { path: 'events/:id/statistics', component: EventStatisticsComponent, canActivate: [authGuard] },

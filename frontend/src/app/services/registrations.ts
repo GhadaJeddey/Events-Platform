@@ -2,7 +2,6 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Registration } from '../Models/registration.model'; 
-// import { environment } from '../../environments/environment'; // Si tu as une variable d'env
 
 @Injectable({
   providedIn: 'root'

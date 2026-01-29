@@ -5,13 +5,12 @@ import { AuthService } from '../../services/auth.service';
 import { EventsService } from '../../services/events';
 import { Event } from '../../Models/Event';
 import { EventCard } from '../../events/event-card/event-card';
-import { ButtonComponent } from '../../shared/components/button/button';
-import { count } from 'rxjs';
+
 
 @Component({
     selector: 'app-organizer-dashboard',
     standalone: true,
-    imports: [CommonModule, RouterLink, EventCard, ButtonComponent],
+    imports: [CommonModule, RouterLink, EventCard],
     templateUrl: './dashboard.html',
     styleUrl: './dashboard.css'
 })

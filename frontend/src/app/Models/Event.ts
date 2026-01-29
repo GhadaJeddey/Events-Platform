@@ -1,4 +1,4 @@
-import { Organizer } from './Organizer';
+import { Organizer } from './organizer';
 export enum RoomLocation {
   A1 = 'A1',
   A2 = 'A2',
@@ -15,7 +15,6 @@ export enum RoomLocation {
 }
 
 
-// Interface qui correspond à l'entité Event du backend
 export interface Event {
     id: string;
     title: string;

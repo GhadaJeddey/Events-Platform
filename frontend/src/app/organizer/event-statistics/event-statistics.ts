@@ -149,7 +149,7 @@ export class EventStatisticsComponent implements OnInit {
     this.loading.set(true);
     this.error.set(null);
 
-    this.eventsService.getEventById(eventId).subscribe({
+    this.eventsService.getEventStatistics(eventId).subscribe({
       next: (data: any) => {
         this.statistics.set(data);
         this.loading.set(false);

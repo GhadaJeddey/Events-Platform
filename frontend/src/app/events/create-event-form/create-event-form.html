@@ -46,22 +46,31 @@
                         <div class="error-message">La date de fin est obligatoire.</div>
                     }
                 </div>
-                <div class="form-group">
+                <div class="form-group full-width">
                     <label for="location">Lieu / Salle</label>
-                    <select id="location" name="location" ngModel required #locInput="ngModel"
-                        [class.invalid]="locInput.invalid && (locInput.dirty || locInput.touched)"
-                        [disabled]="!startDateValue || !endDateValue || isLoadingRooms()">
-                        
-                        <option value="" disabled selected>
-                            @if(!startDateValue || !endDateValue) { Choisissez les dates d'abord }
-                            @else if(isLoadingRooms()) { Recherche en cours... }
-                            @else { Sélectionner une salle }
-                        </option>
+                    <div style="display: flex; gap: 10px; align-items: flex-start;">
+                        <select id="location" name="location" [(ngModel)]="selectedLocation" required #locInput="ngModel"
+                            [class.invalid]="locInput.invalid && (locInput.dirty || locInput.touched)"
+                            [disabled]="!startDateValue || !endDateValue || isLoadingRooms()"
+                            style="flex: 1;">
+                            
+                            <option value="" disabled selected>
+                                @if(!startDateValue || !endDateValue) { Choisissez les dates d'abord }
+                                @else if(isLoadingRooms()) { Recherche en cours... }
+                                @else { Sélectionner une salle }
+                            </option>
 
-                        @for (room of availableRooms(); track room) {
-                            <option [value]="room">{{ room }}</option>
-                        }
-                    </select>
+                            @for (room of availableRooms(); track room) {
+                                <option [value]="room">{{ room }}</option>
+                            }
+                        </select>
+
+                        <button type="button" class="btn-book-room" (click)="openRoomBooking()"
+                            [disabled]="!startDateValue || !endDateValue"
+                            title="Ouvrir le calendrier de réservation">
+                            📅 Réserver une salle
+                        </button>
+                    </div>
 
                     @if(locInput.invalid && (locInput.dirty || locInput.touched)) {
                         <div class="error-message">Le lieu est obligatoire.</div>
@@ -88,3 +97,12 @@
         </form>
     </div>
 </div>
+
+@if (showRoomBooking()) {
+    <app-room-booking
+        [selectedDate]="getSelectedDate()"
+        [availableRooms]="availableRooms()"
+        (slotSelected)="onSlotSelected($event)"
+        (close)="closeRoomBooking()">
+    </app-room-booking>
+}

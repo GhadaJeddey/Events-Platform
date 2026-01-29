@@ -161,8 +161,28 @@ export class EventsService {
         );
       }
     }
+
+    // Recalculer le statut de l'événement en fonction des nouvelles dates
+    let newEventStatus = event.eventStatus;
     
-    await this.eventsRepository.update(id, updateEventDto);
+    if (now >= newStart && now < newEnd) {
+      // L'événement est en cours
+      newEventStatus = EventStatus.ONGOING;
+    } else if (now >= newEnd) {
+      // L'événement est terminé
+      newEventStatus = EventStatus.COMPLETED;
+    } else {
+      // L'événement est à venir
+      newEventStatus = EventStatus.UPCOMING;
+    }
+
+    // Ajouter le nouveau statut aux données de mise à jour si les dates ont changé
+    const updateData = {
+      ...updateEventDto,
+      ...(updateEventDto.startDate || updateEventDto.endDate ? { eventStatus: newEventStatus } : {})
+    };
+    
+    await this.eventsRepository.update(id, updateData);
     return this.findOne(id);
   }
   

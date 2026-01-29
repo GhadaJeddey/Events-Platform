@@ -5,6 +5,7 @@ import { CommonModule } from '@angular/common';
 import { UserRole } from '../Models/auth.models';
 import { MatIconModule } from '@angular/material/icon';
 
+
 @Component({
   selector: 'app-navbar',
   standalone: true,
@@ -15,6 +16,11 @@ import { MatIconModule } from '@angular/material/icon';
 export class Navbar {
   authService = inject(AuthService);
   router = inject(Router);
+
+  isAuthPage(): boolean {
+    const url = this.router.url;
+    return url.includes('/auth/');
+  }
 
   logout(): void {
     this.authService.logout();
