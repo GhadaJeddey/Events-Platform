@@ -11,6 +11,8 @@ import { RolesGuard } from "./Guards/roles.guard";
 import { Roles } from "./decorators/roles.decorator";
 import { Role } from "src/common/enums/role.enum";
 import { UnifiedRegisterDto } from "./dto/unified-signup.dto";
+import { ForgotPassDto } from "src/users/dto/forgot-password.dto";
+import { ResetPasswordDto } from "src/users/dto/reset-password.dto";
 
 
 @Controller('auth')
@@ -25,7 +27,7 @@ export class AuthController {
      */
     @Post('register')
     async register(@Body() body: UnifiedRegisterDto) {
-        console.log('📥 Received registration body:', JSON.stringify(body, null, 2));
+        console.log('Received registration body:', JSON.stringify(body, null, 2));
         return this.authService.register(body);
     }
 
@@ -50,6 +52,15 @@ export class AuthController {
     @UseGuards(AuthGuard, RolesGuard)
     async adminOnly() {
         return 'Direct access for admins only';
+    }
+    @Post('forgot-password')
+    async forgotPassword(@Body() forgotPasswordDto: ForgotPassDto) {
+        return this.authService.forgotPassword(forgotPasswordDto);
+    }
+
+    @Post('reset-password')
+    async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
+        return this.authService.resetPassword(resetPasswordDto);
     }
 }
 

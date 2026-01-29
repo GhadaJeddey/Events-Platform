@@ -11,6 +11,7 @@ import { User } from '../users/entities/user.entity';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { StudentsModule } from '../students/students.module';
 import { OrganizersModule } from '../organizers/organizers.module';
+import { MailModule } from '../mail/mail.module';
 
 console.log('AuthService:', AuthService);
 
@@ -19,6 +20,7 @@ console.log('AuthService:', AuthService);
         forwardRef(() => UsersModule),
         forwardRef(() => StudentsModule),
         forwardRef(() => OrganizersModule),
+        MailModule,
         PassportModule.register({ defaultStrategy: 'jwt' }),
         JwtModule.registerAsync({
             imports: [ConfigModule],

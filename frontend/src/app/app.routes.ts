@@ -15,6 +15,7 @@ import { UserManagement } from './admin/user-management/user-management';
 import { adminOrOrganizerGuard } from './guards/adminororganizer.guard';
 import { adminGuard } from './guards/admin.guard';
 import { Profile } from './profile/profile';
+import { organizerGuard } from './guards/organizer.guard';
 export const routes: Routes = [
 
     {
@@ -34,6 +35,8 @@ export const routes: Routes = [
             { path: 'forgot-password', component: ForgotPasswordComponent },
         ]
     },
+    { path: 'reset-password', loadComponent: () => import('./auth/reset-password/reset-password').then(m => m.ResetPassword) },
+
 
     {
         path: 'admin',
@@ -47,8 +50,12 @@ export const routes: Routes = [
     },
     {
         path: 'profile',
-        component: Profile,
-        canActivate: [authGuard]
+        children: [
+            { path: 'student', component: Profile, canActivate: [authGuard] },
+            { path: 'organizer', component: Profile, canActivate: [authGuard, organizerGuard] },
+            { path: 'admin', component: Profile, canActivate: [authGuard, adminGuard] }
+        ]
+
     },
 
     { path: '**', redirectTo: 'events' }
