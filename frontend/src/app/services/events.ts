@@ -17,6 +17,10 @@ export class EventsService {
   getEvents(): Observable<Event[]> {
     return this.http.get<Event[]>(`${this.apiUrl}/events/public`);
   }
+
+  getMyEvents(): Observable<Event[]> {
+    return this.http.get<Event[]>(`${this.apiUrl}/events/mine`);
+  }
   getEventById(id: string): Observable<Event> {
     return this.http.get<Event>(`${this.apiUrl}/events/${id}`);
   }
@@ -25,6 +29,10 @@ export class EventsService {
     return this.http.get<Event[]>(`${this.apiUrl}/events/search`, {
       params: { q: searchTerm }
     });
+  }
+
+  getEventsByOrganizerId(organizerId: string): Observable<Event[]> {
+    return this.http.get<Event[]>(`${this.apiUrl}/events/organizer/${organizerId}`);
   }
 
   createEvent(eventData: any, imageFile: File | null): Observable<any> {
@@ -62,10 +70,14 @@ export class EventsService {
     // Note: Le backend attend du JSON pour Patch, .
     // Si pas d'image, on pourrait envoyer du JSON pur.
     if (!imageFile) {
-      return this.http.patch(`${this.apiUrl}/events/${id}`, eventData);
+      return this.http.patch(`${this.apiUrl}/events/${id}/edit`, eventData);
     }
 
-    return this.http.patch(`${this.apiUrl}/events/${id}`, formData);
+    return this.http.patch(`${this.apiUrl}/events/${id}/edit`, formData);
+  }
+
+  getEventStatistics(id: string): Observable<any> {
+    return this.http.get(`${this.apiUrl}/events/${id}/statistics`);
   }
 
   getAvailableRooms(start: string, end: string): Observable<string[]> {
@@ -74,5 +86,14 @@ export class EventsService {
       .set('end', new Date(end).toISOString());
 
     return this.http.get<string[]>(`${this.apiUrl}/events/availability`, { params });
+  }
+
+  getRoomSlots(room: string, start: string, end: string): Observable<any[]> {
+    const params = new HttpParams()
+      .set('room', room)
+      .set('start', new Date(start).toISOString())
+      .set('end', new Date(end).toISOString());
+
+    return this.http.get<any[]>(`${this.apiUrl}/events/availability/slots`, { params });
   }
 }

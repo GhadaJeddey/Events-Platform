@@ -1,6 +1,8 @@
 import { Controller, Get } from '@nestjs/common';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AppService } from './app.service';
 
+@ApiTags('App')
 @Controller()
 /**
  * Root controller of the application.
@@ -14,6 +16,7 @@ export class AppController {
    * @returns {string} The greeting message.
    */
   @Get()
+  @ApiOperation({ summary: 'Health check' })
   getHello(): string {
     return this.appService.getHello();
   }

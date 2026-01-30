@@ -1,5 +1,5 @@
 .event-card {
-    background: #ffffff;
+    background: #ffffff5e;
     border-radius: 24px;
     overflow: hidden;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
@@ -118,6 +118,28 @@
     border-radius: 10px;
     transition: all 0.3s ease;
     box-shadow: 0 4px 10px rgba(102, 126, 234, 0.2);
+    border: none;
+    cursor: pointer;
+}
+
+.link-register:hover {
+    background-color: #0056b3;
+    transform: scale(1.02);
+}
+
+.link-register.btn-cancel {
+    background: linear-gradient(135deg, #ef5350 0%, #c62828 100%);
+    box-shadow: 0 4px 10px rgba(239, 83, 80, 0.2);
+}
+
+.link-register.btn-cancel:hover:not(:disabled) {
+    transform: scale(1.02);
+    background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+}
+
+.link-register.btn-cancel:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
 }
 
 /* --- Styles pour l'état ANNULÉ --- */
@@ -171,4 +193,70 @@
     background: #e2e8f0 !important;
     /* Un gris très clair pour le bouton */
     border: 1px solid #cbd5e0;
+}
+
+/* Organizer mode styles */
+.event-stats {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+.stat {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    color: #333;
+    font-weight: 500;
+}
+
+.stat svg {
+    color: #0066cc;
+}
+
+.event-card-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: auto;
+}
+
+.btn-statistics,
+.btn-edit {
+    flex: 1;
+    padding: 0.75rem;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+    display: block;
+    border-radius: 100px;
+
+}
+
+.btn-statistics {
+    background: #0066cc;
+    color: white;
+    background-color: #667eea;
+}
+
+.btn-statistics:hover {
+    background: #0052a3;
+    box-shadow: 0 2px 8px rgba(0, 102, 204, 0.2);
+}
+
+.btn-edit {
+    background: #f0f0f0;
+    color: #333;
+}
+
+.btn-edit:hover {
+    background: #e0e0e0;
 }

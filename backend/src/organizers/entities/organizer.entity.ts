@@ -28,4 +28,7 @@ export class Organizer {
     @OneToMany(() => Event, (event) => event.organizer)
     events: Event[];
 
+    @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+    createdAt: Date;
+
 }

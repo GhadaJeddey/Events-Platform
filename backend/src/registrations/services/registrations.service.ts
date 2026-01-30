@@ -22,13 +22,12 @@ export class RegistrationsService {
   ) { }
 
   async create(createRegistrationDto: CreateRegistrationDto, userId: string) {
-    // 1. Récupération via les services (sécurisé et modulaire)
     const student = await this.studentsService.findOneByUserId(userId);
     const event = await this.eventsService.findOne(createRegistrationDto.eventId);
 
     if (!event) throw new NotFoundException('Event not found');
 
-    // 2. Vérification doublon
+    // Verif doublon
     const existingRegistration = await this.registrationRepository.findOne({
       where: {
         student: { id: student.id },
@@ -40,37 +39,33 @@ export class RegistrationsService {
       throw new ConflictException('Vous êtes déjà inscrit à cet évènement');
     }
 
-    // 3. Détermination du statut
+    // verif statut
     let status = RegistrationStatus.CONFIRMED;
     if (event.currentRegistrations >= event.capacity) {
       status = RegistrationStatus.WAITLIST;
     }
 
-    // 4. Transaction SQL (Atomicité)
+    // Transaction SQL - datasource for when two students try to register at the same time
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
     try {
-      // Création de l'objet registration
       const newRegistration = this.registrationRepository.create({
         student,
         event,
         status,
       });
 
-      // Sauvegarde de l'inscription
       await queryRunner.manager.save(newRegistration);
 
-      // Si confirmé, on incrémente le compteur de l'event de manière atomique
       if (status === RegistrationStatus.CONFIRMED) {
         await queryRunner.manager.increment(Event, { id: event.id }, 'currentRegistrations', 1);
       }
 
-      await queryRunner.commitTransaction(); // ✅ On valide tout en base
+      await queryRunner.commitTransaction(); 
 
-      // 5. Envoi des emails (APRES la transaction réussie)
-      this.sendRegistrationEmail(student, event, status); // Async, on n'attend pas forcément
+      this.sendRegistrationEmail(student, event, status);
 
       return newRegistration;
 
@@ -100,7 +95,6 @@ export class RegistrationsService {
       });
     } catch (e) {
       console.error('Error sending email:', e);
-      // On ne throw pas d'erreur ici pour ne pas annuler l'inscription si le mail échoue
     }
   }
 
@@ -118,7 +112,6 @@ export class RegistrationsService {
   }
 
   async findOne(id: string, userId: string) {
-    // find a specific registration by id for a specific user
     const registration = await this.registrationRepository.findOne({
       where: { id },
       relations: ['event', 'student', 'student.user'],
@@ -197,7 +190,7 @@ export class RegistrationsService {
     return { message: 'Registration cancelled successfully' };
   }
 
-  // --- Method for analytics in clubs dashboard ---
+  // --- Analytics in clubs dashboard ---
   async getAwaitingRegistrations(eventId: string): Promise<number> {
     return await this.registrationRepository.count({
       where: {
@@ -222,6 +215,61 @@ export class RegistrationsService {
         event: { id: String(eventId) },
         status: RegistrationStatus.CANCELLED
       }
+    });
+  }
+
+  async getMajorDistribution(eventId: string) {
+    const majorsRaw = await this.registrationRepository
+      .createQueryBuilder('registration')
+      .leftJoin('registration.student', 'student')
+      .select('UPPER(student.major)', 'major')
+      .addSelect('COUNT(*)', 'count')
+      .where('registration.eventId = :eventId', { eventId })
+      .andWhere('registration.status = :status', { status: RegistrationStatus.CONFIRMED })
+      .groupBy('UPPER(student.major)')
+      .getRawMany();
+
+    return majorsRaw;
+  }
+
+  async getRegistrationsByDay(eventId: string) {
+    const registrationsByDayRaw = await this.registrationRepository
+      .createQueryBuilder('registration')
+      .select('DATE(registration.createdAt)', 'date')
+      .addSelect('COUNT(*)', 'count')
+      .where('registration.eventId = :eventId', { eventId })
+      .andWhere('registration.status = :status', { status: RegistrationStatus.CONFIRMED })
+      .groupBy('DATE(registration.createdAt)')
+      .orderBy('DATE(registration.createdAt)', 'ASC')
+      .getRawMany();
+
+    return registrationsByDayRaw;
+  }
+
+  async getRegistrationsByHour(eventId: string) {
+    const registrationsByHourRaw = await this.registrationRepository
+      .createQueryBuilder('registration')
+      .select('EXTRACT(HOUR FROM registration.createdAt)', 'hour')
+      .addSelect('COUNT(*)', 'count')
+      .where('registration.eventId = :eventId', { eventId })
+      .andWhere('registration.status = :status', { status: RegistrationStatus.CONFIRMED })
+      .groupBy('EXTRACT(HOUR FROM registration.createdAt)')
+      .orderBy('EXTRACT(HOUR FROM registration.createdAt)', 'ASC')
+      .getRawMany();
+
+    return registrationsByHourRaw;
+  }
+
+  // --- FOR ORGANIZERS ---
+
+  async getEventRegistrations(eventId: string) {
+    return await this.registrationRepository.find({
+      where: { 
+        event: { id: eventId },
+        status: In([RegistrationStatus.CONFIRMED, RegistrationStatus.WAITLIST])
+      },
+      relations: ['student', 'student.user'],
+      order: { createdAt: 'ASC' }
     });
   }
 

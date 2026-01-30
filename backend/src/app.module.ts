@@ -14,9 +14,11 @@ import { join } from 'path';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { AdminModule } from './admin/admin.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     ConfigModule.forRoot({
       isGlobal: true, // config globale pour toute l'application
     }),
@@ -27,7 +29,7 @@ import { AdminModule } from './admin/admin.module';
         type: 'postgres',
         url: configService.get<string>('DATABASE_URL'), //checks process.env.DATABASE_URL
         autoLoadEntities: true,
-        synchronize: true, //DEV
+        synchronize: true,
         ssl: { rejectUnauthorized: false },
       }),
     }),

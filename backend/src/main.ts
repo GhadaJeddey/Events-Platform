@@ -21,7 +21,7 @@ async function bootstrap() {
   SwaggerModule.setup('api', app, document);
 
   // Servir les fichiers uploadés comme fichiers statiques
-  app.useStaticAssets(join(process.cwd(), 'uploads'), {
+  app.useStaticAssets(join(process.cwd(), '/uploads'), {
     prefix: '/uploads/',
   });
 
@@ -32,11 +32,13 @@ async function bootstrap() {
       transform: true, // Transforme automatiquement les types
     }),
   );
-  app.enableCors({
+
+  app.enableCors({ // autorise les requêtes cross‑origin
     origin: 'http://localhost:4200', // Autoriser le frontend
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });
   await app.listen(3000);
 }
+
 bootstrap();

@@ -13,9 +13,9 @@ export class OrganizersService {
     private readonly organizerRepository: Repository<Organizer>,
   ) { }
 
-
   async create(user: User, createOrganizerDto: CreateOrganizerDto): Promise<Organizer> {
-    // On vérifie si le nom du club est déjà pris (optionnel mais recommandé)
+
+    // On vérifie si le nom du club est déjà pris 
     const existing = await this.organizerRepository.findOne({ where: { name: createOrganizerDto.name } });
     if (existing) {
       throw new ConflictException('Organization name already exists');
@@ -24,18 +24,16 @@ export class OrganizersService {
     const organizer = this.organizerRepository.create({
       ...createOrganizerDto,
       user,
-      isVerified: false, // Par défaut, un club n'est pas validé
+      isVerified: false,
     });
 
     return await this.organizerRepository.save(organizer);
   }
 
-
   async findAll(): Promise<Organizer[]> {
     return await this.organizerRepository.find({
-      //rendre les clubs valides par admin uniquement . 
       where: { isVerified: true },
-      relations: ['user']
+      relations: ['user', 'events']
     });
   }
 
@@ -48,7 +46,6 @@ export class OrganizersService {
     return organizer;
   }
 
-  // Trouve le profil Club via l'ID du User connecté
   async findOneByUserId(userId: string): Promise<Organizer> {
     const organizer = await this.organizerRepository.findOne({
       where: { user: { id: userId } },
@@ -75,6 +72,28 @@ export class OrganizersService {
     const organizer = await this.findOne(id);
     organizer.isVerified = true;
     return await this.organizerRepository.save(organizer);
+  }
+
+  // --- ADMIN LOGIC ---
+
+  async getPendingOrganizers(): Promise<Organizer[]> {
+
+    return await this.organizerRepository.find({
+      where: { isVerified: false },
+      relations: ['user'],
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+  async approveOrganizer(id: string): Promise<Organizer> {
+    const organizer = await this.findOne(id);
+    organizer.isVerified = true;
+    return await this.organizerRepository.save(organizer);
+  }
+
+  async rejectOrganizer(id: string): Promise<void> {
+    const organizer = await this.findOne(id);
+    await this.organizerRepository.delete(id);
   }
 
   async remove(id: string): Promise<void> {

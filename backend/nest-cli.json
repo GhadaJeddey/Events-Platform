@@ -6,7 +6,8 @@
     "deleteOutDir": true,
     "assets": [
       {
-        "include": "common/templates/**/*",
+        "include": "common/templates/**/*.hbs",
+        "outDir": "dist",
         "watchAssets": true
       }
     ]

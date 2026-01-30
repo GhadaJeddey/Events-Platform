@@ -210,6 +210,14 @@
     margin-bottom: 20px;
 }
 
+.btn-register-primary.btn-cancel {
+    background: linear-gradient(135deg, #ef5350 0%, #c62828 100%);
+    box-shadow: 0 10px 25px rgba(239, 83, 80, 0.4);
+}
+
+.btn-register-primary.btn-cancel:hover:not(:disabled) {
+    background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+}
 
 .btn-register-primary:disabled {
     background: #cbd5e0;

@@ -1,124 +1,100 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { User } from '../../users/entities/user.entity'; 
-import { Event } from '../../events/entities/event.entity'; 
+import { Injectable } from '@nestjs/common';
 import { UpdateEventStatusDto } from '../dto/update-event-status.dto';
 import { UpdateUserRoleDto } from '../dto/update-user-role.dto';
-import { ApprovalStatus, EventStatus } from '../../common/enums/event.enums';
+import { UpdateOrganizerStatusDto } from '../dto/update-organizer-status.dto';
+import { OrganizerStatus } from '../../common/enums/organizers.enum';
+import { UsersService } from '../../users/services/users.service';
+import { EventsService } from '../../events/services/events.service';
+import { OrganizersService } from '../../organizers/services/organizers.service';
 
 
 @Injectable()
 export class AdminService {
   constructor(
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
-    @InjectRepository(Event)
-    private readonly eventRepository: Repository<Event>,
+    private readonly usersService: UsersService,
+    private readonly eventsService: EventsService,
+    private readonly organizersService: OrganizersService,
   ) {}
 
   // --- EVENTS LOGIC ---
 
-  // Récupérer les événements en attente de validation
   async getPendingEvents() {
-    return this.eventRepository.find({
-      where: { approvalStatus: ApprovalStatus.PENDING }, 
-      order: { startDate: 'ASC' }, 
-      relations: ['organizer'], 
-    });
+    return this.eventsService.getPendingEvents();
   }
 
-  // Approuver ou Rejeter un événement
   async updateEventStatus(id: string, updateEventStatusDto: UpdateEventStatusDto) {
-    const event = await this.eventRepository.findOne({ where: { id } });
-    if (!event) throw new NotFoundException(`Event with ID ${id} not found`);
-
-    if (updateEventStatusDto.status === ApprovalStatus.APPROVED) {
-        
-        // Check ultime de conflit : On vérifie s'il existe UN AUTRE événement APPROUVÉ qui chevauche
-        const conflict = await this.eventRepository.createQueryBuilder('e')
-            .where('e.location = :loc', { loc: event.location })
-            .andWhere('e.approvalStatus = :status', { status: ApprovalStatus.APPROVED })
-            .andWhere('e.id != :id', { id: event.id }) 
-            .andWhere('e.startDate < :end', { end: event.endDate })
-            .andWhere('e.endDate > :start', { start: event.startDate })
-            .getOne();
-
-        if (conflict) {
-            throw new ConflictException(
-                `Conflit détecté ! La salle ${event.location} est déjà occupée par l'événement "${conflict.title}" sur ce créneau.`
-            );
-        }
-
-        event.eventStatus = EventStatus.UPCOMING;
-    }
-
-    event.approvalStatus = updateEventStatusDto.status;
-    return this.eventRepository.save(event);
-}
+    return this.eventsService.updateApprovalStatus(id, updateEventStatusDto.status);
+  }
 
   // --- USERS LOGIC ---
 
-  async getAllUsers() {
-    return this.userRepository.find({
-      select: ['id', 'email', 'firstName', 'lastName', 'role', 'isActive'],
-    });
+  async getAllUsers(skip: number = 0, take: number = 10) {
+    const [users, total] = await Promise.all([
+      this.usersService.findAllPaginated(skip, take),
+      this.usersService.countAll(),
+    ]);
+    
+    return {
+      data: users,
+      total,
+      skip,
+      take,
+      pageCount: Math.ceil(total / take),
+    };
   }
 
   async updateUserRole(id: string, updateUserRoleDto: UpdateUserRoleDto) {
-    const user = await this.userRepository.findOne({ where: { id } });
-
-    if (!user) {
-      throw new NotFoundException(`User with ID ${id} not found`);
-    }
-
-    user.role = updateUserRoleDto.role;
-    return this.userRepository.save(user);
+    return this.usersService.update(id, { role: updateUserRoleDto.role });
   }
 
   // --- REPORTS / STATS ---
+
   async getDashboardStats() {
-    const totalUsers = await this.userRepository.count();
-    const totalEvents = await this.eventRepository.count();
-    const pendingEvents = await this.eventRepository.count({
-      where: { approvalStatus: ApprovalStatus.PENDING },
-    });
-
-    // Stats groupées par statut d'approbation 
-    const eventsByStatus = await this.eventRepository
-      .createQueryBuilder('event')
-      .select('event.approvalStatus', 'approvalStatus')
-      .addSelect('COUNT(event.id)', 'count')
-      .groupBy('event.approvalStatus')
-      .getRawMany();
-
-    // Stats groupées par Location (Salle) 
-    const eventsByLocation = await this.eventRepository
-      .createQueryBuilder('event')
-      .select('event.location', 'location')
-      .addSelect('COUNT(event.id)', 'count')
-      .groupBy('event.location')
-      .orderBy('count', 'DESC') 
-      .getRawMany();
-    
+    const totalUsers = await this.usersService.findAll();
+    const eventStats = await this.eventsService.getDashboardStats();
 
     return {
       overview: {
-        totalUsers,
-        totalEvents,
-        pendingEvents,
+        totalUsers: totalUsers.length,
+        totalEvents: eventStats.totalEvents,
+        pendingEvents: eventStats.pendingEvents,
       },
       details: {
-        eventsByApprovalStatus: eventsByStatus,
-        eventsByLocation: eventsByLocation, 
+        eventsByApprovalStatus: eventStats.eventsByStatus,
+        eventsByLocation: eventStats.eventsByLocation,
       },
     };
   }
+
   async getRecentActivity(limit: number = 5) {
-  return this.eventRepository.find({
-    take: limit, 
-    order: { createdAt: 'DESC' }, 
-    relations: ['organizer', 'organizer.user'],
-  });
-}
+    return this.eventsService.getRecentActivity(limit);
+  }
+
+  // --- ORGANIZERS LOGIC ---
+
+  async getPendingOrganizers() {
+    return this.organizersService.getPendingOrganizers();
+  }
+
+  async getMostActiveOrganizers(limit: number = 5) {
+    const allOrganizers = await this.organizersService.findAll();
+    const organizersWithEventCounts = allOrganizers.map(org => ({
+      id: org.id,
+      name: org.name,
+      eventCount: org.events ? org.events.length : 0,
+    }));
+    
+    return organizersWithEventCounts
+      .sort((a, b) => b.eventCount - a.eventCount)
+      .slice(0, limit);
+  }
+
+  async updateOrganizerStatus(id: string, updateOrganizerStatusDto: UpdateOrganizerStatusDto) {
+    if (updateOrganizerStatusDto.status === OrganizerStatus.APPROVED) {
+      return this.organizersService.approveOrganizer(id);
+    } else if (updateOrganizerStatusDto.status === OrganizerStatus.REJECTED) {
+      await this.organizersService.rejectOrganizer(id);
+      return { message: 'Organizer request rejected and removed' };
+    }
+  }
 }

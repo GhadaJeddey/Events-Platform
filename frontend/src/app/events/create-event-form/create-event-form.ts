@@ -1,12 +1,13 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, computed } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { Router } from '@angular/router';
 import { EventsService } from '../../services/events';
 import { ToastrService } from 'ngx-toastr';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-create-event-form',
-  imports: [FormsModule],
+  imports: [FormsModule, CommonModule],
   templateUrl: './create-event-form.html',
   styleUrl: './create-event-form.css',
 })
@@ -23,28 +24,32 @@ export class CreateEventForm {
   availableRooms = signal<string[]>([]);
   isLoadingRooms = signal<boolean>(false);
 
-  // Variables liées aux inputs pour détecter les changements facilement
   startDateValue: string = '';
   endDateValue: string = '';
+  selectedLocation: string = '';
 
-  // Appelé à chaque fois qu'une date change
+  // Vérifier si la salle sélectionnée est disponible pour le créneau
+  isRoomAvailable = computed(() => {
+    if (!this.selectedLocation || !this.startDateValue || !this.endDateValue) {
+      return false;
+    }
+    return this.availableRooms().includes(this.selectedLocation);
+  });
+
   onDateChange() {
     if (this.startDateValue && this.endDateValue) {
-      // Validation basique
       if (this.startDateValue >= this.endDateValue) {
-        this.availableRooms.set([]); // Reset si dates invalides
+        this.availableRooms.set([]); 
         return;
       }
 
       this.isLoadingRooms.set(true);
       
-      // Appel au service (Assure-toi que cette méthode existe dans ton service !)
       this.eventsService.getAvailableRooms(this.startDateValue, this.endDateValue).subscribe({
         next: (rooms) => {
           this.availableRooms.set(rooms);
           this.isLoadingRooms.set(false);
           
-          // Petit feedback si aucune salle n'est dispo
           if (rooms.length === 0) {
             this.toastr.info('Aucune salle disponible pour ce créneau.');
           }
@@ -54,6 +59,13 @@ export class CreateEventForm {
           this.isLoadingRooms.set(false);
         }
       });
+    }
+  }
+
+  onLocationChange() {
+    // Rafraîchir la vérification de disponibilité quand la salle change
+    if (this.selectedLocation && this.startDateValue && this.endDateValue) {
+      this.onDateChange();
     }
   }
   onFileSelected(event: any) {
@@ -83,13 +95,13 @@ export class CreateEventForm {
       this.eventsService.createEvent(eventData, this.selectedFile()).subscribe({
         next: (response) => {
           this.toastr.success('Événement créé avec succès !');
-          this.router.navigate(['/events']);
+          this.router.navigate(['/organizer/dashboard']);
         },
         error: (err) => {
-          //  Gestion spécifique erreur 409 (Salle prise) 
+
           if (err.status === 409) {
             this.toastr.error("La salle sélectionnée n'est plus disponible. Veuillez réactualiser.");
-            this.onDateChange(); // On recharge la liste
+            this.onDateChange(); 
           } else {
             const errorMessage = err.error?.message || 'Erreur lors de la création de l\'événement';
             this.toastr.error(errorMessage);
@@ -99,5 +111,17 @@ export class CreateEventForm {
     } else {
       form.form.markAllAsTouched();
     }
+  }
+  return() {
+    this.router.navigate(['/organizer/dashboard']);
+  }
+
+  reserveRoom() {
+    if (!this.isRoomAvailable()) {
+      this.toastr.warning('Ce créneau n\'est pas disponible pour cette salle.');
+      return;
+    }
+    
+    this.toastr.success(`Salle ${this.selectedLocation} réservée pour le créneau sélectionné. Vous pouvez maintenant créer l'événement.`);
   }
 }

@@ -8,6 +8,11 @@
     justify-content: center;
     position: relative;
     overflow: hidden;
+    cursor: pointer;
+    font-size: 14px;
+    border: none;
+    outline: none;
+    min-width: 100px;
 }
 
 .btn:active {
@@ -15,19 +20,17 @@
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-    border: none;
+    background: #667eea;
     color: white;
 }
 
 .btn-primary:hover:not(:disabled) {
-    background: linear-gradient(135deg, #5b52ec 0%, #8b46f5 100%);
-    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+    background: #4c5fb7;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
 .btn-secondary {
     background: #6c757d;
-    border: none;
     color: white;
 }
 
@@ -49,7 +52,6 @@
 
 .btn-danger {
     background: #dc3545;
-    border: none;
     color: white;
 }
 
@@ -72,4 +74,27 @@
 
 .loading .btn-content {
     visibility: visible;
+}
+
+.spinner-border {
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    vertical-align: text-bottom;
+    border: 0.15em solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: spinner-border 0.75s linear infinite;
+}
+
+.spinner-border-sm {
+    width: 0.8rem;
+    height: 0.8rem;
+    border-width: 0.1em;
+}
+
+@keyframes spinner-border {
+    to {
+        transform: rotate(360deg);
+    }
 }

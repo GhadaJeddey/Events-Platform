@@ -1,4 +1,7 @@
 <div class="form-page-container">
+    <div class="spacer-80">
+        <button (click)="return()"> ← Retour au tableau de bord</button>
+    </div>
     <div class="form-card">
         <div class="form-header">
             <h1>Modifier l'évènement</h1>
@@ -35,21 +38,58 @@
                 <div class="form-group">
                     <label for="startDate">Date de début</label>
                     <input [min]="minDate()" type="datetime-local" id="startDate" name="startDate"
-                        [ngModel]="currentEvent()?.startDate | inputDate" required #startInput="ngModel"
+                        [(ngModel)]="startDateValue" 
+                        (ngModelChange)="onDateChange()"
+                        required #startInput="ngModel"
                         [class.invalid]="startInput.invalid && (startInput.dirty || startInput.touched)">
                 </div>
 
                 <div class="form-group">
                     <label for="endDate">Date de fin</label>
                     <input [min]="minDate()" type="datetime-local" id="endDate" name="endDate"
-                        [ngModel]="currentEvent()?.endDate | inputDate" required #endInput="ngModel"
+                        [(ngModel)]="endDateValue" 
+                        (ngModelChange)="onDateChange()"
+                        required #endInput="ngModel"
                         [class.invalid]="endInput.invalid && (endInput.dirty || endInput.touched)">
                 </div>
 
-                <div class="form-group">
-                    <label for="location">Lieu</label>
-                    <input type="text" id="location" name="location" [ngModel]="currentEvent()?.location" required
-                        #locInput="ngModel" [class.invalid]="locInput.invalid && (locInput.dirty || locInput.touched)">
+                <div class="form-group full-width">
+                    <label for="location">Lieu / Salle</label>
+                    <div style="display: flex; gap: 10px; align-items: flex-start;">
+                        <select id="location" name="location" [(ngModel)]="selectedLocation" 
+                            (ngModelChange)="onLocationChange()"
+                            required #locInput="ngModel"
+                            [class.invalid]="locInput.invalid && (locInput.dirty || locInput.touched)"
+                            [disabled]="!startDateValue || !endDateValue || isLoadingRooms()"
+                            style="flex: 1;">
+                            
+                            <option value="" disabled selected>
+                                @if(!startDateValue || !endDateValue) { Choisissez les dates d'abord }
+                                @else if(isLoadingRooms()) { Recherche en cours... }
+                                @else { Sélectionner une salle }
+                            </option>
+
+                            @for (room of availableRooms(); track room) {
+                                <option [value]="room">{{ room }}</option>
+                            }
+                        </select>
+
+                        <button type="button" class="btn-book-room" 
+                            (click)="reserveRoom()"
+                            [disabled]="!selectedLocation || !startDateValue || !endDateValue || !isRoomAvailable()"
+                            [title]="!isRoomAvailable() ? 'Ce créneau n\'est pas disponible pour cette salle' : 'Réserver cette salle'">
+                            📅 Réserver la salle
+                        </button>
+                    </div>
+
+                    @if(locInput.invalid && (locInput.dirty || locInput.touched)) {
+                        <div class="error-message">Le lieu est obligatoire.</div>
+                    }
+                    @if(selectedLocation && !isRoomAvailable() && startDateValue && endDateValue) {
+                        <div class="info-message" style="color: #f5576c; font-size: 0.85rem; margin-top: 0.5rem;">
+                            ⚠️ Ce créneau n'est pas disponible pour cette salle
+                        </div>
+                    }
                 </div>
 
                 <div class="form-group">

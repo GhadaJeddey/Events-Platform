@@ -1,0 +1,102 @@
+<div class="modal-overlay" (click)="closeModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Réserver une salle</h2>
+      <button class="close-btn" (click)="closeModal()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <!-- Sélection de la salle -->
+      <div class="room-selector">
+        <label for="room-select">Sélectionnez une salle :</label>
+        <select 
+          id="room-select" 
+          [(ngModel)]="selectedRoom" 
+          (change)="onRoomChange()"
+          class="room-select">
+          <option [value]="null">-- Choisir une salle --</option>
+          @for (room of availableRooms(); track room) {
+            <option [value]="room">{{ room }}</option>
+          }
+        </select>
+      </div>
+
+      @if (selectedRoom()) {
+        <!-- Navigation semaine -->
+        <div class="week-navigation">
+          <button class="nav-btn" (click)="previousWeek()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+          </button>
+          <span class="week-label">
+            {{ weekDays()[0]?.date | date:'d MMM' }} - {{ weekDays()[6]?.date | date:'d MMM yyyy' }}
+          </span>
+          <button class="nav-btn" (click)="nextWeek()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Grille calendrier type Doodle -->
+        <div class="calendar-grid">
+          <!-- En-tête des jours -->
+          <div class="grid-header">
+            <div class="time-column-header">Heure</div>
+            @for (day of weekDays(); track day.date.getTime()) {
+              <div class="day-header">
+                <div class="day-name">{{ day.dayName }}</div>
+                <div class="day-number">{{ day.dayNumber }}</div>
+              </div>
+            }
+          </div>
+
+          <!-- Grille des créneaux -->
+          <div class="grid-body">
+            @for (time of timeSlots; track time; let timeIndex = $index) {
+              <div class="time-row">
+                <div class="time-label">{{ time }}</div>
+                @for (day of weekDays(); track day.date.getTime()) {
+                  <div 
+                    class="time-slot"
+                    [class.available]="day.slots[timeIndex].available"
+                    [class.unavailable]="!day.slots[timeIndex].available"
+                    [class.selected]="isSlotSelected(day, time)"
+                    [class.slot-start]="isSlotStartOrEnd(day, time) === 'start'"
+                    [class.slot-end]="isSlotStartOrEnd(day, time) === 'end'"
+                    (click)="day.slots[timeIndex].available && selectSlot(day, timeIndex)">
+                    @if (isSlotStartOrEnd(day, time) === 'start') {
+                      <span class="slot-marker">⬤</span>
+                    }
+                    @if (isSlotStartOrEnd(day, time) === 'end') {
+                      <span class="slot-marker">⬤</span>
+                    }
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Instructions -->
+        <div class="instructions">
+          <p>
+            <strong>Instructions :</strong> 
+            Cliquez sur un créneau pour marquer le début, puis sur un autre pour marquer la fin.
+          </p>
+          @if (selectedSlotStart() && selectedSlotEnd()) {
+            <p class="selection-info">
+              ✓ Créneau sélectionné : {{ selectedSlotStart() }} - {{ selectedSlotEnd() }}
+            </p>
+          }
+        </div>
+      }
+    </div>
+  </div>
+</div>

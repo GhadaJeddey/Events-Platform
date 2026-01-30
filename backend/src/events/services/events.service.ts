@@ -6,8 +6,9 @@ import {
   forwardRef,
   ConflictException
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import { Repository, MoreThanOrEqual, LessThan, Between, In, ILike, Or, And, Brackets } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 import { Event } from '../entities/event.entity';
 import { CreateEventDto } from '../dto/create-event.dto';
 import { UpdateEventDto } from '../dto/update-event.dto';
@@ -26,13 +27,23 @@ export class EventsService {
     private registrationsService: RegistrationsService,
   ) { }
 
-  //  LOGIQUE DE DISPONIBILITÉ DES SALLES 
+  private computeEventStatus(start: Date, end: Date, now: Date = new Date()): EventStatus {
+    if (now >= start && now < end) {
+      return EventStatus.ONGOING;
+    }
+    if (now >= end) {
+      return EventStatus.COMPLETED;
+    }
+    return EventStatus.UPCOMING;
+  }
 
-  /**
-   * Retourne la liste des salles libres pour un créneau donné.
-   * Une salle est exclue si un événement (PENDING ou APPROVED) occupe déjà ce créneau.
-   */
+
+
+
   async getAvailableRooms(startStr: string, endStr: string): Promise<RoomLocation[]> {
+
+    // verifie les salles dispo pour un créneau donné
+
     const startDate = new Date(startStr);
     const endDate = new Date(endStr);
 
@@ -55,6 +66,35 @@ export class EventsService {
     return ALL_ROOMS.filter((room) => !occupiedRooms.includes(room));
   }
 
+  async getRoomSlots(room: string, startStr: string, endStr: string): Promise<any> {
+    const startDate = new Date(startStr);
+    const endDate = new Date(endStr);
+
+    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+      throw new BadRequestException('Dates invalides');
+    }
+
+    // Récupérer tous les événements approuvés ou en attente pour cette salle dans la plage de dates
+    const events = await this.eventsRepository
+      .createQueryBuilder('event')
+      .where('event.location = :room', { room })
+      .andWhere('event.approvalStatus IN (:...statuses)', {
+        statuses: [ApprovalStatus.PENDING, ApprovalStatus.APPROVED]
+      })
+      .andWhere('event.startDate < :endDate', { endDate })
+      .andWhere('event.endDate > :startDate', { startDate })
+      .getMany();
+
+    // Retourner les événements avec leurs créneaux
+    return events.map(event => ({
+      id: event.id,
+      title: event.title,
+      startDate: event.startDate,
+      endDate: event.endDate,
+      approvalStatus: event.approvalStatus
+    }));
+  }
+
   async checkRoomAvailability(
     location: RoomLocation,
     start: Date,
@@ -75,15 +115,14 @@ export class EventsService {
     return count === 0;
   }
 
-
-  // CREATE 
-
   async create(createEventDto: CreateEventDto, userId: string): Promise<Event> {
+
+    // créer un événement en s'assurant que la salle est dispo
+
     const startDate = new Date(createEventDto.startDate);
     const endDate = new Date(createEventDto.endDate);
     const now = new Date();
 
-    // Validations de dates basiques
     if (startDate < now) throw new BadRequestException('La date de début ne peut pas être dans le passé');
     if (endDate <= startDate) throw new BadRequestException('La date de fin doit être après la date de début');
 
@@ -106,21 +145,30 @@ export class EventsService {
     return await this.eventsRepository.save(event);
   }
 
-  // UPDATE 
+  async findByOrganizerUser(userId: string): Promise<Event[]> {
 
-  async update(id: string, updateEventDto: UpdateEventDto) {
-    const event = await this.findOne(id);
+    // Obtenir les événements pour l'organisateur connecté
+
+    const organizer = await this.organizersService.findOneByUserId(userId);
+    const events = await this.eventsRepository.find({
+      where: { organizer: { id: organizer.id } },
+      relations: ['organizer'],
+      order: { createdAt: 'DESC' },
+    });
+    return events;
+  }
+
+  async update(idEvent: string, updateEventDto: UpdateEventDto) {
+    const event = await this.findOne(idEvent);
     const now = new Date();
-    // On fusionne les nouvelles dates/lieux avec les anciennes si elles ne sont pas fournies
+
     const newStart = updateEventDto.startDate ? new Date(updateEventDto.startDate) : event.startDate;
     const newEnd = updateEventDto.endDate ? new Date(updateEventDto.endDate) : event.endDate;
     const newLocation = updateEventDto.location || event.location;
 
-    // Si on modifie la date ou le lieu, on doit revérifier la disponibilité
+    // Si on modifie la date ou le lieu, on doit revérifier la disponibilité de salle 
     if (updateEventDto.startDate || updateEventDto.endDate || updateEventDto.location) {
-      // on passe l'ID de l'événement actuel pour ne pas qu'il "entre en conflit avec lui-même"
-      const isFree = await this.checkRoomAvailability(newLocation, newStart, newEnd, id);
-
+      const isFree = await this.checkRoomAvailability(newLocation, newStart, newEnd, idEvent);
       if (!isFree) {
         throw new ConflictException(`La salle ${newLocation} n'est pas disponible pour les nouvelles dates choisies.`);
       }
@@ -134,7 +182,6 @@ export class EventsService {
         );
       }
     }
-
     if (updateEventDto.startDate && updateEventDto.endDate) {
       const startDate = new Date(updateEventDto.startDate);
       const endDate = new Date(updateEventDto.endDate);
@@ -144,12 +191,26 @@ export class EventsService {
         );
       }
     }
+    // Recalculer le statut de l'événement en fonction des nouvelles dates
+    const newEventStatus = this.computeEventStatus(newStart, newEnd, now);
 
-    await this.eventsRepository.update(id, updateEventDto);
-    return this.findOne(id);
+    const updateData = {
+      ...updateEventDto,
+      ...(updateEventDto.startDate || updateEventDto.endDate ? { eventStatus: newEventStatus } : {})
+    };
+
+    const updatedEvent = await this.eventsRepository.preload({
+      id: idEvent,
+      ...updateData,
+    });
+
+    if (!updatedEvent) {
+      throw new NotFoundException(`Event with ID ${idEvent} not found`);
+    }
+
+    return await this.eventsRepository.save(updatedEvent);
   }
 
-  // READ ALL PUBLIC
   async findAllPublic(): Promise<Event[]> {
     const now = new Date();
     const events = await this.eventsRepository.find({
@@ -157,85 +218,131 @@ export class EventsService {
         approvalStatus: In([ApprovalStatus.APPROVED, ApprovalStatus.CANCELLED]),
         eventStatus: In([EventStatus.UPCOMING, EventStatus.ONGOING]),
       },
+      relations: ['organizer'],
       order: {
         startDate: 'ASC',
       },
     });
 
-    const eventsToUpdate: Event[] = [];
-    events.forEach((event) => {
-      let changed = false;
+    const finalPublicEvents: Event[] = [];
 
-      if (
-        now >= new Date(event.startDate) &&
-        now < new Date(event.endDate) &&
-        event.eventStatus !== EventStatus.ONGOING
-      ) {
-        event.eventStatus = EventStatus.ONGOING;
-        changed = true;
-      }
-      else if (
-        now >= new Date(event.endDate) &&
-        event.eventStatus !== EventStatus.COMPLETED
-      ) {
-        event.eventStatus = EventStatus.COMPLETED;
-        changed = true;
+    for (const event of events) {
+      const startDate = new Date(event.startDate);
+      const endDate = new Date(event.endDate);
+      let calculatedStatus = event.eventStatus;
+
+      if (now >= endDate) {
+        calculatedStatus = EventStatus.COMPLETED;
+      } else if (now >= startDate) {
+        calculatedStatus = EventStatus.ONGOING;
+      } else {
+        calculatedStatus = EventStatus.UPCOMING;
       }
 
-      if (changed) {
-        eventsToUpdate.push(event);
+      if (calculatedStatus !== event.eventStatus) {
+        event.eventStatus = calculatedStatus;
+        await this.eventsRepository.update(event.id, { eventStatus: calculatedStatus });
       }
-    });
 
-    if (eventsToUpdate.length > 0) {
-      this.eventsRepository.save(eventsToUpdate);
+      if (calculatedStatus !== EventStatus.COMPLETED) {
+        finalPublicEvents.push(event);
+      }
     }
-    return events.filter((e) => e.eventStatus !== EventStatus.COMPLETED);
+
+    return finalPublicEvents;
   }
 
-  // SEARCH 
   async searchEvents(searchTerm: string): Promise<Event[]> {
     if (!searchTerm || searchTerm.trim() === '') {
       return [];
     }
 
-    return await this.eventsRepository.createQueryBuilder('event')
-      .where('event.approvalStatus IN (:...statuses)', { statuses: [ApprovalStatus.APPROVED, ApprovalStatus.CANCELLED] })
-      .andWhere('event.eventStatus IN (:...statuses)', {
-        statuses: [EventStatus.UPCOMING, EventStatus.ONGOING],
+    const now = new Date();
+    const events = await this.eventsRepository.createQueryBuilder('event')
+      .leftJoinAndSelect('event.organizer', 'organizer')
+      .where('event.approvalStatus IN (:...appStatuses)', {
+        appStatuses: [ApprovalStatus.APPROVED, ApprovalStatus.CANCELLED]
+      })
+      .andWhere('event.eventStatus IN (:...evtStatuses)', {
+        evtStatuses: [EventStatus.UPCOMING, EventStatus.ONGOING],
       })
       .andWhere(
         new Brackets((qb) => {
           qb.where('event.title ILIKE :term', { term: `%${searchTerm}%` })
             .orWhere('event.description ILIKE :term', { term: `%${searchTerm}%` })
-            .orWhere('event.location ILIKE :term', { term: `%${searchTerm}%` });
+            .orWhere('CAST(event.location AS TEXT) ILIKE :term', { term: `%${searchTerm}%` });
         }),
       )
       .orderBy('event.startDate', 'ASC')
       .getMany();
-  }
 
+    const finalResults: Event[] = [];
+
+    for (const event of events) {
+      const startDate = new Date(event.startDate);
+      const endDate = new Date(event.endDate);
+      let calculatedStatus = event.eventStatus;
+
+      if (now >= endDate) {
+        calculatedStatus = EventStatus.COMPLETED;
+      } else if (now >= startDate) {
+        calculatedStatus = EventStatus.ONGOING;
+      } else {
+        calculatedStatus = EventStatus.UPCOMING;
+      }
+
+      if (calculatedStatus !== event.eventStatus) {
+        event.eventStatus = calculatedStatus;
+        await this.eventsRepository.update(event.id, { eventStatus: calculatedStatus });
+      }
+
+      // On ne retourne pas les évènements terminés dans la recherche publique
+      if (calculatedStatus !== EventStatus.COMPLETED) {
+        finalResults.push(event);
+      }
+    }
+
+    return finalResults;
+  }
 
   async findOne(id: string): Promise<Event> {
     const event = await this.eventsRepository.findOne({
       where: { id },
+      relations: ['organizer'],
     });
 
     if (!event) {
       throw new NotFoundException(`Événement avec l'ID ${id} introuvable`);
     }
 
+    // Mise à jour du statut en temps réel lors de la récupération d'un évènement spécifique
+    const now = new Date();
+    const startDate = new Date(event.startDate);
+    const endDate = new Date(event.endDate);
+    let calculatedStatus = event.eventStatus;
+
+    if (now >= endDate) {
+      calculatedStatus = EventStatus.COMPLETED;
+    } else if (now >= startDate) {
+      calculatedStatus = EventStatus.ONGOING;
+    } else {
+      calculatedStatus = EventStatus.UPCOMING;
+    }
+
+    if (calculatedStatus !== event.eventStatus) {
+      event.eventStatus = calculatedStatus;
+      await this.eventsRepository.update(event.id, { eventStatus: calculatedStatus });
+    }
+
     return event;
   }
 
-
-  // DELETE
   async remove(id: string): Promise<void> {
     await this.eventsRepository.delete(id);
   }
 
-  // Archiver automatiquement les événements passés
   async archivePastEvents(): Promise<void> {
+    // Archiver automatiquement les événements passés
     await this.eventsRepository.update(
       {
         endDate: LessThan(new Date()),
@@ -246,8 +353,10 @@ export class EventsService {
       },
     );
   }
-  // Vérifier la capacité disponible
+
+
   async checkAvailability(eventId: string): Promise<number> {
+    // Vérifier la capacité disponible de places pour un événement
     const event = await this.findOne(eventId);
     return event.availableSpots;
   }
@@ -260,7 +369,6 @@ export class EventsService {
     this.eventsRepository.increment({ id: eventId }, 'currentRegistrations', 1);
   }
 
-  // Décrémenter le nombre d'inscriptions (annulation)
   async decrementRegistrations(eventId: string) {
     const event = await this.findOne(eventId);
 
@@ -270,11 +378,120 @@ export class EventsService {
     this.eventsRepository.decrement({ id: eventId }, 'currentRegistrations', 1);
   }
 
-  // Obtenir les événements d'un organisateur
-  async findByOrganizer(organizerId: string): Promise<Event[]> {
-    return await this.eventsRepository.find({
-      where: { organizer: { id: organizerId } },
-      order: { startDate: 'DESC' },
+  async getEventStatistics(eventId: string) {
+
+    const event = await this.eventsRepository.findOne({
+      where: { id: eventId },
+      relations: ['registrations', 'registrations.student'],
+    });
+
+    if (!event) {
+      throw new NotFoundException(`Event with ID ${eventId} not found`);
+    }
+
+    // Compter les inscriptions par statut
+    const confirmed = await this.registrationsService.getConfirmedRegistrations(eventId);
+    const waitlist = await this.registrationsService.getAwaitingRegistrations(eventId);
+    const cancelled = await this.registrationsService.getCancelledRegistrations(Number(eventId));
+
+    // Répartition par filière 
+    const majors = ['IIA', 'IMI', 'GL', 'RT'];
+    const majorsRaw = await this.registrationsService.getMajorDistribution(eventId);
+
+    const majorDistribution = majors.map((major) => {
+      const entry = majorsRaw.find((m) => (m.major || '').toUpperCase() === major);
+      return { major, count: entry ? Number(entry.count) : 0 };
+    });
+
+    // Inscriptions par jour 
+    const registrationsByDayRaw = await this.registrationsService.getRegistrationsByDay(eventId);
+
+    const registrationsByDay = registrationsByDayRaw.map((row) => ({
+      date: row.date instanceof Date ? row.date.toISOString().split('T')[0] : row.date,
+      count: Number(row.count),
+    }));
+
+    // Inscriptions par heure
+    const registrationsByHourRaw = await this.registrationsService.getRegistrationsByHour(eventId);
+
+    const registrationsByHour = registrationsByHourRaw.map((row) => ({
+      hour: Number(row.hour),
+      count: Number(row.count),
+    }));
+
+    return {
+      eventId: event.id,
+      title: event.title,
+      description: event.description,
+      startDate: event.startDate,
+      endDate: event.endDate,
+      location: event.location,
+      capacity: event.capacity,
+      participants: confirmed,
+      waitlist,
+      cancelled,
+      fillRate: event.capacity > 0 ? Math.round((confirmed / event.capacity) * 100) : 0,
+      availableSpots: Math.max(0, event.capacity - confirmed),
+      approvalStatus: event.approvalStatus,
+      eventStatus: event.eventStatus,
+      majorDistribution,
+      registrationsByDay,
+      registrationsByHour,
+    };
+  }
+
+  // --- ADMIN METHODS ---
+
+  async getPendingEvents(): Promise<Event[]> {
+    return this.eventsRepository.find({
+      where: { approvalStatus: ApprovalStatus.PENDING },
+      order: { startDate: 'ASC' },
+      relations: ['organizer'],
+    });
+  }
+
+  async updateApprovalStatus(id: string, status: ApprovalStatus): Promise<Event> {
+    const event = await this.eventsRepository.findOne({ where: { id } });
+    if (!event) throw new NotFoundException(`Event with ID ${id} not found`);
+
+    event.approvalStatus = status;
+    return this.eventsRepository.save(event);
+  }
+
+  async getDashboardStats() {
+    const totalEvents = await this.eventsRepository.count();
+    const pendingEvents = await this.eventsRepository.count({
+      where: { approvalStatus: ApprovalStatus.PENDING },
+    });
+
+    const eventsByStatus = await this.eventsRepository
+      .createQueryBuilder('event')
+      .select('event.approvalStatus', 'approvalStatus')
+      .addSelect('COUNT(event.id)', 'count')
+      .groupBy('event.approvalStatus')
+      .getRawMany();
+
+    const eventsByLocation = await this.eventsRepository
+      .createQueryBuilder('event')
+      .select('event.location', 'location')
+      .addSelect('COUNT(event.id)', 'count')
+      .groupBy('event.location')
+      .orderBy('count', 'DESC')
+      .getRawMany();
+
+    return {
+      totalEvents,
+      pendingEvents,
+      eventsByStatus,
+      eventsByLocation,
+    };
+  }
+
+  async getRecentActivity(limit: number = 5): Promise<Event[]> {
+    return this.eventsRepository.find({
+      take: limit,
+      order: { createdAt: 'DESC' },
+      relations: ['organizer', 'organizer.user'],
     });
   }
 

@@ -5,6 +5,7 @@ import { CommonModule } from '@angular/common';
 import { UserRole } from '../Models/auth.models';
 import { MatIconModule } from '@angular/material/icon';
 
+
 @Component({
   selector: 'app-navbar',
   standalone: true,
@@ -14,29 +15,32 @@ import { MatIconModule } from '@angular/material/icon';
 })
 export class Navbar {
   authService = inject(AuthService);
-  private router = inject(Router);
+  router = inject(Router);
 
   isAuthPage(): boolean {
-    return this.router.url.startsWith('/auth');
+    const url = this.router.url;
+    return url.includes('/auth/');
   }
 
   logout(): void {
     this.authService.logout();
+    this.router.navigate(['/login']);
   }
 
-  getProfilePath(): string {
+  getPath(dest : string): string {
     const user = this.authService.currentUser();
-    if (!user) return '';
+    if (!user) return '/events';
 
     switch (user.role) {
       case UserRole.STUDENT:
-        return '/profile/student';
+        return '/student/' + dest;
       case UserRole.ORGANIZER:
-        return '/profile/organizer';
+        return '/organizer/' + dest;
       case UserRole.ADMIN:
-        return '/profile/admin';
+        return '/admin/' + dest;
       default:
         return '';
     }
   }
+
 }

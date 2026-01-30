@@ -8,16 +8,20 @@ import { LoginComponent } from './auth/login/login';
 import { RegisterComponent } from './auth/register/register';
 import { ForgotPasswordComponent } from './auth/forgot-password/forgot-password';
 import { authGuard } from './guards/auth.guard';
-
+import { adminOrOrganizerGuard } from './guards/adminororganizer.guard';
+import { adminGuard } from './guards/admin.guard';
 import { Dashboard } from './admin/dashboard/dashboard';
 import { EventApproval } from './admin/event-approval/event-approval';
 import { UserManagement } from './admin/user-management/user-management';
-import { adminOrOrganizerGuard } from './guards/adminororganizer.guard';
-import { adminGuard } from './guards/admin.guard';
+import { StudentDashboard } from './student/dashboard/dashboard';
+import { OrganizerDashboard } from './organizer/dashboard/dashboard';
+import { EventStatisticsComponent } from './organizer/event-statistics/event-statistics';
+import { OrganizersList } from './organizer/organizers-list/organizers-list';
+import { OrganizerDetails } from './organizer/organizer-details/organizer-details';
+import { AllMyEvents } from './organizer/all-my-events/all-my-events';
 import { Profile } from './profile/profile';
 import { organizerGuard } from './guards/organizer.guard';
 export const routes: Routes = [
-
     {
         path: 'events',
         children: [
@@ -25,6 +29,13 @@ export const routes: Routes = [
             { path: 'create', component: CreateEventForm, canActivate: [authGuard, adminOrOrganizerGuard] },
             { path: 'details/:id', component: EventDetails },
             { path: ':id/edit', component: UpdateEvent, canActivate: [authGuard, adminOrOrganizerGuard] }
+        ]
+    },
+    {
+        path: 'organisations',
+        children: [
+            { path: '', component: OrganizersList },
+            { path: ':id', component: OrganizerDetails }
         ]
     },
     {
@@ -39,24 +50,47 @@ export const routes: Routes = [
 
 
     {
+        path: 'organisations',
+        children: [
+            { path: '', component: OrganizersList },
+            { path: ':id', component: OrganizerDetails }
+        ]
+    },
+
+    {
         path: 'admin',
         children: [
-            { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-            { path: 'dashboard', component: Dashboard, canActivate: [authGuard, adminGuard] },
-            { path: 'approvals', component: EventApproval, canActivate: [authGuard, adminGuard] },
-            { path: 'users', component: UserManagement, canActivate: [authGuard, adminGuard] }
+            { path: '', redirectTo: 'dashboard', pathMatch: 'full'},
+            { path: 'profile', component: Profile, canActivate:[authGuard] },
+            { path: 'dashboard', component: Dashboard,canActivate:[authGuard,adminGuard] },
+            { path: 'approvals', component: EventApproval,canActivate:[authGuard,adminGuard] },
+            { path: 'users', component: UserManagement,canActivate:[authGuard,adminGuard] }
         ]
-        // TODO: Plus tard, ajouter : canActivate: [AdminGuard]
-    },
+    }, 
+
     {
-        path: 'profile',
+        path: 'student',
         children: [
-            { path: 'student', component: Profile, canActivate: [authGuard] },
-            { path: 'organizer', component: Profile, canActivate: [authGuard, organizerGuard] },
-            { path: 'admin', component: Profile, canActivate: [authGuard, adminGuard] }
+            { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+            { path: 'dashboard', component: StudentDashboard, canActivate: [authGuard] },
+            { path: 'profile', component: Profile, canActivate: [authGuard] }
         ]
-
     },
 
-    { path: '**', redirectTo: 'events' }
+
+    {
+        path: 'organizer',
+        children: [
+            { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+            {path: 'profile', component: Profile, canActivate: [authGuard] },
+            { path: 'dashboard', component: OrganizerDashboard, canActivate: [authGuard] },
+            { path: 'dashboard/tous', component: AllMyEvents, canActivate: [authGuard] },
+            { path: 'events/:id/statistics', component: EventStatisticsComponent, canActivate: [authGuard] },
+            { path: 'events/create', component: CreateEventForm, canActivate: [authGuard,adminOrOrganizerGuard] },
+            { path: 'events/:id/edit', component: UpdateEvent, canActivate: [authGuard,adminOrOrganizerGuard] }
+
+        ]
+    },
+    {path: '**', redirectTo: 'events' }
+
 ];

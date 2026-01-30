@@ -13,7 +13,8 @@ export enum RoomLocation {
   ORANGE = 'Salle Orange',
   AUDITORIUM = 'Auditorium',
 }
-// Interface qui correspond à l'entité Event du backend
+
+
 export interface Event {
     id: string;
     title: string;

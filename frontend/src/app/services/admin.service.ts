@@ -1,9 +1,11 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { Event } from '../Models/Event';
 import { User, UserRole } from '../Models/auth.models';
 import { DashboardStats } from '../Models/AdminStats';
+import { Organizer } from '../Models/organizer';
 
 @Injectable({
   providedIn: 'root'
@@ -23,11 +25,26 @@ export class AdminService {
 
   // --- USERS ---
   getAllUsers(): Observable<User[]> {
-    return this.http.get<User[]>(`${this.apiUrl}/users`);
+    return this.http.get<any>(`${this.apiUrl}/users`).pipe(
+      map(response => response.data || [])
+    );
   }
 
   updateUserRole(id: string, role: UserRole): Observable<User> {
     return this.http.patch<User>(`${this.apiUrl}/users/${id}/role`, { role });
+  }
+
+  // --- ORGANIZERS ---
+  getPendingOrganizers(): Observable<Organizer[]> {
+    return this.http.get<Organizer[]>(`${this.apiUrl}/organizers/pending`);
+  }
+
+  getMostActiveOrganizers(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/organizers/most-active`);
+  }
+
+  updateOrganizerStatus(id: string, status: 'APPROVED' | 'REJECTED'): Observable<Organizer> {
+    return this.http.patch<Organizer>(`${this.apiUrl}/organizers/${id}/status`, { status });
   }
 
   // --- STATS ---

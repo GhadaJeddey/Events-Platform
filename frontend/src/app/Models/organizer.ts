@@ -1,4 +1,4 @@
-import { User } from '../Models/auth.models';
+import { User } from './auth.models';
 
 export interface Organizer {
   id: string;
@@ -6,6 +6,7 @@ export interface Organizer {
   description?: string;
   website?: string;
   isVerified: boolean;
-
+eventsCount?: number;
   user?: User;
+  createdAt?: Date | string;
 }

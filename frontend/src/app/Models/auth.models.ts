@@ -12,10 +12,18 @@ export interface User {
     firstName?: string;
     lastName?: string;
     role: UserRole;
-    isActive: boolean;
-    createdAt: Date;
-    updatedAt: Date;
+    organizerProfile?: {
+        id: string;
+        name: string;
+        description?: string;
+        website?: string;
+        isVerified: boolean;
+    };
+    studentProfile?: any; 
     clubName?: string; 
+    createdAt?: string;
+    updatedAt?: string;
+    isActive?: boolean;
 }
 
 export interface AuthResponse {

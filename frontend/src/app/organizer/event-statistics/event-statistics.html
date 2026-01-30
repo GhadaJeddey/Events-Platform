@@ -1,0 +1,166 @@
+<div class="statistics-container">
+  <div class="header">
+    <a routerLink="/organizer/dashboard" class="back-link">
+      ← Retour au dashboard
+    </a>
+    @if (statistics()) {
+      <h1>Statistiques : {{ statistics().title }}</h1>
+    }
+  </div>
+
+  @if (loading()) {
+    <div class="loading">
+      <p>Chargement des statistiques...</p>
+    </div>
+  }
+
+  @if (error()) {
+    <div class="error-message">
+      {{ error() }}
+    </div>
+  }
+
+  @if (statistics() && !loading()) {
+    <div class="stats-content">
+      <!-- Event Info -->
+      <div class="event-info">
+        <div class="info-item">
+          <h3>Jours Restants</h3>
+          <p class="date">
+            {{ getDaysRemaining(statistics().startDate) }} jours
+          </p>
+        </div>
+        <div class="info-item">
+          <h3>Statut</h3>
+          <p>
+            <span class="status-badge" [ngClass]="statistics().approvalStatus">
+              {{ statistics().approvalStatus }}
+            </span>
+            <span class="status-badge" [ngClass]="statistics().eventStatus">
+              {{ statistics().eventStatus }}
+            </span>
+          </p>
+        </div>
+      </div>
+
+      <!-- Main Statistics -->
+      <div class="stats-grid">
+        <!-- Participants -->
+        <div class="stat-card">
+          <div class="stat-header">
+            <h2>Participants Confirmés</h2>
+            <span class="stat-value">{{ statistics().participants }}</span>
+          </div>
+          <p class="stat-description">Sur {{ statistics().capacity }} places</p>
+          <div class="progress-bar">
+            <div class="progress-fill" [style.width.%]="statistics().fillRate"
+              [style.background]="getGradientColor(statistics().fillRate)">
+            </div>
+          </div>
+          <p class="stat-percentage">{{ statistics().fillRate }}% de remplissage</p>
+        </div>
+
+        <!-- Waitlist -->
+        <div class="stat-card">
+          <div class="stat-header">
+            <h2>Liste d'Attente</h2>
+            <span class="stat-value">{{ statistics().waitlist }}</span>
+          </div>
+          <p class="stat-description">En attente de place</p>
+        </div>
+
+        <!-- Cancellations -->
+        <div class="stat-card">
+          <div class="stat-header">
+            <h2>Annulations</h2>
+            <span class="stat-value">{{ statistics().cancelled }}</span>
+          </div>
+          <p class="stat-description">Inscriptions annulées</p>
+        </div>
+
+        <!-- Available Spots -->
+        <div class="stat-card">
+          <div class="stat-header">
+            <h2>Places Restantes</h2>
+            <span class="stat-value">{{ statistics().availableSpots }}</span>
+          </div>
+          <p class="stat-description">
+            {{ statistics().availableSpots === 0 ? 'Événement complet' : 'Disponibles' }}
+          </p>
+        </div>
+      </div>
+
+      <!-- Charts Section -->
+      <div class="charts-section">
+        <!-- Major Distribution -->
+        <div class="chart-card">
+          <h2>Répartition par Filière</h2>
+          <div class="major-distribution">
+            @for (major of majorDistribution(); track major.name) {
+              <div class="major-item">
+                <div class="major-color" [style.background]="major.color"></div>
+                <div class="major-info">
+                  <div class="major-name">{{ major.name }}</div>
+                  <div class="major-stats">
+                    <span>{{ major.count }} participants</span>
+                  </div>
+                </div>
+                <div class="major-bar">
+                  <div class="major-bar-fill" 
+                       [style.width.%]="major.percentage"
+                       [style.background]="major.color">
+                  </div>
+                </div>
+                <div class="major-percentage">{{ major.percentage }}%</div>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Registration Timeline -->
+        <div class="chart-card">
+          <h2>Inscriptions par Jour</h2>
+          <div class="timeline-chart">
+            <div class="timeline-bars">
+              @for (day of registrationTimeline(); track day.date) {
+                <div class="timeline-bar" 
+                     [style.height.%]="(day.count / getMaxRegistrations()) * 100">
+                  <div class="timeline-tooltip">
+                    <div>{{ day.label }}</div>
+                    <div><strong>{{ day.count }} inscriptions</strong></div>
+                  </div>
+                </div>
+              }
+            </div>
+            <div class="timeline-labels">
+              @for (day of registrationTimeline(); track day.date; let i = $index) {
+                @if (i % Math.ceil(registrationTimeline().length / 7) === 0) {
+                  <div class="timeline-label">{{ day.shortLabel }}</div>
+                }
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Peak Registration Stats -->
+      <div class="chart-card">
+        <h2>Pics d'Inscriptions</h2>
+        <div class="peak-stats">
+          <div class="peak-item">
+            <div class="peak-label">Jour de Pic</div>
+            <div class="peak-value">{{ peakRegistrations().peakDay.count }}</div>
+            <div class="peak-detail">{{ peakRegistrations().peakDay.date }}</div>
+          </div>
+          <div class="peak-item">
+            <div class="peak-label">Heure de Pic</div>
+            <div class="peak-value">{{ peakRegistrations().peakHour.count }}</div>
+            <div class="peak-detail">{{ peakRegistrations().peakHour.time }}</div>
+          </div>
+        </div>
+      </div>
+
+     
+    </div>
+  }
+</div>
