@@ -11,51 +11,56 @@
         <form #eventForm="ngForm" (ngSubmit)="onSubmit(eventForm)" class="modern-form">
             <div class="form-grid">
                 <div class="form-group full-width">
-                     <label for="title">Titre de l'évènement</label>
-                     <input type="text" id="title" name="title" ngModel required minlength="3" #titleInput="ngModel" [class.invalid]="titleInput.invalid && (titleInput.dirty || titleInput.touched)">
-                     </div>
+                    <label for="title">Titre de l'évènement</label>
+                    <input type="text" id="title" name="title" ngModel required minlength="3" #titleInput="ngModel"
+                        [class.invalid]="titleInput.invalid && (titleInput.dirty || titleInput.touched || eventForm.submitted)">
+                    @if (titleInput.invalid && (titleInput.dirty || titleInput.touched || eventForm.submitted)) {
+                    <div class="error-message">
+                        @if (titleInput.errors?.['required']) { Le titre est obligatoire. }
+                        @if (titleInput.errors?.['minlength']) { Le titre doit comporter au moins 3 caractères. }
+                    </div>
+                    }
+                </div>
                 <div class="form-group full-width">
-                     <label for="description">Description</label>
-                     <textarea id="description" name="description" ngModel required minlength="10" #descInput="ngModel" rows="4" [class.invalid]="descInput.invalid && (descInput.dirty || descInput.touched)"></textarea>
-                     </div>
+                    <label for="description">Description</label>
+                    <textarea id="description" name="description" ngModel required minlength="10" #descInput="ngModel"
+                        rows="4"
+                        [class.invalid]="descInput.invalid && (descInput.dirty || descInput.touched || eventForm.submitted)"></textarea>
+                    @if (descInput.invalid && (descInput.dirty || descInput.touched || eventForm.submitted)) {
+                    <div class="error-message">
+                        @if (descInput.errors?.['required']) { La description est obligatoire. }
+                        @if (descInput.errors?.['minlength']) { La description doit comporter au moins 10 caractères. }
+                    </div>
+                    }
+                </div>
 
                 <div class="form-group">
                     <label for="startDate">Date de début</label>
-                    <input [min]="minDate()" type="datetime-local" id="startDate" 
-                        name="startDate" 
-                        [(ngModel)]="startDateValue" 
-                        (ngModelChange)="onDateChange()"
-                        required
-                        #startInput="ngModel"
-                        [class.invalid]="startInput.invalid && (startInput.dirty || startInput.touched)">
-                    @if(startInput.invalid && (startInput.dirty || startInput.touched)) {
-                        <div class="error-message">La date de début est obligatoire.</div>
+                    <input [min]="minDate()" type="datetime-local" id="startDate" name="startDate"
+                        [(ngModel)]="startDateValue" (ngModelChange)="onDateChange()" required #startInput="ngModel"
+                        [class.invalid]="startInput.invalid && (startInput.dirty || startInput.touched || eventForm.submitted)">
+                    @if(startInput.invalid && (startInput.dirty || startInput.touched || eventForm.submitted)) {
+                    <div class="error-message">La date de début est obligatoire.</div>
                     }
                 </div>
 
                 <div class="form-group">
                     <label for="endDate">Date de fin</label>
-                    <input [min]="minDate()" type="datetime-local" id="endDate" 
-                        name="endDate" 
-                        [(ngModel)]="endDateValue" 
-                        (ngModelChange)="onDateChange()"
-                        required
-                        #endInput="ngModel" 
-                        [class.invalid]="endInput.invalid && (endInput.dirty || endInput.touched)">
-                    @if(endInput.invalid && (endInput.dirty || endInput.touched)) {
-                        <div class="error-message">La date de fin est obligatoire.</div>
+                    <input [min]="minDate()" type="datetime-local" id="endDate" name="endDate"
+                        [(ngModel)]="endDateValue" (ngModelChange)="onDateChange()" required #endInput="ngModel"
+                        [class.invalid]="endInput.invalid && (endInput.dirty || endInput.touched || eventForm.submitted)">
+                    @if(endInput.invalid && (endInput.dirty || endInput.touched || eventForm.submitted)) {
+                    <div class="error-message">La date de fin est obligatoire.</div>
                     }
                 </div>
                 <div class="form-group full-width">
                     <label for="location">Lieu / Salle</label>
                     <div style="display: flex; gap: 10px; align-items: flex-start;">
-                        <select id="location" name="location" [(ngModel)]="selectedLocation" 
-                            (ngModelChange)="onLocationChange()"
-                            required #locInput="ngModel"
-                            [class.invalid]="locInput.invalid && (locInput.dirty || locInput.touched)"
-                            [disabled]="!startDateValue || !endDateValue || isLoadingRooms()"
-                            style="flex: 1;">
-                            
+                        <select id="location" name="location" [(ngModel)]="selectedLocation"
+                            (ngModelChange)="onLocationChange()" required #locInput="ngModel"
+                            [class.invalid]="locInput.invalid && (locInput.dirty || locInput.touched || eventForm.submitted)"
+                            [disabled]="!startDateValue || !endDateValue || isLoadingRooms()" style="flex: 1;">
+
                             <option value="" disabled selected>
                                 @if(!startDateValue || !endDateValue) { Choisissez les dates d'abord }
                                 @else if(isLoadingRooms()) { Recherche en cours... }
@@ -63,44 +68,51 @@
                             </option>
 
                             @for (room of availableRooms(); track room) {
-                                <option [value]="room">{{ room }}</option>
+                            <option [value]="room">{{ room }}</option>
                             }
                         </select>
 
-                        <button type="button" class="btn-book-room" 
-                            (click)="reserveRoom()"
+                        <button type="button" class="btn-book-room" (click)="reserveRoom()"
                             [disabled]="!selectedLocation || !startDateValue || !endDateValue || !isRoomAvailable()"
                             [title]="!isRoomAvailable() ? 'Ce créneau n\'est pas disponible pour cette salle' : 'Réserver cette salle'">
                             Réserver la salle
                         </button>
                     </div>
 
-                    @if(locInput.invalid && (locInput.dirty || locInput.touched)) {
-                        <div class="error-message">Le lieu est obligatoire.</div>
+                    @if(locInput.invalid && (locInput.dirty || locInput.touched || eventForm.submitted)) {
+                    <div class="error-message">Le lieu est obligatoire.</div>
                     }
                     @if(selectedLocation && !isRoomAvailable() && startDateValue && endDateValue) {
-                        <div class="info-message" style="color: #f5576c; font-size: 0.85rem; margin-top: 0.5rem;">
-                            ⚠️ Ce créneau n'est pas disponible pour cette salle
-                        </div>
+                    <div class="info-message" style="color: #f5576c; font-size: 0.85rem; margin-top: 0.5rem;">
+                        ⚠️ Ce créneau n'est pas disponible pour cette salle
+                    </div>
                     }
                 </div>
                 <div class="form-group">
-                     <label for="capacity">Capacité (participants)</label>
-                     <input type="number" id="capacity" name="capacity" ngModel required min="1" #capInput="ngModel" [class.invalid]="capInput.invalid && (capInput.dirty || capInput.touched)">
-                     </div>
+                    <label for="capacity">Capacité (participants)</label>
+                    <input type="number" id="capacity" name="capacity" ngModel required min="1" #capInput="ngModel"
+                        [class.invalid]="capInput.invalid && (capInput.dirty || capInput.touched || eventForm.submitted)">
+                    @if (capInput.invalid && (capInput.dirty || capInput.touched || eventForm.submitted)) {
+                    <div class="error-message">
+                        @if (capInput.errors?.['required']) { La capacité est obligatoire. }
+                        @if (capInput.errors?.['min']) { La capacité doit être d'au moins 1 personne. }
+                    </div>
+                    }
+                </div>
                 <div class="form-group full-width">
-                     <label>Image de couverture</label>
-                     <div class="image-upload-container" [class.has-image]="imagePreview()" (click)="fileInput.click()">
-                         <input #fileInput type="file" (change)="onFileSelected($event)" accept="image/*" style="display: none">
-                         @if (!imagePreview()) { <div class="upload-placeholder">...</div> }
-                         @if (imagePreview()) { <div class="image-preview"><img [src]="imagePreview()">...</div> }
-                     </div>
+                    <label>Image de couverture</label>
+                    <div class="image-upload-container" [class.has-image]="imagePreview()" (click)="fileInput.click()">
+                        <input #fileInput type="file" (change)="onFileSelected($event)" accept="image/*"
+                            style="display: none">
+                        @if (!imagePreview()) { <div class="upload-placeholder">...</div> }
+                        @if (imagePreview()) { <div class="image-preview"><img [src]="imagePreview()">...</div> }
+                    </div>
                 </div>
 
             </div>
             <div class="form-actions">
                 <button type="button" class="btn-cancel" (click)="eventForm.reset()">Réinitialiser</button>
-                <button type="submit" class="btn-submit" [disabled]="eventForm.invalid && eventForm.submitted">Créer l'évènement</button>
+                <button type="submit" class="btn-submit">Créer l'évènement</button>
             </div>
         </form>
     </div>
