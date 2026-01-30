@@ -128,7 +128,11 @@ export class RegisterComponent {
 
             this.authService.register(request).subscribe({
                 next: () => {
-                    this.toastr.success('Inscription réussie ! Vous pouvez maintenant vous connecter.');
+                    if (formValue.role === UserRole.ORGANIZER) {
+                        this.toastr.info('Votre compte a été envoyé à l\'administrateur pour validation. Vous serez notifié une fois validé.');
+                    } else {
+                        this.toastr.success('Inscription réussie ! Vous pouvez maintenant vous connecter.');
+                    }
                     this.router.navigate(['/auth/login']);
                     this.isLoading.set(false);
                 },

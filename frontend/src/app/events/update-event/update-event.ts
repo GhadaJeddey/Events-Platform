@@ -145,6 +145,22 @@ export class UpdateEvent {
       return;
     }
     
-    this.toastr.success(`Salle ${this.selectedLocation} réservée pour le créneau sélectionné. Vous pouvez maintenant modifier l'événement.`);
+    // Envoyer une demande de réservation au dashboard admin
+    const reservationData = {
+      room: this.selectedLocation,
+      startDate: this.startDateValue,
+      endDate: this.endDateValue,
+      eventTitle: this.currentEvent()?.title,
+    };
+
+    this.eventsService.requestRoomReservation(reservationData).subscribe({
+      next: (response) => {
+        this.toastr.success('Demande de réservation envoyée à l\'administrateur. En attente d\'approbation.');
+      },
+      error: (err) => {
+        const errorMessage = err.error?.message || 'Erreur lors de l\'envoi de la demande de réservation';
+        this.toastr.error(errorMessage);
+      }
+    });
   }
 }

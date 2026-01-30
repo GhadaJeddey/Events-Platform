@@ -48,6 +48,9 @@ export class AuthService {
     async validateUser(input: SignInDto) {
         const user = await this.usersService.findByEmail(input.email);
         if (user && await bcrypt.compare(input.password, user.password)) {
+            if (user.role === Role.ORGANIZER && !user.organizerProfile?.isVerified) {
+                throw new UnauthorizedException('Compte club en attente de validation par un administrateur');
+            }
             const { password, ...result } = user;
             return result;
         }

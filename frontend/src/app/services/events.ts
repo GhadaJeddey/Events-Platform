@@ -96,4 +96,16 @@ export class EventsService {
 
     return this.http.get<any[]>(`${this.apiUrl}/events/availability/slots`, { params });
   }
+
+  requestRoomReservation(reservationData: {
+    room: string;
+    startDate: string;
+    endDate: string;
+    eventTitle?: string;
+  }): Observable<any> {
+    return this.http.post(
+      `${this.apiUrl}/events/rooms/reserve`,
+      reservationData
+    );
+  }
 }

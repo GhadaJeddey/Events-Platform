@@ -6,6 +6,7 @@ import { Event } from '../Models/Event';
 import { User, UserRole } from '../Models/auth.models';
 import { DashboardStats } from '../Models/AdminStats';
 import { Organizer } from '../Models/organizer';
+import { environment } from '../../../Commun/environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -13,6 +14,7 @@ import { Organizer } from '../Models/organizer';
 export class AdminService {
   private http = inject(HttpClient);
   private apiUrl = 'http://localhost:3000/admin';
+  private eventsApiUrl = `${environment.apiUrl}/events`;
 
   // --- EVENTS ---
   getPendingEvents(): Observable<Event[]> {
@@ -45,6 +47,19 @@ export class AdminService {
 
   updateOrganizerStatus(id: string, status: 'APPROVED' | 'REJECTED'): Observable<Organizer> {
     return this.http.patch<Organizer>(`${this.apiUrl}/organizers/${id}/status`, { status });
+  }
+
+  // --- ROOM RESERVATIONS ---
+  getPendingRoomReservations(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.eventsApiUrl}/rooms/reservations/pending`);
+  }
+
+  approveRoomReservation(id: string): Observable<any> {
+    return this.http.patch(`${this.eventsApiUrl}/rooms/reservations/${id}/approve`, {});
+  }
+
+  rejectRoomReservation(id: string, rejectionReason?: string): Observable<any> {
+    return this.http.patch(`${this.eventsApiUrl}/rooms/reservations/${id}/reject`, { rejectionReason });
   }
 
   // --- STATS ---

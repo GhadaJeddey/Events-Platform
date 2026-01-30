@@ -58,7 +58,12 @@ export class LoginComponent {
                     this.isLoading.set(false);
                 },
                 error: (err) => {
-                    this.toastr.error(err.error?.message || 'Identifiants invalides');
+                    const message = err.error?.message || 'Identifiants invalides';
+                    if (typeof message === 'string' && message.toLowerCase().includes('validation')) {
+                        this.toastr.warning(message);
+                    } else {
+                        this.toastr.error(message);
+                    }
                     this.isLoading.set(false);
                 }
             });

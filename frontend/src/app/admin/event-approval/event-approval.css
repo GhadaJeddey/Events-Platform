@@ -15,6 +15,7 @@
 .custom-table {
     width: 100%;
     white-space: nowrap; 
+    background-color: none;
 }
 
 .action-buttons {

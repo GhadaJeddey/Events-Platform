@@ -1,0 +1,71 @@
+.container {
+  padding: 2rem 1.5rem;
+}
+
+.section-title {
+  font-size: 1.8rem;
+  margin-bottom: 1.5rem;
+}
+
+.table-container {
+  background: var(--bg-card, #fff);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 16px;
+  padding: 1rem;
+  box-shadow: var(--card-shadow, 0 10px 20px rgba(0,0,0,0.05));
+}
+
+.custom-table {
+  width: 100%;
+}
+
+.font-medium {
+  font-weight: 600;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+
+.btn-action {
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-action.approve {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 4px 6px rgba(102, 126, 234, 0.3);
+}
+
+.btn-action.reject {
+    background: linear-gradient(135deg, #ff6b6b 0%, #d63031 100%); 
+    color: white; 
+    box-shadow: 0 4px 6px rgba(214, 48, 49, 0.3); 
+}
+
+
+
+.btn-action.approve:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 8px rgba(102, 126, 234, 0.4);
+}
+
+.btn-action.reject:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 8px rgba(214, 48, 49, 0.4);
+}
+
+
+.empty-state {
+  text-align: center;
+  color: #718096;
+  padding: 1.5rem 0;
+}

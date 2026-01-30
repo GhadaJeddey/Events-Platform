@@ -3,6 +3,7 @@ import { OrganizersService } from './services/organizers.service';
 import { OrganizersController } from './organizers.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Organizer } from './entities/organizer.entity';
+import { User } from '../users/entities/user.entity';
 import { AuthModule } from '../auth/auth.module';
 
 console.log('OrganizersService:', OrganizersService);
@@ -10,7 +11,7 @@ console.log('OrganizersService:', OrganizersService);
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Organizer]),
+    TypeOrmModule.forFeature([Organizer, User]),
     forwardRef(() => AuthModule),
   ],
   controllers: [OrganizersController],

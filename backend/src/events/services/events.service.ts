@@ -16,12 +16,16 @@ import { ApprovalStatus, EventStatus } from '../../common/enums/event.enums';
 import { OrganizersService } from '../../organizers/services/organizers.service';
 import { RegistrationsService } from '../../registrations/services/registrations.service';
 import { ALL_ROOMS, RoomLocation } from 'src/common/enums/room-location.enum';
+import { RoomReservationRequest, ReservationStatus } from '../entities/room-reservation-request.entity';
+import { CreateRoomReservationRequestDto } from '../dto/create-room-reservation-request.dto';
 
 @Injectable()
 export class EventsService {
   constructor(
     @InjectRepository(Event)
     private eventsRepository: Repository<Event>,
+    @InjectRepository(RoomReservationRequest)
+    private roomReservationRequestRepository: Repository<RoomReservationRequest>,
     private organizersService: OrganizersService,
     @Inject(forwardRef(() => RegistrationsService))
     private registrationsService: RegistrationsService,
@@ -493,6 +497,84 @@ export class EventsService {
       order: { createdAt: 'DESC' },
       relations: ['organizer', 'organizer.user'],
     });
+  }
+
+  // Room Reservation Requests Management
+  async createRoomReservationRequest(
+    createRoomReservationRequestDto: CreateRoomReservationRequestDto,
+    userId: string
+  ): Promise<RoomReservationRequest> {
+    const startDate = new Date(createRoomReservationRequestDto.startDate);
+    const endDate = new Date(createRoomReservationRequestDto.endDate);
+
+    if (startDate >= endDate) {
+      throw new BadRequestException('La date de fin doit être après la date de début');
+    }
+
+    const organizer = await this.organizersService.findOneByUserId(userId);
+
+    const reservationRequest = this.roomReservationRequestRepository.create({
+      ...createRoomReservationRequestDto,
+      organizer: { id: organizer.id },
+      status: ReservationStatus.PENDING,
+    });
+
+    return await this.roomReservationRequestRepository.save(reservationRequest);
+  }
+
+  async getRoomReservationRequests(
+    status?: ReservationStatus,
+    room?: RoomLocation
+  ): Promise<RoomReservationRequest[]> {
+    const query = this.roomReservationRequestRepository
+      .createQueryBuilder('reservation')
+      .leftJoinAndSelect('reservation.organizer', 'organizer')
+      .leftJoinAndSelect('organizer.user', 'user');
+
+    if (status) {
+      query.andWhere('reservation.status = :status', { status });
+    }
+
+    if (room) {
+      query.andWhere('reservation.room = :room', { room });
+    }
+
+    return await query.orderBy('reservation.createdAt', 'DESC').getMany();
+  }
+
+  async approveRoomReservationRequest(requestId: string): Promise<RoomReservationRequest> {
+    const reservationRequest = await this.roomReservationRequestRepository.findOne({
+      where: { id: requestId },
+      relations: ['organizer'],
+    });
+
+    if (!reservationRequest) {
+      throw new NotFoundException('Demande de réservation non trouvée');
+    }
+
+    reservationRequest.status = ReservationStatus.APPROVED;
+    return await this.roomReservationRequestRepository.save(reservationRequest);
+  }
+
+  async rejectRoomReservationRequest(
+    requestId: string,
+    rejectionReason?: string
+  ): Promise<RoomReservationRequest> {
+    const reservationRequest = await this.roomReservationRequestRepository.findOne({
+      where: { id: requestId },
+    });
+
+    if (!reservationRequest) {
+      throw new NotFoundException('Demande de réservation non trouvée');
+    }
+
+    reservationRequest.status = ReservationStatus.REJECTED;
+    reservationRequest.rejectionReason = rejectionReason;
+    return await this.roomReservationRequestRepository.save(reservationRequest);
+  }
+
+  async getPendingRoomReservationRequests(): Promise<RoomReservationRequest[]> {
+    return await this.getRoomReservationRequests(ReservationStatus.PENDING);
   }
 
 }

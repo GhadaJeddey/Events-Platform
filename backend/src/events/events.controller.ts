@@ -21,6 +21,7 @@ import { diskStorage } from 'multer';
 import { EventsService } from './services/events.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
+import { CreateRoomReservationRequestDto } from './dto/create-room-reservation-request.dto';
 import { AuthGuard } from '../auth/Guards/auth.guard';
 import { RolesGuard } from '../auth/Guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -165,5 +166,63 @@ export class EventsController {
   @ApiOperation({ summary: 'Delete an event (Admin/Organizer)' })
   remove(@Param('id') id: string) {
     return this.eventsService.remove(id);
+  }
+
+  // Room Reservation Requests endpoints
+  @Post('rooms/reserve')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(Role.ORGANIZER)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Request a room reservation (Organizer)' })
+  requestRoomReservation(
+    @Body() createRoomReservationRequestDto: CreateRoomReservationRequestDto,
+    @Req() req
+  ) {
+    return this.eventsService.createRoomReservationRequest(
+      createRoomReservationRequestDto,
+      req.user.id
+    );
+  }
+
+  @Get('rooms/reservations/pending')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get pending room reservation requests (Admin)' })
+  getPendingRoomReservationRequests() {
+    return this.eventsService.getPendingRoomReservationRequests();
+  }
+
+  @Get('rooms/reservations')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get all room reservation requests (Admin)' })
+  getRoomReservationRequests(
+    @Query('status') status?: string,
+    @Query('room') room?: string
+  ) {
+    return this.eventsService.getRoomReservationRequests(status as any, room as any);
+  }
+
+  @Patch('rooms/reservations/:id/approve')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Approve a room reservation request (Admin)' })
+  approveRoomReservationRequest(@Param('id') id: string) {
+    return this.eventsService.approveRoomReservationRequest(id);
+  }
+
+  @Patch('rooms/reservations/:id/reject')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Reject a room reservation request (Admin)' })
+  rejectRoomReservationRequest(
+    @Param('id') id: string,
+    @Body('rejectionReason') rejectionReason?: string
+  ) {
+    return this.eventsService.rejectRoomReservationRequest(id, rejectionReason);
   }
 }

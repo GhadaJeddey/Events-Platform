@@ -11,6 +11,8 @@ export class OrganizersService {
   constructor(
     @InjectRepository(Organizer)
     private readonly organizerRepository: Repository<Organizer>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
   ) { }
 
   async create(user: User, createOrganizerDto: CreateOrganizerDto): Promise<Organizer> {
@@ -92,7 +94,15 @@ export class OrganizersService {
   }
 
   async rejectOrganizer(id: string): Promise<void> {
-    const organizer = await this.findOne(id);
+    const organizer = await this.organizerRepository.findOne({
+      where: { id },
+      relations: ['user'],
+    });
+    if (!organizer) throw new NotFoundException(`Organizer #${id} not found`);
+    if (organizer.user?.id) {
+      await this.userRepository.delete(organizer.user.id);
+      return;
+    }
     await this.organizerRepository.delete(id);
   }
 

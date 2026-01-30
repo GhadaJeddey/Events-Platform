@@ -16,7 +16,7 @@ export const appConfig: ApplicationConfig = {
     provideAnimations(),
     provideToastr({
       timeOut: 3000,
-      positionClass: 'toast-top-center',
+      positionClass: 'toast-bottom-right',
       preventDuplicates: true,
     }),
     provideCharts(withDefaultRegisterables())

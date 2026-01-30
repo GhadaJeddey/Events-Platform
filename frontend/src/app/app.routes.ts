@@ -13,6 +13,8 @@ import { adminGuard } from './guards/admin.guard';
 import { Dashboard } from './admin/dashboard/dashboard';
 import { EventApproval } from './admin/event-approval/event-approval';
 import { UserManagement } from './admin/user-management/user-management';
+import { OrganizerApproval } from './admin/organizer-approval/organizer-approval';
+import { RoomApproval } from './admin/room-approval/room-approval';
 import { StudentDashboard } from './student/dashboard/dashboard';
 import { OrganizerDashboard } from './organizer/dashboard/dashboard';
 import { EventStatisticsComponent } from './organizer/event-statistics/event-statistics';
@@ -64,6 +66,8 @@ export const routes: Routes = [
             { path: 'profile', component: Profile, canActivate:[authGuard] },
             { path: 'dashboard', component: Dashboard,canActivate:[authGuard,adminGuard] },
             { path: 'approvals', component: EventApproval,canActivate:[authGuard,adminGuard] },
+            { path: 'organizers-approvals', component: OrganizerApproval, canActivate:[authGuard,adminGuard] },
+            { path: 'rooms-approvals', component: RoomApproval, canActivate:[authGuard,adminGuard] },
             { path: 'users', component: UserManagement,canActivate:[authGuard,adminGuard] }
         ]
     }, 
