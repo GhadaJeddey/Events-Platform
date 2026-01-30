@@ -14,17 +14,19 @@ import {
   Req,
   Query,
 } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
-import { EventsService } from '../services/events.service';
-import { CreateEventDto } from '../dto/create-event.dto';
-import { UpdateEventDto } from '../dto/update-event.dto';
-import { AuthGuard } from '../../auth/guards/auth.guard';
-import { RolesGuard } from '../../auth/guards/roles.guard';
-import { Roles } from '../../auth/decorators/roles.decorator';
-import { Role } from '../../common/enums/role.enum';
+import { EventsService } from './services/events.service';
+import { CreateEventDto } from './dto/create-event.dto';
+import { UpdateEventDto } from './dto/update-event.dto';
+import { AuthGuard } from '../auth/guards/auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { Role } from '../common/enums/role.enum';
 
+@ApiTags('Events')
 @Controller('events')
 export class EventsController {
   constructor(private readonly eventsService: EventsService) { }
@@ -32,6 +34,8 @@ export class EventsController {
   @Post('create')
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(Role.ADMIN, Role.ORGANIZER)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Create an event (Admin/Organizer)' })
   @UseInterceptors(
     FileInterceptor('image', {
       storage: diskStorage({
@@ -55,14 +59,14 @@ export class EventsController {
 
     const eventData = {
       ...createEventDto,
-      imageUrl,
+      ...(imageUrl && { imageUrl }),
     };
 
     return this.eventsService.create(eventData, req.user.id);
   }
 
-  //  Événements publics
   @Get('public')
+  @ApiOperation({ summary: 'Get all public events' })
   findAllPublic() {
     return this.eventsService.findAllPublic();
   }
@@ -70,17 +74,20 @@ export class EventsController {
   @Get('mine')
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(Role.ADMIN, Role.ORGANIZER)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get my events (Admin/Organizer)' })
   findMine(@Req() req) {
     return this.eventsService.findByOrganizerUser(req.user.id);
   }
 
-  // SEARCH - Rechercher des événements
   @Get('search')
+  @ApiOperation({ summary: 'Search events by keyword' })
   searchEvents(@Query('q') searchTerm: string) {
     return this.eventsService.searchEvents(searchTerm);
   }
 
   @Get('availability')
+  @ApiOperation({ summary: 'Get available rooms between dates' })
   getAvailableRooms(
     @Query('start') start: string,
     @Query('end') end: string
@@ -88,28 +95,23 @@ export class EventsController {
     return this.eventsService.getAvailableRooms(start, end);
   }
 
-  // Get events by organizer ID
-  @Get('organizer/:organizerId')
-  findByOrganizer(@Param('organizerId') organizerId: string) {
-    return this.eventsService.findByOrganizer(organizerId);
-  }
-
-  // retourner un événement par ID
   @Get(':id')
+  @ApiOperation({ summary: 'Get event by ID' })
   findOne(@Param('id') id: string) {
     return this.eventsService.findOne(id);
   }
 
-  // Obtenir les statistiques d'un événement
   @Get(':id/statistics')
+  @ApiOperation({ summary: 'Get event statistics' })
   getEventStatistics(@Param('id') id: string) {
     return this.eventsService.getEventStatistics(id);
   }
 
-  // Mettre à jour un événement
   @Patch(':id/edit')
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(Role.ADMIN, Role.ORGANIZER)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update an event (Admin/Organizer)' })
   @UseInterceptors(
     FileInterceptor('image', {
       storage: diskStorage({
@@ -133,23 +135,24 @@ export class EventsController {
     return this.eventsService.update(id, updateData);
   }
 
-  //Incrémenter inscriptions
   @Patch(':id/register')
+  @ApiOperation({ summary: 'Increment registrations for event' })
   incrementRegistrations(@Param('id') id: string) {
     return this.eventsService.incrementRegistrations(id);
   }
 
-  //Décrémenter inscriptions
   @Patch(':id/unregister')
+  @ApiOperation({ summary: 'Decrement registrations for event' })
   decrementRegistrations(@Param('id') id: string) {
     return this.eventsService.decrementRegistrations(id);
   }
 
-  // DELETE - Supprimer un événement
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(Role.ADMIN, Role.ORGANIZER)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Delete an event (Admin/Organizer)' })
   remove(@Param('id') id: string) {
     return this.eventsService.remove(id);
   }

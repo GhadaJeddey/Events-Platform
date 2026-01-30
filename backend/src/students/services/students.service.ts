@@ -5,7 +5,6 @@ import { Repository } from 'typeorm';
 import { Student } from '../entities/student.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../../users/entities/user.entity';
-import { Roles } from '../../auth/decorators/roles.decorator';
 
 @Injectable()
 export class StudentsService {
@@ -15,7 +14,6 @@ export class StudentsService {
   ) { }
 
   async create(user: User, createStudentDto: CreateStudentDto): Promise<Student> {
-
     const existingStudentCardNumber = await this.studentRepository.findOne({
       where: { studentCardNumber: createStudentDto.studentCardNumber }
     });
@@ -37,7 +35,6 @@ export class StudentsService {
       relations: ['user'],
     });
   }
-
 
   async findOne(id: string): Promise<Student> {
     const student = await this.studentRepository.findOne({
@@ -75,18 +72,24 @@ export class StudentsService {
   }
 
   async update(id: string, updateStudentDto: UpdateStudentDto): Promise<Student> {
-    // On vérifie d'abord que le student existe
     const student = await this.findOne(id);
 
-    // Si on modifie le numéro de carte, attention aux doublons
+    // verif de doublon de card number
     if (updateStudentDto.studentCardNumber && updateStudentDto.studentCardNumber !== student.studentCardNumber) {
       const existing = await this.studentRepository.findOne({ where: { studentCardNumber: updateStudentDto.studentCardNumber } });
       if (existing) throw new ConflictException('Card number already taken');
     }
 
-    // Fusion et sauvegarde
-    Object.assign(student, updateStudentDto);
-    return await this.studentRepository.save(student);
+    const updatedStudent = await this.studentRepository.preload({
+      id: id,
+      ...updateStudentDto,
+    });
+
+    if (!updatedStudent) {
+      throw new NotFoundException(`Student with ID ${id} not found`);
+    }
+
+    return await this.studentRepository.save(updatedStudent);
   }
 
 

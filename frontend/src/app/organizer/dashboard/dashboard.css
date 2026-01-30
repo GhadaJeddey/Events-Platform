@@ -797,3 +797,146 @@ body {
     font-size: 1.5rem;
   }
 }
+
+/* Room Slots Section */
+.room-slots-section {
+  padding: 0 3rem 2rem;
+  animation: fadeInUp 0.8s ease-out 0.25s backwards;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.room-slots-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 24px;
+  padding: 2rem;
+  box-shadow: var(--card-shadow);
+}
+
+.room-slots-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.section-subtitle {
+  color: var(--text-muted);
+  margin-top: 0.4rem;
+  font-size: 0.9rem;
+}
+
+.timezone-pill {
+  background: rgba(102, 126, 234, 0.2);
+  color: #a7b4ff;
+  padding: 0.4rem 0.8rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  border: 1px solid rgba(102, 126, 234, 0.4);
+}
+
+.room-slots-controls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.control-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.control-item input,
+.control-item select {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  border-radius: 12px;
+  padding: 0.6rem 0.8rem;
+  font-family: 'Space Mono', monospace;
+}
+
+.slots-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.8rem;
+}
+
+.slot-item {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 0.8rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  text-align: left;
+  color: var(--text-primary);
+  transition: all 0.2s ease;
+}
+
+.slot-item.available {
+  border-color: rgba(67, 233, 123, 0.5);
+  background: rgba(67, 233, 123, 0.08);
+}
+
+.slot-item.pending {
+  border-color: rgba(250, 112, 154, 0.6);
+  background: rgba(250, 112, 154, 0.12);
+}
+
+.slot-item.occupied {
+  border-color: rgba(113, 128, 150, 0.6);
+  background: rgba(113, 128, 150, 0.1);
+  color: var(--text-muted);
+}
+
+.slot-item.selected {
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.6);
+}
+
+.slot-item:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.slot-time {
+  font-weight: 700;
+  font-family: 'Space Mono', monospace;
+}
+
+.slot-status {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.selected-slots {
+  margin-top: 1.2rem;
+  border-top: 1px solid var(--border-color);
+  padding-top: 1rem;
+}
+
+.selected-slots-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.selected-slot {
+  background: rgba(102, 126, 234, 0.2);
+  color: #dbe1ff;
+  padding: 0.3rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  border: 1px solid rgba(102, 126, 234, 0.5);
+}

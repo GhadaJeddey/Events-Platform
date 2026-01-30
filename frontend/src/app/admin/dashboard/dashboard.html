@@ -1,5 +1,10 @@
 <div class="dashboard-container fade-in-up">
-  <h2 class="text-gradient section-title">Tableau de Bord Admin</h2>
+  <div class="dashboard-header">
+    <div class="header-content">
+      <h1 class="header-title">Tableau de Bord Admin</h1>
+      <p class="header-date">{{ currentDate | date:'d MMM yyyy' }}</p>
+    </div>
+  </div>
 
   @if (!stats()) {
     <div class="loading-state">
@@ -16,14 +21,6 @@
         </div>
       </div>
 
-      <div class="stat-card events-card" routerLink="/events">
-        <div class="stat-icon">📅</div>
-        <div class="stat-content">
-          <h3>Événements</h3>
-          <p class="stat-number">{{ stats()?.overview?.totalEvents }}</p>
-        </div>
-      </div>
-
       <div class="stat-card pending-card" routerLink="/admin/approvals">
         <div class="stat-icon">⏳</div>
         <div class="stat-content">
@@ -33,13 +30,55 @@
       </div>
     </div>
 
+    <div class="room-requests-card">
+      <div class="room-requests-header">
+        <div>
+          <h2>Demandes de salles</h2>
+          <p class="subtitle">Validation des créneaux demandés</p>
+        </div>
+        <a routerLink="/admin/approvals" class="view-all-link">Voir tout →</a>
+      </div>
+
+      <div class="room-requests-list">
+        @if (pendingEvents().length > 0) {
+          @for (event of pendingEvents(); track event.id) {
+            <div class="room-request-item">
+              <div class="request-info">
+                <div class="request-title">
+                  <span class="room-name">{{ event.location }}</span>
+                  <span class="request-date">{{ event.startDate | date:'EEE d MMM' }}</span>
+                </div>
+                <div class="request-meta">
+                  <span class="organizer-name">
+                    {{ event.organizer?.user?.firstName || 'Un utilisateur' }} {{ event.organizer?.user?.lastName || '' }}
+                  </span>
+                  <span class="separator">•</span>
+                  <span class="event-title">{{ event.title }}</span>
+                </div>
+                <div class="slot-list">
+                  @for (slot of getHourlySlots(event); track slot) {
+                    <button class="slot-chip" [class.inactive]="isSlotInactive(event.id, slot)" (click)="toggleSlot(event.id, slot)">
+                      {{ slot }}
+                    </button>
+                  }
+                </div>
+              </div>
+              <div class="request-actions">
+                <button class="action-btn approve" (click)="approveEvent(event.id)">Approuver</button>
+                <button class="action-btn reject" (click)="rejectEvent(event.id)">Rejeter</button>
+              </div>
+            </div>
+          }
+        } @else {
+          <p class="no-data">Aucune demande en attente.</p>
+        }
+      </div>
+    </div>
+
     <div class="charts-section">
-      
       <div class="chart-container">
-        <h3>Statuts d'approbation</h3>
-        <div class="canvas-wrapper pie-wrapper">
         <h3>Répartition des Événements</h3>
-        <div class="canvas-wrapper">
+        <div class="canvas-wrapper pie-wrapper">
           <canvas baseChart
             [data]="pieChartData()"
             [type]="'pie'"
@@ -63,38 +102,37 @@
         </div>
       </div>
     </div>
-  <div class="recent-activity-container">
-  <h3>🕑 Activité Récente</h3>
-  
-  <div class="activity-list">
-    @for (event of recentActivity(); track event.id) {
-      <div class="activity-item">
-        
-        <div class="activity-icon" [ngClass]="event.approvalStatus">
-          @if(event.approvalStatus === 'approved') { <i class="fas fa-check"></i> }
-          @else if(event.approvalStatus === 'rejected') { <i class="fas fa-times"></i> }
-          @else { <i class="fas fa-clock"></i> }
-        </div>
 
-        <div class="activity-details">
-          <p class="activity-text">
-            <strong>{{ event.organizer?.user?.firstName || 'Un utilisateur' }} {{event.organizer?.user?.lastName}}</strong> 
-            a demandé :
-            <strong>{{ event.location }}</strong>
-          </p>
-          <p class="activity-subtext">
-            {{ event.title }} • {{ event.createdAt | date:'dd/MM/yyyy à HH:mm' }}
-          </p>
-        </div>
+    <div class="recent-activity-container">
+      <h3>🕑 Activité Récente</h3>
+      <div class="activity-list">
+        @for (event of recentActivity(); track event.id) {
+          <div class="activity-item">
+            <div class="activity-icon" [ngClass]="event.approvalStatus">
+              @if(event.approvalStatus === 'approved') { <i class="fas fa-check"></i> }
+              @else if(event.approvalStatus === 'rejected') { <i class="fas fa-times"></i> }
+              @else { <i class="fas fa-clock"></i> }
+            </div>
 
-        <div class="status-badge-mini" [ngClass]="event.approvalStatus">
-          {{ event.approvalStatus }}
-        </div>
+            <div class="activity-details">
+              <p class="activity-text">
+                <strong>{{ event.organizer?.user?.firstName || 'Un utilisateur' }} {{event.organizer?.user?.lastName}}</strong> 
+                a demandé :
+                <strong>{{ event.location }}</strong>
+              </p>
+              <p class="activity-subtext">
+                {{ event.title }} • {{ event.createdAt | date:'dd/MM/yyyy à HH:mm' }}
+              </p>
+            </div>
+
+            <div class="status-badge-mini" [ngClass]="event.approvalStatus">
+              {{ event.approvalStatus }}
+            </div>
+          </div>
+        } @empty {
+          <p class="no-data">Aucune activité récente.</p>
+        }
       </div>
-    } @empty {
-      <p class="no-data">Aucune activité récente.</p>
-    }
-  </div>
-</div>
-</div>
+    </div>
   }
+</div>

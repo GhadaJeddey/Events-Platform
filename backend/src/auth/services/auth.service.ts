@@ -1,22 +1,20 @@
 import { Injectable, UnauthorizedException, BadRequestException } from "@nestjs/common";
-import { UsersService } from "../users/services/users.service";
-import { CreateUserDto } from "../users/dto/create-user.dto";
-import { SignInDto } from "../users/dto/SignInDto";
+import { UsersService } from "../../users/services/users.service";
+import { SignInDto } from "../../users/dto/SignInDto";
+import { ChangePasswordDto } from "../../users/dto/change-password.dto";
 import * as bcrypt from 'bcrypt';
 import { JwtService } from "@nestjs/jwt";
-import { User } from "../users/entities/user.entity";
-import { StudentsService } from "../students/services/students.service";
-import { OrganizersService } from "../organizers/services/organizers.service";
-import { Role } from "../common/enums/role.enum";
-import { UnifiedRegisterDto } from "./dto/unified-signup.dto";
+import { User } from "../../users/entities/user.entity";
+import { StudentsService } from "../../students/services/students.service";
+import { OrganizersService } from "../../organizers/services/organizers.service";
+import { Role } from "../../common/enums/role.enum";
+import { UnifiedRegisterDto } from "../dto/unified-signup.dto";
 import { ForgotPassDto } from "src/users/dto/forgot-password.dto";
 import { ResetPasswordDto } from "src/users/dto/reset-password.dto";
 import { nanoid } from "nanoid";
 import { MailService } from "src/mail/mail.service";
 @Injectable()
-/**
- * Service for handling authentication logic.
- */
+
 export class AuthService {
     constructor(
         private usersService: UsersService,
@@ -26,11 +24,6 @@ export class AuthService {
         private mailService: MailService,
     ) { }
 
-    /**
-     * Registers a new user.
-     * @param {CreateUserDto} body - The user creation data.
-     * @returns {Promise<User>} The created user entity.
-     */
     async register(dto: UnifiedRegisterDto) {
         const user = await this.usersService.create(dto.user);
 
@@ -52,13 +45,6 @@ export class AuthService {
         return user;
     }
 
-
-    /**
-     * Validates user credentials and logs them in.
-     * @param {SignInDto} body - The login credentials.
-     * @returns {Promise<Omit<User, 'password'>>} The user entity without password.
-     * @throws {UnauthorizedException} If credentials are invalid.
-     */
     async validateUser(input: SignInDto) {
         const user = await this.usersService.findByEmail(input.email);
         if (user && await bcrypt.compare(input.password, user.password)) {
@@ -85,6 +71,7 @@ export class AuthService {
         const user = await this.validateUser(input);
         return this.SignIn(user);
     }
+
     async forgotPassword(input: ForgotPassDto) {
         const user = await this.usersService.findByEmail(input.email);
         if (!user) {
@@ -100,6 +87,7 @@ export class AuthService {
         return { message: "If user exists, an email will be sent" };
     }
 
+    // function used when user clicks on forgot password at login
     async resetPassword(input: ResetPasswordDto) {
         const users = await this.usersService.findAll();
         const user = users.find(u => u.resetToken === input.token);
@@ -122,5 +110,10 @@ export class AuthService {
         } as any);
 
         return { message: "Password successfully reset" };
+    }
+
+    // function used when logged in user wants to change password
+    async changePassword(userId: string, changePasswordDto: ChangePasswordDto) {
+        return this.usersService.changePassword(userId, changePasswordDto);
     }
 }

@@ -1,8 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
+import { ChangePasswordDto } from '../dto/change-password.dto';
 import { User } from '../entities/user.entity';
 import * as bcrypt from 'bcrypt';
 
@@ -27,6 +28,19 @@ export class UsersService {
     return await this.userRepository.find();
   }
 
+  async findAllPaginated(skip: number = 0, take: number = 10): Promise<User[]> {
+    return await this.userRepository.find({
+      skip,
+      take,
+      select: ['id', 'email', 'firstName', 'lastName', 'role', 'isActive'],
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+  async countAll(): Promise<number> {
+    return await this.userRepository.count();
+  }
+
   async findOne(id: string): Promise<User> {
     const user = await this.userRepository.findOne({
       where: { id },
@@ -43,17 +57,16 @@ export class UsersService {
     });
   }
 
-  // 👇 THIS IS THE KEY FIX
   async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
     const user = await this.findOne(id);
 
-    // 1. Hash password if it exists
+    // Hash password if it exists
     if (updateUserDto.password) {
       const salt = await bcrypt.genSalt();
       updateUserDto.password = await bcrypt.hash(updateUserDto.password, salt);
     }
 
-    // 2. Merge changes (including new password and profile data)
+    // Merge changes and save
     const updatedUser = this.userRepository.merge(user, updateUserDto);
 
     return await this.userRepository.save(updatedUser);
@@ -62,5 +75,19 @@ export class UsersService {
   async remove(id: string): Promise<void> {
     const result = await this.userRepository.delete(id);
     if (result.affected === 0) throw new NotFoundException(`User with ID ${id} not found`);
+  }
+
+  async changePassword(id: string, changePasswordDto: ChangePasswordDto): Promise<{ message: string }> {
+    const user = await this.findOne(id);
+
+    // Verify current password
+    const isPasswordValid = await bcrypt.compare(changePasswordDto.currentPassword, user.password);
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Current password is incorrect');
+    }
+
+    // Update to new password (hashing assuré par update())
+    await this.update(id, { password: changePasswordDto.newPassword });
+    return { message: 'Password changed successfully' };
   }
 }

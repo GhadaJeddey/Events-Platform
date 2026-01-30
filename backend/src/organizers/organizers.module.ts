@@ -1,6 +1,6 @@
 import { Module, forwardRef } from '@nestjs/common';
 import { OrganizersService } from './services/organizers.service';
-import { OrganizersController } from './controllers/organizers.controller';
+import { OrganizersController } from './organizers.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Organizer } from './entities/organizer.entity';
 import { AuthModule } from '../auth/auth.module';

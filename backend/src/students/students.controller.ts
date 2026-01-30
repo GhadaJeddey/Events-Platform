@@ -1,6 +1,7 @@
 import {
   Controller,
   Get,
+  Post,
   Body,
   Patch,
   Param,
@@ -10,26 +11,36 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 
-import { StudentsService } from '../services/students.service';
-import { UpdateStudentDto } from '../dto/update-student.dto';
+import { StudentsService } from './services/students.service';
+import { CreateStudentDto } from './dto/create-student.dto';
+import { UpdateStudentDto } from './dto/update-student.dto';
 
-import { AuthGuard } from '../../auth/guards/auth.guard';
-import { RolesGuard } from '../../auth/guards/roles.guard';
-import { Roles } from '../../auth/decorators/roles.decorator';
-import { CurrentUser } from '../../auth/decorators/current-user.decorator'; // Ton décorateur perso
-import { Role } from '../../common/enums/role.enum';
+import { AuthGuard } from '../auth/guards/auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { CurrentUser } from '../auth/decorators/current-user.decorator'; // Ton décorateur perso
+import { Role } from '../common/enums/role.enum';
 
 @ApiTags('Students') // Pour grouper dans Swagger
 @ApiBearerAuth() // Indique que ces routes nécessitent un token
-@UseGuards(AuthGuard, RolesGuard) // Sécurise tout le contrôleur
+@UseGuards(AuthGuard, RolesGuard) 
 @Controller('students')
 export class StudentsController {
   constructor(private readonly studentsService: StudentsService) { }
 
+  @Post('me')
+  @ApiOperation({ summary: 'Create current user student profile' })
+  async createMyProfile(
+    @CurrentUser() user,
+    @Body() createStudentDto: CreateStudentDto
+  ) {
+    return this.studentsService.create(user, createStudentDto);
+  }
+
   @Get('me')
   @ApiOperation({ summary: 'Get current user student profile' })
   async getMyProfile(@CurrentUser() user) {
-    // L'utilisateur récupère SON profil grâce à son token
+
     return this.studentsService.findOneByUserId(user.id);
   }
 

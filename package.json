@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@nestjs/schedule": "^6.1.0",
     "nanoid": "^3.3.7",
     "ng2-charts": "^8.0.0"
   }

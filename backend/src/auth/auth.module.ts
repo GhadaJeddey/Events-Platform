@@ -2,7 +2,7 @@ import { forwardRef, Module } from '@nestjs/common';
 import { AuthGuard } from './guards/auth.guard';
 import { RolesGuard } from './guards/roles.guard';
 import { UsersModule } from '../users/users.module';
-import { AuthService } from './auth.service';
+import { AuthService } from './services/auth.service';
 import { AuthController } from './auth.controller';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';

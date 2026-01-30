@@ -6,6 +6,7 @@ import { CreateOrganizerDto } from '../../organizers/dto/create-organizer.dto';
 import { Role } from '../../common/enums/role.enum';
 
 export class UnifiedRegisterDto {
+  // unified dto for both student and organizer registr 
   @IsNotEmpty()
   @ValidateNested()
   @Type(() => CreateUserDto)
@@ -23,6 +24,5 @@ export class UnifiedRegisterDto {
   @ValidateNested()
   @Type(() => CreateOrganizerDto)
   organizerProfile?: CreateOrganizerDto; // name, website, description
-
 
 }

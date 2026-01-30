@@ -1,4 +1,4 @@
-import { User } from '../Models/auth.models';
+import { User } from './auth.models';
 
 export interface Organizer {
   id: string;

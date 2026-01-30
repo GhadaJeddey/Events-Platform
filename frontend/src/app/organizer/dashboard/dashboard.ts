@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { EventsService } from '../../services/events';
-import { Event } from '../../Models/Event';
+import { Event as EventModel, RoomLocation } from '../../Models/Event';
 import { EventCard } from '../../events/event-card/event-card';
 
 
@@ -22,8 +22,13 @@ export class OrganizerDashboard implements OnInit {
     months: string[] = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'];
 
     currentUser = this.authService.currentUser;
-    events = signal<Event[] | null>(null);
+    events = signal<EventModel[] | null>(null);
     currentDate = new Date();
+    selectedDate = signal<string>(this.toDateInputValue(new Date()));
+    selectedLocation = signal<RoomLocation>(RoomLocation.AUDITORIUM);
+    selectedSlots = signal<Set<string>>(new Set());
+    timeSlots = ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00'];
+    roomLocations = Object.values(RoomLocation);
 
     myEvents = computed(() => {
         const user = this.currentUser();
@@ -69,6 +74,19 @@ export class OrganizerDashboard implements OnInit {
             fillRate,
             createdThisYear,
         };
+    });
+
+    slotsForDay = computed(() => {
+        const date = this.selectedDate();
+        const location = this.selectedLocation();
+        const events = this.myEvents() || [];
+
+        return this.timeSlots.map((start, index) => {
+            const end = this.timeSlots[index + 1] || this.addHour(start);
+            const status = this.getSlotStatus(events, date, location, start, end);
+            const label = `${start} - ${end}`;
+            return { label, status };
+        });
     });
 
     // mapping des status 
@@ -200,5 +218,75 @@ export class OrganizerDashboard implements OnInit {
     }
     goToReserveRooms(): void {
     // verifier avec sana 
+    }
+
+    onDateChange(event: Event) {
+        const value = (event.target as HTMLInputElement).value;
+        if (value) {
+            this.selectedDate.set(value);
+            this.selectedSlots.set(new Set());
+        }
+    }
+
+    onLocationChange(event: Event) {
+        const value = (event.target as HTMLSelectElement).value as RoomLocation;
+        if (value) {
+            this.selectedLocation.set(value);
+            this.selectedSlots.set(new Set());
+        }
+    }
+
+    toggleSlot(label: string, status: string) {
+        if (status !== 'available') return;
+        const current = new Set(this.selectedSlots());
+        if (current.has(label)) {
+            current.delete(label);
+        } else {
+            current.add(label);
+        }
+        this.selectedSlots.set(current);
+    }
+
+    isSlotSelected(label: string): boolean {
+        return this.selectedSlots().has(label);
+    }
+
+    getSlotStatus(events: EventModel[], date: string, location: RoomLocation, start: string, end: string): 'available' | 'pending' | 'occupied' {
+        const slotStart = new Date(`${date}T${start}:00`);
+        const slotEnd = new Date(`${date}T${end}:00`);
+
+        let hasPending = false;
+
+        for (const event of events) {
+            if (!event.startDate || !event.endDate || event.location !== location) continue;
+            const eventStart = new Date(event.startDate as any);
+            const eventEnd = new Date(event.endDate as any);
+
+            if (isNaN(eventStart.getTime()) || isNaN(eventEnd.getTime())) continue;
+
+            const sameDay = eventStart.toDateString() === slotStart.toDateString();
+            if (!sameDay) continue;
+
+            const overlaps = eventStart < slotEnd && eventEnd > slotStart;
+            if (!overlaps) continue;
+
+            if (event.approvalStatus === 'approved') return 'occupied';
+            if (event.approvalStatus === 'pending') hasPending = true;
+        }
+
+        return hasPending ? 'pending' : 'available';
+    }
+
+    addHour(start: string): string {
+        const [h, m] = start.split(':').map(Number);
+        const date = new Date();
+        date.setHours(h + 1, m, 0, 0);
+        return date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    }
+
+    toDateInputValue(date: Date): string {
+        const offset = date.getTimezoneOffset();
+        const local = new Date(date.getTime() - offset * 60000);
+        return local.toISOString().split('T')[0];
     }
 }

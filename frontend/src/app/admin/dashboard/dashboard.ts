@@ -1,10 +1,11 @@
-import { Component, inject, computed } from '@angular/core';
+import { Component, inject, computed, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartOptions } from 'chart.js';
 import { toSignal } from '@angular/core/rxjs-interop'; 
 import { AdminService } from '../../services/admin.service';
 import { RouterLink } from '@angular/router';
+import { Event } from '../../Models/Event';
 
 @Component({
   selector: 'app-dashboard',
@@ -13,11 +14,14 @@ import { RouterLink } from '@angular/router';
   templateUrl: './dashboard.html',
   styleUrls: ['./dashboard.css']
 })
-export class Dashboard {
+export class Dashboard implements OnInit {
   private adminService = inject(AdminService);
 
   stats = toSignal(this.adminService.getDashboardStats(), { initialValue: null });
   recentActivity = toSignal(this.adminService.getRecentEvents(), { initialValue: [] });
+  pendingEvents = signal<Event[]>([]);
+  inactiveSlots = signal<Set<string>>(new Set());
+  currentDate = new Date();
   
   public pieChartOptions: ChartOptions<'pie'> = {
     responsive: true,
@@ -96,4 +100,76 @@ export class Dashboard {
       }]
     };
   });
+
+  ngOnInit() {
+    this.loadPendingEvents();
+  }
+
+  loadPendingEvents() {
+    this.adminService.getPendingEvents().subscribe({
+      next: (events) => this.pendingEvents.set(events || []),
+      error: (err) => console.error('Error loading pending events:', err)
+    });
+  }
+
+  approveEvent(eventId: string) {
+    this.adminService.updateEventStatus(eventId, 'approved').subscribe({
+      next: () => {
+        const updated = this.pendingEvents().filter(e => e.id !== eventId);
+        this.pendingEvents.set(updated);
+      },
+      error: (err) => console.error('Error approving event:', err)
+    });
+  }
+
+  rejectEvent(eventId: string) {
+    this.adminService.updateEventStatus(eventId, 'rejected').subscribe({
+      next: () => {
+        const updated = this.pendingEvents().filter(e => e.id !== eventId);
+        this.pendingEvents.set(updated);
+      },
+      error: (err) => console.error('Error rejecting event:', err)
+    });
+  }
+
+  getHourlySlots(event: Event): string[] {
+    if (!event.startDate || !event.endDate) return [];
+
+    const start = new Date(event.startDate as any);
+    const end = new Date(event.endDate as any);
+    const slots: string[] = [];
+
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) return slots;
+
+    const current = new Date(start);
+    current.setMinutes(0, 0, 0);
+
+    while (current < end) {
+      const next = new Date(current);
+      next.setHours(current.getHours() + 1);
+      slots.push(`${this.formatTime(current)} - ${this.formatTime(next)}`);
+      current.setHours(current.getHours() + 1);
+    }
+
+    return slots;
+  }
+
+  formatTime(date: Date): string {
+    return date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  toggleSlot(eventId: string, slotLabel: string) {
+    const key = `${eventId}|${slotLabel}`;
+    const current = new Set(this.inactiveSlots());
+    if (current.has(key)) {
+      current.delete(key);
+    } else {
+      current.add(key);
+    }
+    this.inactiveSlots.set(current);
+  }
+
+  isSlotInactive(eventId: string, slotLabel: string): boolean {
+    return this.inactiveSlots().has(`${eventId}|${slotLabel}`);
+  }
 } 
