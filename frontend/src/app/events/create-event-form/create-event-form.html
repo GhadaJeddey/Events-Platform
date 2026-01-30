@@ -49,7 +49,9 @@
                 <div class="form-group full-width">
                     <label for="location">Lieu / Salle</label>
                     <div style="display: flex; gap: 10px; align-items: flex-start;">
-                        <select id="location" name="location" [(ngModel)]="selectedLocation" required #locInput="ngModel"
+                        <select id="location" name="location" [(ngModel)]="selectedLocation" 
+                            (ngModelChange)="onLocationChange()"
+                            required #locInput="ngModel"
                             [class.invalid]="locInput.invalid && (locInput.dirty || locInput.touched)"
                             [disabled]="!startDateValue || !endDateValue || isLoadingRooms()"
                             style="flex: 1;">
@@ -65,15 +67,21 @@
                             }
                         </select>
 
-                        <button type="button" class="btn-book-room" (click)="openRoomBooking()"
-                            [disabled]="!startDateValue || !endDateValue"
-                            title="Ouvrir le calendrier de réservation">
-                            📅 Réserver une salle
+                        <button type="button" class="btn-book-room" 
+                            (click)="reserveRoom()"
+                            [disabled]="!selectedLocation || !startDateValue || !endDateValue || !isRoomAvailable()"
+                            [title]="!isRoomAvailable() ? 'Ce créneau n\'est pas disponible pour cette salle' : 'Réserver cette salle'">
+                            Réserver la salle
                         </button>
                     </div>
 
                     @if(locInput.invalid && (locInput.dirty || locInput.touched)) {
                         <div class="error-message">Le lieu est obligatoire.</div>
+                    }
+                    @if(selectedLocation && !isRoomAvailable() && startDateValue && endDateValue) {
+                        <div class="info-message" style="color: #f5576c; font-size: 0.85rem; margin-top: 0.5rem;">
+                            ⚠️ Ce créneau n'est pas disponible pour cette salle
+                        </div>
                     }
                 </div>
                 <div class="form-group">
@@ -97,12 +105,3 @@
         </form>
     </div>
 </div>
-
-@if (showRoomBooking()) {
-    <app-room-booking
-        [selectedDate]="getSelectedDate()"
-        [availableRooms]="availableRooms()"
-        (slotSelected)="onSlotSelected($event)"
-        (close)="closeRoomBooking()">
-    </app-room-booking>
-}

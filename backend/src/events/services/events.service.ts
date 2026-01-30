@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { Repository, MoreThanOrEqual, LessThan, Between, In, ILike, Or, And, Brackets } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 import { Event } from '../entities/event.entity';
 import { CreateEventDto } from '../dto/create-event.dto';
 import { UpdateEventDto } from '../dto/update-event.dto';
@@ -19,6 +20,7 @@ import { ALL_ROOMS, RoomLocation } from 'src/common/enums/room-location.enum';
 @Injectable()
 export class EventsService {
   constructor(
+    @InjectRepository(Event)
     private eventsRepository: Repository<Event>,
     private organizersService: OrganizersService,
     @Inject(forwardRef(() => RegistrationsService))
@@ -88,6 +90,35 @@ export class EventsService {
 
     const occupiedRooms = conflictingEvents.map((e) => e.location);
     return ALL_ROOMS.filter((room) => !occupiedRooms.includes(room));
+  }
+
+  async getRoomSlots(room: string, startStr: string, endStr: string): Promise<any> {
+    const startDate = new Date(startStr);
+    const endDate = new Date(endStr);
+
+    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+      throw new BadRequestException('Dates invalides');
+    }
+
+    // Récupérer tous les événements approuvés ou en attente pour cette salle dans la plage de dates
+    const events = await this.eventsRepository
+      .createQueryBuilder('event')
+      .where('event.location = :room', { room })
+      .andWhere('event.approvalStatus IN (:...statuses)', { 
+        statuses: [ApprovalStatus.PENDING, ApprovalStatus.APPROVED] 
+      })
+      .andWhere('event.startDate < :endDate', { endDate })
+      .andWhere('event.endDate > :startDate', { startDate })
+      .getMany();
+
+    // Retourner les événements avec leurs créneaux
+    return events.map(event => ({
+      id: event.id,
+      title: event.title,
+      startDate: event.startDate,
+      endDate: event.endDate,
+      approvalStatus: event.approvalStatus
+    }));
   }
 
   async checkRoomAvailability(

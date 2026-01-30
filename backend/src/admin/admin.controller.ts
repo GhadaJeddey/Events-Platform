@@ -50,6 +50,12 @@ export class AdminController {
         return this.adminService.getPendingOrganizers();
     }
 
+    @Get('organizers/most-active')
+    @ApiOperation({ summary: 'Get most active organizers (Admin)' })
+    async getMostActiveOrganizers() {
+        return this.adminService.getMostActiveOrganizers(5);
+    }
+
     @Patch('organizers/:id/status')
     @ApiOperation({ summary: 'Update organizer status (Admin)' })
     async updateOrganizerStatus(

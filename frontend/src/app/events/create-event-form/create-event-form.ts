@@ -1,14 +1,13 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, computed } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { Router } from '@angular/router';
 import { EventsService } from '../../services/events';
 import { ToastrService } from 'ngx-toastr';
-import { RoomBookingComponent } from '../../shared/components/room-booking/room-booking';
 import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-create-event-form',
-  imports: [FormsModule, CommonModule, RoomBookingComponent],
+  imports: [FormsModule, CommonModule],
   templateUrl: './create-event-form.html',
   styleUrl: './create-event-form.css',
 })
@@ -24,11 +23,18 @@ export class CreateEventForm {
   // Gestion des salles
   availableRooms = signal<string[]>([]);
   isLoadingRooms = signal<boolean>(false);
-  showRoomBooking = signal<boolean>(false);
 
   startDateValue: string = '';
   endDateValue: string = '';
   selectedLocation: string = '';
+
+  // Vérifier si la salle sélectionnée est disponible pour le créneau
+  isRoomAvailable = computed(() => {
+    if (!this.selectedLocation || !this.startDateValue || !this.endDateValue) {
+      return false;
+    }
+    return this.availableRooms().includes(this.selectedLocation);
+  });
 
   onDateChange() {
     if (this.startDateValue && this.endDateValue) {
@@ -53,6 +59,13 @@ export class CreateEventForm {
           this.isLoadingRooms.set(false);
         }
       });
+    }
+  }
+
+  onLocationChange() {
+    // Rafraîchir la vérification de disponibilité quand la salle change
+    if (this.selectedLocation && this.startDateValue && this.endDateValue) {
+      this.onDateChange();
     }
   }
   onFileSelected(event: any) {
@@ -103,27 +116,12 @@ export class CreateEventForm {
     this.router.navigate(['/organizer/dashboard']);
   }
 
-  openRoomBooking() {
-    if (!this.startDateValue || !this.endDateValue) {
-      this.toastr.info('Veuillez d\'abord sélectionner les dates de début et de fin.');
+  reserveRoom() {
+    if (!this.isRoomAvailable()) {
+      this.toastr.warning('Ce créneau n\'est pas disponible pour cette salle.');
       return;
     }
-    this.showRoomBooking.set(true);
-  }
-
-  closeRoomBooking() {
-    this.showRoomBooking.set(false);
-  }
-
-  onSlotSelected(selection: { date: Date; startTime: string; endTime: string; room: string }) {
-    this.selectedLocation = selection.room;
-    this.startDateValue = selection.startTime.slice(0, 16);
-    this.endDateValue = selection.endTime.slice(0, 16);
-    this.showRoomBooking.set(false);
-    this.toastr.success(`Salle ${selection.room} réservée pour le créneau sélectionné`);
-  }
-
-  getSelectedDate(): Date {
-    return this.startDateValue ? new Date(this.startDateValue) : new Date();
+    
+    this.toastr.success(`Salle ${this.selectedLocation} réservée pour le créneau sélectionné. Vous pouvez maintenant créer l'événement.`);
   }
 }

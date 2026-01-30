@@ -4,6 +4,7 @@
       <h1 class="header-title">Tableau de Bord Admin</h1>
       <p class="header-date">{{ currentDate | date:'d MMM yyyy' }}</p>
     </div>
+  
   </div>
 
   @if (!stats()) {
@@ -12,65 +13,152 @@
     </div>
   } 
   @else {
-    <div class="stats-grid">
-      <div class="stat-card users-card" routerLink="/admin/users">
-        <div class="stat-icon">👥</div>
-        <div class="stat-content">
-          <h3>Utilisateurs</h3>
-          <p class="stat-number">{{ stats()?.overview?.totalUsers }}</p>
-        </div>
-      </div>
+   
+    <div class="pending-requests-grid">
+      
 
-      <div class="stat-card pending-card" routerLink="/admin/approvals">
-        <div class="stat-icon">⏳</div>
-        <div class="stat-content">
-          <h3>En Attente</h3>
-          <p class="stat-number">{{ stats()?.overview?.pendingEvents }}</p>
+      <div class="pending-card">
+        <div class="pending-card-header">
+          <h3>Demandes d'événements</h3>
+          <span class="badge">{{ pendingEvents().length }}</span>
         </div>
-      </div>
-    </div>
-
-    <div class="room-requests-card">
-      <div class="room-requests-header">
-        <div>
-          <h2>Demandes de salles</h2>
-          <p class="subtitle">Validation des créneaux demandés</p>
+        <div class="pending-card-footer">
+          <a routerLink="/admin/events-approvals" class="view-more-link">Voir plus →</a>
         </div>
-        <a routerLink="/admin/approvals" class="view-all-link">Voir tout →</a>
-      </div>
-
-      <div class="room-requests-list">
-        @if (pendingEvents().length > 0) {
-          @for (event of pendingEvents(); track event.id) {
-            <div class="room-request-item">
-              <div class="request-info">
-                <div class="request-title">
-                  <span class="room-name">{{ event.location }}</span>
-                  <span class="request-date">{{ event.startDate | date:'EEE d MMM' }}</span>
+        <div class="pending-items">
+          @if (pendingEvents().length > 0) {
+            @for (event of pendingEvents().slice(0, 1); track event.id) {
+              <div class="pending-item">
+                <div class="item-info">
+                  <p class="item-title">{{ event.title }}</p>
+                  <p class="item-meta">{{ event.organizer?.user?.firstName }} • {{ event.location }}</p>
                 </div>
-                <div class="request-meta">
-                  <span class="organizer-name">
-                    {{ event.organizer?.user?.firstName || 'Un utilisateur' }} {{ event.organizer?.user?.lastName || '' }}
-                  </span>
-                  <span class="separator">•</span>
-                  <span class="event-title">{{ event.title }}</span>
-                </div>
-                <div class="slot-list">
-                  @for (slot of getHourlySlots(event); track slot) {
-                    <button class="slot-chip" [class.inactive]="isSlotInactive(event.id, slot)" (click)="toggleSlot(event.id, slot)">
-                      {{ slot }}
-                    </button>
-                  }
+                <div class="item-actions">
+                  <button class="action-btn approve" (click)="approveEvent(event.id)">✓</button>
+                  <button class="action-btn reject" (click)="rejectEvent(event.id)">✕</button>
                 </div>
               </div>
-              <div class="request-actions">
-                <button class="action-btn approve" (click)="approveEvent(event.id)">Approuver</button>
-                <button class="action-btn reject" (click)="rejectEvent(event.id)">Rejeter</button>
+            }
+            @if (pendingEvents().length > 1) {
+              <p class="more-items">+{{ pendingEvents().length - 1 }} de plus...</p>
+            }
+          } @else {
+            <p class="no-data">Aucune demande</p>
+          }
+        </div>
+      </div>
+
+      
+      <div class="pending-card">
+        <div class="pending-card-header">
+          <h3>Demandes de salles</h3>
+          <span class="badge">{{ pendingEvents().length }}</span>
+        </div>
+        <div class="pending-card-footer">
+          <a routerLink="/admin/rooms-approvals" class="view-more-link">Voir plus →</a>
+        </div>
+        <div class="pending-items">
+          @if (pendingEvents().length > 0) {
+            @for (event of pendingEvents().slice(0, 1); track event.id) {
+              <div class="pending-item">
+                <div class="item-info">
+                  <p class="item-title">{{ event.location }}</p>
+                  <p class="item-meta">{{ event.startDate | date:'EEE d MMM' }} • {{ event.title }}</p>
+                </div>
+                <div class="item-actions">
+                  <button class="action-btn approve" (click)="approveEvent(event.id)">✓</button>
+                  <button class="action-btn reject" (click)="rejectEvent(event.id)">✕</button>
+                </div>
+              </div>
+            }
+            @if (pendingEvents().length > 1) {
+              <p class="more-items">+{{ pendingEvents().length - 1 }} de plus...</p>
+            }
+          } @else {
+            <p class="no-data">Aucune demande</p>
+          }
+        </div>
+      </div>
+
+      <div class="pending-card">
+        <div class="pending-card-header">
+          <h3>Demandes de clubs</h3>
+          <span class="badge">{{ pendingOrganizers().length }}</span>
+        </div>
+        <div class="pending-card-footer">
+          <a routerLink="/admin/organizers-approvals" class="view-more-link">Voir plus →</a>
+        </div>
+        <div class="pending-items">
+          @if (pendingOrganizers().length > 0) {
+            @for (org of pendingOrganizers().slice(0, 1); track org.id) {
+              <div class="pending-item">
+                <div class="item-info">
+                  <p class="item-title">{{ org.name }}</p>
+                  <p class="item-meta">{{ org.user?.firstName }} • {{ org.user?.lastName }}</p>
+                </div>
+                <div class="item-actions">
+                  <button class="action-btn approve" (click)="approveOrganizer(org.id)">✓</button>
+                  <button class="action-btn reject" (click)="rejectOrganizer(org.id)">✕</button>
+                </div>
+              </div>
+            }
+            @if (pendingOrganizers().length > 1) {
+              <p class="more-items">+{{ pendingOrganizers().length - 1 }} de plus...</p>
+            }
+          } @else {
+            <p class="no-data">Aucune demande</p>
+          }
+        </div>
+      </div>
+
+      <div class="pending-card">
+        <div class="pending-card-header">
+          <h3>Utilisateurs</h3>
+          <span class="badge">{{ users().length }}</span>
+        </div>
+        <div class="pending-card-footer">
+          <a routerLink="/admin/users" class="view-more-link">Voir plus →</a>
+        </div>
+        <div class="pending-items">
+          @if (users().length > 0) {
+            @for (user of users().slice(0, 1); track user.id) {
+              <div class="pending-item">
+                <div class="item-info">
+                  <p class="item-title">{{ user.firstName }} {{ user.lastName }}</p>
+                  <p class="item-meta">{{ user.email }}</p>
+                </div>
+              </div>
+            }
+            @if (users().length > 1) {
+              <p class="more-items">+{{ users().length - 1 }} de plus...</p>
+            }
+          } @else {
+            <p class="no-data">Aucun utilisateur</p>
+          }
+        </div>
+      </div>
+
+    </div>
+    <div class="most-active-clubs-container">
+      <h3>Clubs les Plus Actifs</h3>
+      <div class="clubs-list">
+        @if (mostActiveOrganizers().length > 0) {
+          @for (org of mostActiveOrganizers(); track org.id; let i = $index) {
+            <div class="club-item">
+              <div class="club-rank">
+                <span class="rank-badge">{{ i + 1 }}</span>
+              </div>
+              <div class="club-info">
+                <p class="club-name">{{ org.name }}</p>
+                <p class="club-events">{{ org.eventCount }} événement(s)</p>
+              </div>
+              <div class="club-bar">
+                <div class="progress-bar" [style.width.%]="(org.eventCount / (mostActiveOrganizers()[0]?.eventCount || 1)) * 100"></div>
               </div>
             </div>
           }
         } @else {
-          <p class="no-data">Aucune demande en attente.</p>
+          <p class="no-data">Aucune donnée disponible.</p>
         }
       </div>
     </div>
@@ -103,8 +191,9 @@
       </div>
     </div>
 
+    
     <div class="recent-activity-container">
-      <h3>🕑 Activité Récente</h3>
+      <h3>Activité Récente</h3>
       <div class="activity-list">
         @for (event of recentActivity(); track event.id) {
           <div class="activity-item">

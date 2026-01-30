@@ -8,4 +8,5 @@ export interface Organizer {
   isVerified: boolean;
 eventsCount?: number;
   user?: User;
+  createdAt?: Date | string;
 }

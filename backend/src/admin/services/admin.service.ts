@@ -76,6 +76,19 @@ export class AdminService {
     return this.organizersService.getPendingOrganizers();
   }
 
+  async getMostActiveOrganizers(limit: number = 5) {
+    const allOrganizers = await this.organizersService.findAll();
+    const organizersWithEventCounts = allOrganizers.map(org => ({
+      id: org.id,
+      name: org.name,
+      eventCount: org.events ? org.events.length : 0,
+    }));
+    
+    return organizersWithEventCounts
+      .sort((a, b) => b.eventCount - a.eventCount)
+      .slice(0, limit);
+  }
+
   async updateOrganizerStatus(id: string, updateOrganizerStatusDto: UpdateOrganizerStatusDto) {
     if (updateOrganizerStatusDto.status === OrganizerStatus.APPROVED) {
       return this.organizersService.approveOrganizer(id);

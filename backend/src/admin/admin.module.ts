@@ -2,18 +2,17 @@ import { Module } from '@nestjs/common';
 import { AdminController } from './admin.controller';
 import { AdminService } from './services/admin.service';
 import { User } from '../users/entities/user.entity';
-import { Event } from '../events/entities/event.entity';
 import { Organizer } from '../organizers/entities/organizer.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { OrganizersService } from '../organizers/services/organizers.service';
-import { UsersService } from '../users/services/users.service';
-import { EventsService } from '../events/services/events.service';
+import { OrganizersModule } from '../organizers/organizers.module';
+import { UsersModule } from '../users/users.module';
+import { EventsModule } from '../events/events.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Event, Organizer]), 
+    TypeOrmModule.forFeature([User, Organizer]), 
     JwtModule.registerAsync({ // Async to allow access to ConfigService before JwtModule is init . Dynamic load of config values 
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -22,8 +21,11 @@ import { EventsService } from '../events/services/events.service';
         signOptions: { expiresIn: '24h' },
       }),
     }),
+    EventsModule,
+    OrganizersModule,
+    UsersModule,
   ],
   controllers: [AdminController],
-  providers: [AdminService, OrganizersService, UsersService, EventsService]
+  providers: [AdminService]
 })
 export class AdminModule {}

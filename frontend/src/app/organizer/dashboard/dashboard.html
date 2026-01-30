@@ -38,65 +38,6 @@
     </div>
     }
 
-    <div class="room-slots-section">
-        <div class="room-slots-card">
-            <div class="room-slots-header">
-                <div>
-                    <h2 class="section-title">Créneaux de salle</h2>
-                    <p class="section-subtitle">Choisissez une date et des créneaux d'une heure</p>
-                </div>
-                <span class="timezone-pill">Tunisia, Tunis (GMT+1)</span>
-            </div>
-
-            <div class="room-slots-controls">
-                <label class="control-item">
-                    <span>Date</span>
-                    <input type="date" [value]="selectedDate()" (change)="onDateChange($event)" />
-                </label>
-                <label class="control-item">
-                    <span>Salle</span>
-                    <select [value]="selectedLocation()" (change)="onLocationChange($event)">
-                        @for (room of roomLocations; track room) {
-                        <option [value]="room">{{ room }}</option>
-                        }
-                    </select>
-                </label>
-            </div>
-
-            <div class="slots-grid">
-                @for (slot of slotsForDay(); track slot.label) {
-                <button
-                    class="slot-item"
-                    [class.available]="slot.status === 'available'"
-                    [class.pending]="slot.status === 'pending'"
-                    [class.occupied]="slot.status === 'occupied'"
-                    [class.selected]="isSlotSelected(slot.label)"
-                    (click)="toggleSlot(slot.label, slot.status)"
-                    [disabled]="slot.status !== 'available'"
-                >
-                    <span class="slot-time">{{ slot.label }}</span>
-                    <span class="slot-status">
-                        @if (slot.status === 'available') { Disponible }
-                        @else if (slot.status === 'pending') { En attente }
-                        @else { Indisponible }
-                    </span>
-                </button>
-                }
-            </div>
-
-            @if (selectedSlots().size > 0) {
-            <div class="selected-slots">
-                <p>Créneaux sélectionnés :</p>
-                <div class="selected-slots-list">
-                    @for (slot of selectedSlots(); track slot) {
-                    <span class="selected-slot">{{ slot }}</span>
-                    }
-                </div>
-            </div>
-            }
-        </div>
-    </div>
-
     <div class="recent-events-section">
         <div class="section-header">
             <h2 class="section-title">Mes Événements Récents</h2>

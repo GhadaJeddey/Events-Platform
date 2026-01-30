@@ -6,6 +6,8 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { AdminService } from '../../services/admin.service';
 import { RouterLink } from '@angular/router';
 import { Event } from '../../Models/Event';
+import { Organizer } from '../../Models/organizer';
+import { User } from '../../Models/auth.models';
 
 @Component({
   selector: 'app-dashboard',
@@ -20,13 +22,23 @@ export class Dashboard implements OnInit {
   stats = toSignal(this.adminService.getDashboardStats(), { initialValue: null });
   recentActivity = toSignal(this.adminService.getRecentEvents(), { initialValue: [] });
   pendingEvents = signal<Event[]>([]);
+  pendingOrganizers = signal<Organizer[]>([]);
+  mostActiveOrganizers = signal<any[]>([]);
+  users = signal<User[]>([]);
   inactiveSlots = signal<Set<string>>(new Set());
   currentDate = new Date();
   
   public pieChartOptions: ChartOptions<'pie'> = {
     responsive: true,
     plugins: {
-      legend: { position: 'bottom' }
+      legend: { 
+        position: 'bottom',
+        labels: {
+          color: '#a0aec0',
+          padding: 15,
+          font: { size: 12 }
+        }
+      }
     }
   };
 
@@ -44,10 +56,10 @@ export class Dashboard implements OnInit {
     };
 
     const colorMap: Record<string, string> = {
-      'approved': '#43e97b',  
-      'pending': '#fa709a',   
+      'approved': '#6fef9a',  
+      'pending': '#667eea',   
       'rejected': '#f5576c',  
-      'cancelled': '#6c757d',
+      'cancelled': '#764ba2',
     };
 
     const labels = data.details.eventsByApprovalStatus.map(d => d.approvalStatus);
@@ -71,12 +83,19 @@ export class Dashboard implements OnInit {
   public barChartOptions: ChartConfiguration<'bar'>['options'] = {
     responsive: true,
     scales: {
-      y: { beginAtZero: true, ticks: { stepSize: 1 } }, 
-      x: { grid: { display: false } }
+      y: { 
+        beginAtZero: true, 
+        ticks: { stepSize: 1, color: '#a0aec0' },
+        grid: { color: 'rgba(102, 126, 234, 0.1)' }
+      }, 
+      x: { 
+        grid: { display: false },
+        ticks: { color: '#a0aec0' }
+      }
     },
     plugins: {
       legend: { display: false }, 
-      title: { display: true, text: 'Occupation des Salles (Top 10)' }
+      title: { display: true, text: 'Occupation des Salles (Top 10)', color: '#764ba2' }
     }
   };
 
@@ -94,7 +113,9 @@ export class Dashboard implements OnInit {
       labels: sortedLocs.map(l => l.location),
       datasets: [{
         data: sortedLocs.map(l => parseInt(l.count)),
-        backgroundColor: '#667eea', 
+        backgroundColor: 'rgba(102, 126, 234, 0.8)', 
+        borderColor: '#667eea',
+        borderWidth: 1,
         borderRadius: 5,
         barThickness: 30
       }]
@@ -103,12 +124,39 @@ export class Dashboard implements OnInit {
 
   ngOnInit() {
     this.loadPendingEvents();
+    this.loadPendingOrganizers();
+    this.loadUsers();
+    this.loadMostActiveOrganizers();
   }
 
   loadPendingEvents() {
     this.adminService.getPendingEvents().subscribe({
       next: (events) => this.pendingEvents.set(events || []),
       error: (err) => console.error('Error loading pending events:', err)
+    });
+  }
+
+  loadPendingOrganizers() {
+    this.adminService.getPendingOrganizers().subscribe({
+      next: (organizers) => this.pendingOrganizers.set(organizers || []),
+      error: (err) => console.error('Error loading pending organizers:', err)
+    });
+  }
+
+  loadUsers() {
+    this.adminService.getAllUsers().subscribe({
+      next: (users) => this.users.set(users || []),
+      error: (err) => console.error('Error loading users:', err)
+    });
+  }
+
+  loadMostActiveOrganizers() {
+    this.adminService.getMostActiveOrganizers().subscribe({
+      next: (organizers) => {
+        console.log('Most Active Organizers:', organizers);
+        this.mostActiveOrganizers.set(organizers || []);
+      },
+      error: (err) => console.error('Error loading most active organizers:', err)
     });
   }
 
@@ -129,6 +177,26 @@ export class Dashboard implements OnInit {
         this.pendingEvents.set(updated);
       },
       error: (err) => console.error('Error rejecting event:', err)
+    });
+  }
+
+  approveOrganizer(organizerId: string) {
+    this.adminService.updateOrganizerStatus(organizerId, 'APPROVED').subscribe({
+      next: () => {
+        const updated = this.pendingOrganizers().filter(o => o.id !== organizerId);
+        this.pendingOrganizers.set(updated);
+      },
+      error: (err) => console.error('Error approving organizer:', err)
+    });
+  }
+
+  rejectOrganizer(organizerId: string) {
+    this.adminService.updateOrganizerStatus(organizerId, 'REJECTED').subscribe({
+      next: () => {
+        const updated = this.pendingOrganizers().filter(o => o.id !== organizerId);
+        this.pendingOrganizers.set(updated);
+      },
+      error: (err) => console.error('Error rejecting organizer:', err)
     });
   }
 

@@ -33,7 +33,7 @@ export class OrganizersService {
   async findAll(): Promise<Organizer[]> {
     return await this.organizerRepository.find({
       where: { isVerified: true },
-      relations: ['user']
+      relations: ['user', 'events']
     });
   }
 

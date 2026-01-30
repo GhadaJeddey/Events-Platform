@@ -40,6 +40,7 @@ export class RoomBookingComponent {
   selectedSlotStart = signal<string | null>(null);
   selectedSlotEnd = signal<string | null>(null);
   isLoading = signal(false);
+  occupiedSlots = signal<any[]>([]);
 
   // Time slots de 8h à 20h par tranches de 30 min
   timeSlots = [
@@ -85,25 +86,51 @@ export class RoomBookingComponent {
   }
 
   private isSlotAvailable(date: Date, time: string): boolean {
-    // Pour l'instant, on retourne true. La logique réelle viendra du backend
+    // Vérifie si le créneau est dans le futur
     const now = new Date();
     const slotDateTime = new Date(date);
     const [hours, minutes] = time.split(':').map(Number);
     slotDateTime.setHours(hours, minutes, 0, 0);
     
-    return slotDateTime > now;
+    if (slotDateTime <= now) return false;
+
+    // Vérifie si le créneau est occupé par un événement
+    const occupied = this.occupiedSlots();
+    for (const event of occupied) {
+      const eventStart = new Date(event.startDate);
+      const eventEnd = new Date(event.endDate);
+      
+      // Vérifie si le créneau chevauche cet événement
+      if (slotDateTime >= eventStart && slotDateTime < eventEnd) {
+        return false;
+      }
+    }
+    
+    return true;
   }
 
   previousWeek() {
     const current = this.currentWeekStart();
     current.setDate(current.getDate() - 7);
     this.currentWeekStart.set(new Date(current));
+    
+    // Recharger les créneaux pour la nouvelle semaine
+    const room = this.selectedRoom();
+    if (room) {
+      this.loadOccupiedSlots(room);
+    }
   }
 
   nextWeek() {
     const current = this.currentWeekStart();
     current.setDate(current.getDate() + 7);
     this.currentWeekStart.set(new Date(current));
+    
+    // Recharger les créneaux pour la nouvelle semaine
+    const room = this.selectedRoom();
+    if (room) {
+      this.loadOccupiedSlots(room);
+    }
   }
 
   selectSlot(day: DaySchedule, timeIndex: number) {
@@ -174,6 +201,34 @@ export class RoomBookingComponent {
     // Reset la sélection quand on change de salle
     this.selectedSlotStart.set(null);
     this.selectedSlotEnd.set(null);
+    
+    // Charger les créneaux occupés pour cette salle
+    const room = this.selectedRoom();
+    if (room) {
+      this.loadOccupiedSlots(room);
+    }
+  }
+
+  loadOccupiedSlots(room: string) {
+    this.isLoading.set(true);
+    
+    // Calculer la plage de dates (semaine actuelle)
+    const weekStart = this.currentWeekStart();
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekEnd.getDate() + 7);
+    
+    this.eventsService.getRoomSlots(room, weekStart.toISOString(), weekEnd.toISOString())
+      .subscribe({
+        next: (slots) => {
+          this.occupiedSlots.set(slots);
+          this.isLoading.set(false);
+        },
+        error: (err) => {
+          console.error('Error loading occupied slots:', err);
+          this.occupiedSlots.set([]);
+          this.isLoading.set(false);
+        }
+      });
   }
 
   closeModal() {

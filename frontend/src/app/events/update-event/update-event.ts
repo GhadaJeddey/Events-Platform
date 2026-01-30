@@ -9,12 +9,11 @@ import { ToastrService } from 'ngx-toastr';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map, switchMap, of, tap } from 'rxjs';
 import { LoaderComponent } from '../../shared/components/loader/loader';
-import { RoomBookingComponent } from '../../shared/components/room-booking/room-booking';
 import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-update-event',
-  imports: [FormsModule, LoaderComponent, RoomBookingComponent, CommonModule],
+  imports: [FormsModule, LoaderComponent, CommonModule],
   templateUrl: './update-event.html',
   styleUrl: './update-event.css',
 })
@@ -31,10 +30,17 @@ export class UpdateEvent {
   // Room booking
   availableRooms = signal<string[]>([]);
   isLoadingRooms = signal(false);
-  showRoomBooking = signal(false);
   startDateValue: string = '';
   endDateValue: string = '';
   selectedLocation: string = '';
+
+  // Vérifier si la salle sélectionnée est disponible pour le créneau
+  isRoomAvailable = computed(() => {
+    if (!this.selectedLocation || !this.startDateValue || !this.endDateValue) {
+      return false;
+    }
+    return this.availableRooms().includes(this.selectedLocation);
+  });
 
   currentEvent = toSignal(
     this.route.paramMap.pipe(
@@ -126,27 +132,19 @@ export class UpdateEvent {
     }
   }
 
-  openRoomBooking() {
-    if (!this.startDateValue || !this.endDateValue) {
-      this.toastr.info('Veuillez d\'abord sélectionner les dates de début et de fin.');
+  onLocationChange() {
+    // Rafraîchir la vérification de disponibilité quand la salle change
+    if (this.selectedLocation && this.startDateValue && this.endDateValue) {
+      this.onDateChange();
+    }
+  }
+
+  reserveRoom() {
+    if (!this.isRoomAvailable()) {
+      this.toastr.warning('Ce créneau n\'est pas disponible pour cette salle.');
       return;
     }
-    this.showRoomBooking.set(true);
-  }
-
-  closeRoomBooking() {
-    this.showRoomBooking.set(false);
-  }
-
-  onSlotSelected(selection: { date: Date; startTime: string; endTime: string; room: string }) {
-    this.selectedLocation = selection.room;
-    this.startDateValue = selection.startTime.slice(0, 16);
-    this.endDateValue = selection.endTime.slice(0, 16);
-    this.showRoomBooking.set(false);
-    this.toastr.success(`Salle ${selection.room} réservée pour le créneau sélectionné`);
-  }
-
-  getSelectedDate(): Date {
-    return this.startDateValue ? new Date(this.startDateValue) : new Date();
+    
+    this.toastr.success(`Salle ${this.selectedLocation} réservée pour le créneau sélectionné. Vous pouvez maintenant modifier l'événement.`);
   }
 }

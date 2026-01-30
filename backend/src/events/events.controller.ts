@@ -95,6 +95,16 @@ export class EventsController {
     return this.eventsService.getAvailableRooms(start, end);
   }
 
+  @Get('availability/slots')
+  @ApiOperation({ summary: 'Get room availability slots for a specific room and date range' })
+  getRoomSlots(
+    @Query('room') room: string,
+    @Query('start') start: string,
+    @Query('end') end: string
+  ) {
+    return this.eventsService.getRoomSlots(room, start, end);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get event by ID' })
   findOne(@Param('id') id: string) {
