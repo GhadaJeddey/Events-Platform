@@ -44,11 +44,11 @@ export class EventsService {
     const conflictingEvents = await this.eventsRepository
       .createQueryBuilder('event')
       .select('event.location')
-      .where('event.approvalStatus IN (:...statuses)', { 
-          statuses: [ApprovalStatus.PENDING, ApprovalStatus.APPROVED] 
+      .where('event.approvalStatus IN (:...statuses)', {
+        statuses: [ApprovalStatus.PENDING, ApprovalStatus.APPROVED]
       })
-      .andWhere('event.startDate < :endDate', { endDate }) 
-      .andWhere('event.endDate > :startDate', { startDate }) 
+      .andWhere('event.startDate < :endDate', { endDate })
+      .andWhere('event.endDate > :startDate', { startDate })
       .getMany();
 
     const occupiedRooms = conflictingEvents.map((e) => e.location);
@@ -56,9 +56,9 @@ export class EventsService {
   }
 
   async checkRoomAvailability(
-    location: RoomLocation, 
-    start: Date, 
-    end: Date, 
+    location: RoomLocation,
+    start: Date,
+    end: Date,
     excludeEventId?: string
   ): Promise<boolean> {
     const query = this.eventsRepository.createQueryBuilder('event')
@@ -109,7 +109,7 @@ export class EventsService {
   // UPDATE 
 
   async update(id: string, updateEventDto: UpdateEventDto) {
-    const event = await this.findOne(id); 
+    const event = await this.findOne(id);
     const now = new Date();
     // On fusionne les nouvelles dates/lieux avec les anciennes si elles ne sont pas fournies
     const newStart = updateEventDto.startDate ? new Date(updateEventDto.startDate) : event.startDate;
@@ -118,12 +118,12 @@ export class EventsService {
 
     // Si on modifie la date ou le lieu, on doit revérifier la disponibilité
     if (updateEventDto.startDate || updateEventDto.endDate || updateEventDto.location) {
-        // on passe l'ID de l'événement actuel pour ne pas qu'il "entre en conflit avec lui-même"
-        const isFree = await this.checkRoomAvailability(newLocation, newStart, newEnd, id);
-        
-        if (!isFree) {
-            throw new ConflictException(`La salle ${newLocation} n'est pas disponible pour les nouvelles dates choisies.`);
-        }
+      // on passe l'ID de l'événement actuel pour ne pas qu'il "entre en conflit avec lui-même"
+      const isFree = await this.checkRoomAvailability(newLocation, newStart, newEnd, id);
+
+      if (!isFree) {
+        throw new ConflictException(`La salle ${newLocation} n'est pas disponible pour les nouvelles dates choisies.`);
+      }
     }
 
     if (updateEventDto.startDate) {
@@ -144,17 +144,17 @@ export class EventsService {
         );
       }
     }
-    
+
     await this.eventsRepository.update(id, updateEventDto);
     return this.findOne(id);
   }
-  
+
   // READ ALL PUBLIC
   async findAllPublic(): Promise<Event[]> {
     const now = new Date();
     const events = await this.eventsRepository.find({
       where: {
-        approvalStatus: ApprovalStatus.APPROVED,
+        approvalStatus: In([ApprovalStatus.APPROVED, ApprovalStatus.CANCELLED]),
         eventStatus: In([EventStatus.UPCOMING, EventStatus.ONGOING]),
       },
       order: {
@@ -200,7 +200,7 @@ export class EventsService {
     }
 
     return await this.eventsRepository.createQueryBuilder('event')
-      .where('event.approvalStatus = :status', { status: ApprovalStatus.APPROVED })
+      .where('event.approvalStatus IN (:...statuses)', { statuses: [ApprovalStatus.APPROVED, ApprovalStatus.CANCELLED] })
       .andWhere('event.eventStatus IN (:...statuses)', {
         statuses: [EventStatus.UPCOMING, EventStatus.ONGOING],
       })

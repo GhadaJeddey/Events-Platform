@@ -119,3 +119,56 @@
     transition: all 0.3s ease;
     box-shadow: 0 4px 10px rgba(102, 126, 234, 0.2);
 }
+
+/* --- Styles pour l'état ANNULÉ --- */
+
+.event-card.is-cancelled {
+    pointer-events: none;
+    /* Désactive tous les clics */
+    opacity: 0.8;
+}
+
+.event-card.is-cancelled .event-card-image img {
+    filter: grayscale(1) contrast(0.7);
+}
+
+.cancelled-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+}
+
+.cancelled-text {
+    color: #ff4d4d;
+    font-size: 2.5rem;
+    font-weight: 900;
+    border: 6px solid #ff4d4d;
+    padding: 10px 20px;
+    text-transform: uppercase;
+    transform: rotate(-15deg);
+    letter-spacing: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(2px);
+    box-shadow: 0 0 20px rgba(255, 77, 77, 0.3);
+}
+
+.disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    color: #a0aec0 !important;
+    /* Le texte devient gris */
+    box-shadow: none !important;
+}
+
+.link-register.disabled {
+    background: #e2e8f0 !important;
+    /* Un gris très clair pour le bouton */
+    border: 1px solid #cbd5e0;
+}
