@@ -82,8 +82,8 @@ export class EventsService {
 
   getAvailableRooms(start: string, end: string): Observable<string[]> {
     const params = new HttpParams()
-      .set('start', new Date(start).toISOString())
-      .set('end', new Date(end).toISOString());
+      .set('start', start)
+      .set('end', end);
 
     return this.http.get<string[]>(`${this.apiUrl}/events/availability`, { params });
   }
@@ -91,8 +91,8 @@ export class EventsService {
   getRoomSlots(room: string, start: string, end: string): Observable<any[]> {
     const params = new HttpParams()
       .set('room', room)
-      .set('start', new Date(start).toISOString())
-      .set('end', new Date(end).toISOString());
+      .set('start', start)
+      .set('end', end);
 
     return this.http.get<any[]>(`${this.apiUrl}/events/availability/slots`, { params });
   }

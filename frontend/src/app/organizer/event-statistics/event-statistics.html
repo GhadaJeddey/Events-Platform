@@ -39,6 +39,11 @@
             <span class="status-badge" [ngClass]="statistics().eventStatus">
               {{ statistics().eventStatus }}
             </span>
+            @if (statistics().roomBookingStatus) {
+              <span class="status-badge" [ngClass]="statistics().roomBookingStatus">
+                Salle: {{ statistics().roomBookingStatus }}
+              </span>
+            }
           </p>
         </div>
       </div>

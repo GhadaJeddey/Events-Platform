@@ -5,11 +5,12 @@ import { ToastrService } from 'ngx-toastr';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AdminService } from '../../services/admin.service';
 import { Organizer } from '../../Models/organizer';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-organizer-approval',
   standalone: true,
-  imports: [CommonModule, MatTableModule, DatePipe],
+  imports: [CommonModule, MatTableModule, DatePipe, RouterLink],
   templateUrl: './organizer-approval.html',
   styleUrls: ['./organizer-approval.css']
 })

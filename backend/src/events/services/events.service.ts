@@ -51,68 +51,78 @@ export class EventsService {
     const startDate = new Date(startStr);
     const endDate = new Date(endStr);
 
+    console.log('🔍 [BACKEND] getAvailableRooms:', { startStr, endStr, startDate, endDate });
+
     if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
       throw new BadRequestException('Dates invalides');
     }
 
-    // On cherche les événements qui chevauchent ce créneau
-    const conflictingEvents = await this.eventsRepository
-      .createQueryBuilder('event')
-      .select('event.location')
-      .where('event.approvalStatus IN (:...statuses)', {
-        statuses: [ApprovalStatus.PENDING, ApprovalStatus.APPROVED]
-      })
-      .andWhere('event.startDate < :endDate', { endDate })
-      .andWhere('event.endDate > :startDate', { startDate })
+    // On cherche les réservations approuvées qui chevauchent ce créneau
+    const conflictingReservations = await this.roomReservationRequestRepository
+      .createQueryBuilder('reservation')
+      .select('reservation.room')
+      .where('reservation.status = :status', { status: ReservationStatus.APPROVED })
+      .andWhere('reservation.startDate < :endDate', { endDate })
+      .andWhere('reservation.endDate > :startDate', { startDate })
       .getMany();
 
-    const occupiedRooms = conflictingEvents.map((e) => e.location);
-    return ALL_ROOMS.filter((room) => !occupiedRooms.includes(room));
+    console.log('📋 [BACKEND] Réservations conflictuelles:', conflictingReservations);
+
+    const occupiedRooms = conflictingReservations.map((r) => r.room);
+    const availableRooms = ALL_ROOMS.filter((room) => !occupiedRooms.includes(room));
+    
+    console.log('✅ [BACKEND] Salles disponibles:', availableRooms);
+    return availableRooms;
   }
 
   async getRoomSlots(room: string, startStr: string, endStr: string): Promise<any> {
     const startDate = new Date(startStr);
     const endDate = new Date(endStr);
 
+    console.log('🔍 [BACKEND] getRoomSlots:', { room, startStr, endStr, startDate, endDate });
+
     if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
       throw new BadRequestException('Dates invalides');
     }
 
-    // Récupérer tous les événements approuvés ou en attente pour cette salle dans la plage de dates
-    const events = await this.eventsRepository
-      .createQueryBuilder('event')
-      .where('event.location = :room', { room })
-      .andWhere('event.approvalStatus IN (:...statuses)', {
-        statuses: [ApprovalStatus.PENDING, ApprovalStatus.APPROVED]
-      })
-      .andWhere('event.startDate < :endDate', { endDate })
-      .andWhere('event.endDate > :startDate', { startDate })
+    // Récupérer les réservations approuvées pour cette salle dans la plage de dates
+    const reservations = await this.roomReservationRequestRepository
+      .createQueryBuilder('reservation')
+      .where('reservation.room = :room', { room })
+      .andWhere('reservation.status = :status', { status: ReservationStatus.APPROVED })
+      .andWhere('reservation.startDate < :endDate', { endDate })
+      .andWhere('reservation.endDate > :startDate', { startDate })
       .getMany();
 
-    // Retourner les événements avec leurs créneaux
-    return events.map(event => ({
-      id: event.id,
-      title: event.title,
-      startDate: event.startDate,
-      endDate: event.endDate,
-      approvalStatus: event.approvalStatus
+    console.log('📋 [BACKEND] Réservations trouvées pour', room, ':', reservations);
+
+    // Retourner les réservations avec leurs créneaux
+    const result = reservations.map(reservation => ({
+      id: reservation.id,
+      title: reservation.eventTitle || 'Réservé',
+      startDate: reservation.startDate,
+      endDate: reservation.endDate,
+      approvalStatus: reservation.status
     }));
+    
+    console.log('✅ [BACKEND] Résultats getRoomSlots:', result);
+    return result;
   }
 
   async checkRoomAvailability(
     location: RoomLocation,
     start: Date,
     end: Date,
-    excludeEventId?: string
+    excludeReservationRequestId?: string
   ): Promise<boolean> {
-    const query = this.eventsRepository.createQueryBuilder('event')
-      .where('event.location = :location', { location })
-      .andWhere('event.approvalStatus IN (:...statuses)', { statuses: [ApprovalStatus.PENDING, ApprovalStatus.APPROVED] })
-      .andWhere('event.startDate < :end', { end })
-      .andWhere('event.endDate > :start', { start });
+    const query = this.roomReservationRequestRepository.createQueryBuilder('reservation')
+      .where('reservation.room = :location', { location })
+      .andWhere('reservation.status = :status', { status: ReservationStatus.APPROVED })
+      .andWhere('reservation.startDate < :end', { end })
+      .andWhere('reservation.endDate > :start', { start });
 
-    if (excludeEventId) {
-      query.andWhere('event.id != :id', { id: excludeEventId });
+    if (excludeReservationRequestId) {
+      query.andWhere('reservation.id != :id', { id: excludeReservationRequestId });
     }
 
     const count = await query.getCount();
@@ -172,7 +182,7 @@ export class EventsService {
 
     // Si on modifie la date ou le lieu, on doit revérifier la disponibilité de salle 
     if (updateEventDto.startDate || updateEventDto.endDate || updateEventDto.location) {
-      const isFree = await this.checkRoomAvailability(newLocation, newStart, newEnd, idEvent);
+      const isFree = await this.checkRoomAvailability(newLocation, newStart, newEnd);
       if (!isFree) {
         throw new ConflictException(`La salle ${newLocation} n'est pas disponible pour les nouvelles dates choisies.`);
       }
@@ -386,7 +396,7 @@ export class EventsService {
 
     const event = await this.eventsRepository.findOne({
       where: { id: eventId },
-      relations: ['registrations', 'registrations.student'],
+      relations: ['registrations', 'registrations.student', 'organizer'],
     });
 
     if (!event) {
@@ -423,6 +433,23 @@ export class EventsService {
       count: Number(row.count),
     }));
 
+    // Récupérer le statut de réservation de salle pour cet événement
+    let roomBookingStatus: ReservationStatus | null = null;
+    if (event.location && event.organizer) {
+      const roomReservation = await this.roomReservationRequestRepository
+        .createQueryBuilder('reservation')
+        .where('reservation.organizerId = :organizerId', { organizerId: event.organizer.id })
+        .andWhere('reservation.room = :room', { room: event.location })
+        .andWhere('reservation.startDate = :startDate', { startDate: event.startDate })
+        .andWhere('reservation.endDate = :endDate', { endDate: event.endDate })
+        .orderBy('reservation.createdAt', 'DESC')
+        .getOne();
+
+      if (roomReservation) {
+        roomBookingStatus = roomReservation.status;
+      }
+    }
+
     return {
       eventId: event.id,
       title: event.title,
@@ -438,6 +465,7 @@ export class EventsService {
       availableSpots: Math.max(0, event.capacity - confirmed),
       approvalStatus: event.approvalStatus,
       eventStatus: event.eventStatus,
+      roomBookingStatus,
       majorDistribution,
       registrationsByDay,
       registrationsByHour,
@@ -507,8 +535,29 @@ export class EventsService {
     const startDate = new Date(createRoomReservationRequestDto.startDate);
     const endDate = new Date(createRoomReservationRequestDto.endDate);
 
+    console.log('📥 [BACKEND] createRoomReservationRequest:', {
+      dto: createRoomReservationRequestDto,
+      userId,
+      startDate,
+      endDate
+    });
+
     if (startDate >= endDate) {
       throw new BadRequestException('La date de fin doit être après la date de début');
+    }
+
+    const isFree = await this.checkRoomAvailability(
+      createRoomReservationRequestDto.room,
+      startDate,
+      endDate
+    );
+    
+    console.log(`${isFree ? '✅' : '❌'} [BACKEND] Disponibilité:`, isFree);
+    
+    if (!isFree) {
+      throw new ConflictException(
+        `La salle ${createRoomReservationRequestDto.room} n'est pas disponible pour ce créneau.`
+      );
     }
 
     const organizer = await this.organizersService.findOneByUserId(userId);
@@ -519,7 +568,9 @@ export class EventsService {
       status: ReservationStatus.PENDING,
     });
 
-    return await this.roomReservationRequestRepository.save(reservationRequest);
+    const saved = await this.roomReservationRequestRepository.save(reservationRequest);
+    console.log('✅ [BACKEND] Réservation créée:', saved);
+    return saved;
   }
 
   async getRoomReservationRequests(
@@ -550,6 +601,18 @@ export class EventsService {
 
     if (!reservationRequest) {
       throw new NotFoundException('Demande de réservation non trouvée');
+    }
+
+    const isFree = await this.checkRoomAvailability(
+      reservationRequest.room,
+      reservationRequest.startDate,
+      reservationRequest.endDate,
+      reservationRequest.id
+    );
+    if (!isFree) {
+      throw new ConflictException(
+        `La salle ${reservationRequest.room} n'est pas disponible pour ce créneau.`
+      );
     }
 
     reservationRequest.status = ReservationStatus.APPROVED;

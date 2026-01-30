@@ -49,6 +49,16 @@ export class RoomBookingComponent {
     '16:00', '16:30', '17:00', '17:30', '18:00', '18:30', '19:00', '19:30', '20:00'
   ];
 
+  private toLocalDateTimeString(date: Date): string {
+    const pad = (value: number) => value.toString().padStart(2, '0');
+    const year = date.getFullYear();
+    const month = pad(date.getMonth() + 1);
+    const day = pad(date.getDate());
+    const hours = pad(date.getHours());
+    const minutes = pad(date.getMinutes());
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  }
+
   // Génère le calendrier de la semaine
   weekDays = computed<DaySchedule[]>(() => {
     const start = this.currentWeekStart();
@@ -170,8 +180,8 @@ export class RoomBookingComponent {
         // Émettre la sélection
         this.slotSelected.emit({
           date: day.date,
-          startTime: startDateTime.toISOString(),
-          endTime: endDateTime.toISOString(),
+          startTime: this.toLocalDateTimeString(startDateTime),
+          endTime: this.toLocalDateTimeString(endDateTime),
           room: selectedRoom
         });
       }
@@ -216,8 +226,12 @@ export class RoomBookingComponent {
     const weekStart = this.currentWeekStart();
     const weekEnd = new Date(weekStart);
     weekEnd.setDate(weekEnd.getDate() + 7);
-    
-    this.eventsService.getRoomSlots(room, weekStart.toISOString(), weekEnd.toISOString())
+
+    this.eventsService.getRoomSlots(
+      room,
+      this.toLocalDateTimeString(weekStart),
+      this.toLocalDateTimeString(weekEnd)
+    )
       .subscribe({
         next: (slots) => {
           this.occupiedSlots.set(slots);

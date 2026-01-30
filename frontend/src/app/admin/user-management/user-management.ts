@@ -11,11 +11,12 @@ import { ToastrService } from 'ngx-toastr';
 import { AdminService } from '../../services/admin.service';
 import { UserRole, User } from '../../Models/auth.models';
 import { catchError, of } from 'rxjs';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-user-management',
   standalone: true,
-  imports: [CommonModule, MatTableModule, MatSelectModule, MatFormFieldModule, MatInputModule, MatIconModule, FormsModule],
+  imports: [CommonModule, MatTableModule, MatSelectModule, MatFormFieldModule, MatInputModule, MatIconModule, FormsModule, RouterLink],
   templateUrl: './user-management.html',
   styleUrls: ['./user-management.css']
 })

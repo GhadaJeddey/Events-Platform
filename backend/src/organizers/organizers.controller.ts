@@ -3,9 +3,9 @@ import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { OrganizersService } from './services/organizers.service';
 import { CreateOrganizerDto } from './dto/create-organizer.dto';
 import { UpdateOrganizerDto } from './dto/update-organizer.dto';
-import { AuthGuard } from '../auth/Guards/auth.guard';
+import { AuthGuard } from '../auth/guards/auth.guard';
 import { Role } from '../common/enums/role.enum';
-import { RolesGuard } from '../auth/Guards/roles.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 

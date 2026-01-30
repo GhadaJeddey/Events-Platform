@@ -90,11 +90,6 @@
                     @if(locInput.invalid && (locInput.dirty || locInput.touched || updateForm.submitted)) {
                     <div class="error-message">Le lieu est obligatoire.</div>
                     }
-                    @if(selectedLocation && !isRoomAvailable() && startDateValue && endDateValue) {
-                    <div class="info-message" style="color: #f5576c; font-size: 0.85rem; margin-top: 0.5rem;">
-                        ⚠️ Ce créneau n'est pas disponible pour cette salle
-                    </div>
-                    }
                 </div>
 
                 <div class="form-group">

@@ -4,11 +4,12 @@ import { MatTableModule } from '@angular/material/table';
 import { ToastrService } from 'ngx-toastr';
 import { toSignal } from '@angular/core/rxjs-interop'; 
 import { AdminService } from '../../services/admin.service';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-event-approval',
   standalone: true,
-  imports: [CommonModule, MatTableModule], 
+  imports: [CommonModule, MatTableModule, RouterLink], 
   templateUrl: './event-approval.html',
   styleUrls: ['./event-approval.css']
 })

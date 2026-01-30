@@ -1,8 +1,8 @@
 import { RegistrationsService } from './services/registrations.service';
 import { CreateRegistrationDto } from './dto/create-registration.dto';
 import { Roles } from '../auth/decorators/roles.decorator';
-import { RolesGuard } from '../auth/Guards/roles.guard';
-import { AuthGuard } from '../auth/Guards/auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { AuthGuard } from '../auth/guards/auth.guard';
 import { Role } from '../common/enums/role.enum';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { Controller, UseGuards, Post, Get, Delete, Body, Param, ParseUUIDPipe } from '@nestjs/common';

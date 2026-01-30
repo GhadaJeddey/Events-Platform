@@ -22,8 +22,8 @@ import { EventsService } from './services/events.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { CreateRoomReservationRequestDto } from './dto/create-room-reservation-request.dto';
-import { AuthGuard } from '../auth/Guards/auth.guard';
-import { RolesGuard } from '../auth/Guards/roles.guard';
+import { AuthGuard } from '../auth/guards/auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { Role } from '../common/enums/role.enum';
 

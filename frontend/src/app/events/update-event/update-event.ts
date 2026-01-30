@@ -30,6 +30,7 @@ export class UpdateEvent {
   // Room booking
   availableRooms = signal<string[]>([]);
   isLoadingRooms = signal(false);
+  roomAvailability = signal<boolean | null>(null);
   startDateValue: string = '';
   endDateValue: string = '';
   selectedLocation: string = '';
@@ -39,8 +40,22 @@ export class UpdateEvent {
     if (!this.selectedLocation || !this.startDateValue || !this.endDateValue) {
       return false;
     }
-    return this.availableRooms().includes(this.selectedLocation);
+    if (this.roomAvailability() === false) return false;
+    if (this.roomAvailability() === true) {
+      return this.availableRooms().includes(this.selectedLocation);
+    }
+    return false;
   });
+
+  private toLocalDateTimeString(date: Date): string {
+    const pad = (value: number) => value.toString().padStart(2, '0');
+    const year = date.getFullYear();
+    const month = pad(date.getMonth() + 1);
+    const day = pad(date.getDate());
+    const hours = pad(date.getHours());
+    const minutes = pad(date.getMinutes());
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  }
 
   currentEvent = toSignal(
     this.route.paramMap.pipe(
@@ -55,12 +70,11 @@ export class UpdateEvent {
             }
             if (event) {
               this.selectedLocation = event.location;
-              this.startDateValue = typeof event.startDate === 'string' 
-                ? event.startDate.slice(0, 16) 
-                : new Date(event.startDate).toISOString().slice(0, 16);
-              this.endDateValue = typeof event.endDate === 'string' 
-                ? event.endDate.slice(0, 16) 
-                : new Date(event.endDate).toISOString().slice(0, 16);
+              const startDate = new Date(event.startDate as any);
+              const endDate = new Date(event.endDate as any);
+              this.startDateValue = this.toLocalDateTimeString(startDate);
+              this.endDateValue = this.toLocalDateTimeString(endDate);
+              this.onDateChange();
             }
           })
         );
@@ -114,19 +128,29 @@ export class UpdateEvent {
 
   onDateChange() {
     if (this.startDateValue && this.endDateValue) {
+      if (this.startDateValue >= this.endDateValue) {
+        this.availableRooms.set([]);
+        this.roomAvailability.set(false);
+        return;
+      }
       this.isLoadingRooms.set(true);
-      const start = new Date(this.startDateValue).toISOString();
-      const end = new Date(this.endDateValue).toISOString();
-
-      this.eventsService.getAvailableRooms(start, end).subscribe({
+      console.log('🔍 [UPDATE] Vérification disponibilité salles:', {
+        start: this.startDateValue,
+        end: this.endDateValue
+      });
+      
+      this.eventsService.getAvailableRooms(this.startDateValue, this.endDateValue).subscribe({
         next: (rooms) => {
+          console.log('✅ [UPDATE] Salles disponibles reçues:', rooms);
           this.availableRooms.set(rooms);
           this.isLoadingRooms.set(false);
+          this.updateRoomAvailability();
         },
         error: (err) => {
-          console.error('Error fetching available rooms:', err);
+          console.error('❌ [UPDATE] Erreur getAvailableRooms:', err);
           this.availableRooms.set([]);
           this.isLoadingRooms.set(false);
+          this.roomAvailability.set(null);
         },
       });
     }
@@ -136,11 +160,52 @@ export class UpdateEvent {
     // Rafraîchir la vérification de disponibilité quand la salle change
     if (this.selectedLocation && this.startDateValue && this.endDateValue) {
       this.onDateChange();
+    } else {
+      this.roomAvailability.set(null);
     }
   }
 
+  private updateRoomAvailability() {
+    if (!this.selectedLocation || !this.startDateValue || !this.endDateValue) {
+      console.log('⚠️ [UPDATE] updateRoomAvailability: données manquantes');
+      this.roomAvailability.set(null);
+      return;
+    }
+
+    console.log('🔍 [UPDATE] Vérification créneaux pour salle:', {
+      room: this.selectedLocation,
+      start: this.startDateValue,
+      end: this.endDateValue
+    });
+
+    this.eventsService
+      .getRoomSlots(this.selectedLocation, this.startDateValue, this.endDateValue)
+      .subscribe({
+        next: (slots) => {
+          console.log('📊 [UPDATE] Créneaux occupés reçus:', slots);
+          const isAvailable = slots.length === 0;
+          console.log(`${isAvailable ? '✅' : '❌'} [UPDATE] Salle disponible:`, isAvailable);
+          this.roomAvailability.set(isAvailable);
+        },
+        error: (err) => {
+          console.error('❌ [UPDATE] Erreur getRoomSlots:', err);
+          this.roomAvailability.set(null);
+        },
+      });
+  }
+
   reserveRoom() {
+    console.log('🎯 [UPDATE] Tentative réservation salle:', {
+      selectedLocation: this.selectedLocation,
+      startDate: this.startDateValue,
+      endDate: this.endDateValue,
+      roomAvailability: this.roomAvailability(),
+      isRoomAvailable: this.isRoomAvailable(),
+      availableRooms: this.availableRooms()
+    });
+
     if (!this.isRoomAvailable()) {
+      console.warn('⚠️ [UPDATE] Réservation bloquée: créneau non disponible');
       this.toastr.warning('Ce créneau n\'est pas disponible pour cette salle.');
       return;
     }
@@ -153,11 +218,15 @@ export class UpdateEvent {
       eventTitle: this.currentEvent()?.title,
     };
 
+    console.log('📤 [UPDATE] Envoi demande réservation:', reservationData);
+
     this.eventsService.requestRoomReservation(reservationData).subscribe({
       next: (response) => {
+        console.log('✅ [UPDATE] Réservation envoyée avec succès:', response);
         this.toastr.success('Demande de réservation envoyée à l\'administrateur. En attente d\'approbation.');
       },
       error: (err) => {
+        console.error('❌ [UPDATE] Erreur envoi réservation:', err);
         const errorMessage = err.error?.message || 'Erreur lors de l\'envoi de la demande de réservation';
         this.toastr.error(errorMessage);
       }

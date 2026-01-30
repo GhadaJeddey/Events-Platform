@@ -23,6 +23,7 @@ export class CreateEventForm {
   // Gestion des salles
   availableRooms = signal<string[]>([]);
   isLoadingRooms = signal<boolean>(false);
+  roomAvailability = signal<boolean | null>(null);
 
   startDateValue: string = '';
   endDateValue: string = '';
@@ -33,30 +34,43 @@ export class CreateEventForm {
     if (!this.selectedLocation || !this.startDateValue || !this.endDateValue) {
       return false;
     }
-    return this.availableRooms().includes(this.selectedLocation);
+    if (this.roomAvailability() === false) return false;
+    if (this.roomAvailability() === true) {
+      return this.availableRooms().includes(this.selectedLocation);
+    }
+    return false;
   });
 
   onDateChange() {
     if (this.startDateValue && this.endDateValue) {
       if (this.startDateValue >= this.endDateValue) {
         this.availableRooms.set([]); 
+        this.roomAvailability.set(false);
         return;
       }
 
       this.isLoadingRooms.set(true);
       
+      console.log('🔍 [CREATE] Vérification disponibilité salles:', {
+        start: this.startDateValue,
+        end: this.endDateValue
+      });
+      
       this.eventsService.getAvailableRooms(this.startDateValue, this.endDateValue).subscribe({
         next: (rooms) => {
+          console.log('✅ [CREATE] Salles disponibles reçues:', rooms);
           this.availableRooms.set(rooms);
           this.isLoadingRooms.set(false);
+          this.updateRoomAvailability();
           
           if (rooms.length === 0) {
             this.toastr.info('Aucune salle disponible pour ce créneau.');
           }
         },
         error: (err) => {
-          console.error(err);
+          console.error('❌ [CREATE] Erreur getAvailableRooms:', err);
           this.isLoadingRooms.set(false);
+          this.roomAvailability.set(null);
         }
       });
     }
@@ -66,7 +80,38 @@ export class CreateEventForm {
     // Rafraîchir la vérification de disponibilité quand la salle change
     if (this.selectedLocation && this.startDateValue && this.endDateValue) {
       this.onDateChange();
+    } else {
+      this.roomAvailability.set(null);
     }
+  }
+
+  private updateRoomAvailability() {
+    if (!this.selectedLocation || !this.startDateValue || !this.endDateValue) {
+      console.log('⚠️ [CREATE] updateRoomAvailability: données manquantes');
+      this.roomAvailability.set(null);
+      return;
+    }
+
+    console.log('🔍 [CREATE] Vérification créneaux pour salle:', {
+      room: this.selectedLocation,
+      start: this.startDateValue,
+      end: this.endDateValue
+    });
+
+    this.eventsService
+      .getRoomSlots(this.selectedLocation, this.startDateValue, this.endDateValue)
+      .subscribe({
+        next: (slots) => {
+          console.log('📊 [CREATE] Créneaux occupés reçus:', slots);
+          const isAvailable = slots.length === 0;
+          console.log(`${isAvailable ? '✅' : '❌'} [CREATE] Salle disponible:`, isAvailable);
+          this.roomAvailability.set(isAvailable);
+        },
+        error: (err) => {
+          console.error('❌ [CREATE] Erreur getRoomSlots:', err);
+          this.roomAvailability.set(null);
+        },
+      });
   }
   onFileSelected(event: any) {
     const file = event.target.files[0];
@@ -117,7 +162,17 @@ export class CreateEventForm {
   }
 
   reserveRoom() {
+    console.log('🎯 [CREATE] Tentative réservation salle:', {
+      selectedLocation: this.selectedLocation,
+      startDate: this.startDateValue,
+      endDate: this.endDateValue,
+      roomAvailability: this.roomAvailability(),
+      isRoomAvailable: this.isRoomAvailable(),
+      availableRooms: this.availableRooms()
+    });
+
     if (!this.isRoomAvailable()) {
+      console.warn('⚠️ [CREATE] Réservation bloquée: créneau non disponible');
       this.toastr.warning('Ce créneau n\'est pas disponible pour cette salle.');
       return;
     }
@@ -129,11 +184,15 @@ export class CreateEventForm {
       endDate: this.endDateValue,
     };
 
+    console.log('📤 [CREATE] Envoi demande réservation:', reservationData);
+
     this.eventsService.requestRoomReservation(reservationData).subscribe({
       next: (response) => {
+        console.log('✅ [CREATE] Réservation envoyée avec succès:', response);
         this.toastr.success('Demande de réservation envoyée à l\'administrateur. En attente d\'approbation.');
       },
       error: (err) => {
+        console.error('❌ [CREATE] Erreur envoi réservation:', err);
         const errorMessage = err.error?.message || 'Erreur lors de l\'envoi de la demande de réservation';
         this.toastr.error(errorMessage);
       }

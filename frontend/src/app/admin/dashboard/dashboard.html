@@ -52,27 +52,23 @@
       <div class="pending-card">
         <div class="pending-card-header">
           <h3>Demandes de salles</h3>
-          <span class="badge">{{ pendingEvents().length }}</span>
+          <span class="badge">{{ pendingRoomReservations().length }}</span>
         </div>
         <div class="pending-card-footer">
           <a routerLink="/admin/rooms-approvals" class="view-more-link">Voir plus →</a>
         </div>
         <div class="pending-items">
-          @if (pendingEvents().length > 0) {
-            @for (event of pendingEvents().slice(0, 1); track event.id) {
+          @if (pendingRoomReservations().length > 0) {
+            @for (reservation of pendingRoomReservations().slice(0, 1); track reservation.id) {
               <div class="pending-item">
                 <div class="item-info">
-                  <p class="item-title">{{ event.location }}</p>
-                  <p class="item-meta">{{ event.startDate | date:'EEE d MMM' }} • {{ event.title }}</p>
-                </div>
-                <div class="item-actions">
-                  <button class="action-btn approve" (click)="approveEvent(event.id)">✓</button>
-                  <button class="action-btn reject" (click)="rejectEvent(event.id)">✕</button>
+                  <p class="item-title">{{ reservation.room }}</p>
+                  <p class="item-meta">{{ reservation.startDate | date:'EEE d MMM' }} • {{ reservation.eventTitle || 'Sans titre' }}</p>
                 </div>
               </div>
             }
-            @if (pendingEvents().length > 1) {
-              <p class="more-items">+{{ pendingEvents().length - 1 }} de plus...</p>
+            @if (pendingRoomReservations().length > 1) {
+              <p class="more-items">+{{ pendingRoomReservations().length - 1 }} de plus...</p>
             }
           } @else {
             <p class="no-data">Aucune demande</p>

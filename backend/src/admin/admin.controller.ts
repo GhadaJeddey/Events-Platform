@@ -14,8 +14,8 @@ import { AdminService } from './services/admin.service';
 import { UpdateEventStatusDto } from './dto/update-event-status.dto';
 import { UpdateUserRoleDto } from './dto/update-user-role.dto';
 import { UpdateOrganizerStatusDto } from './dto/update-organizer-status.dto';
-import { AuthGuard } from '../auth/Guards/auth.guard';
-import { RolesGuard } from '../auth/Guards/roles.guard';
+import { AuthGuard } from '../auth/guards/auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { Role } from '../common/enums/role.enum';
 

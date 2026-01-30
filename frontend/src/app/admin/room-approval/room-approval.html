@@ -1,5 +1,11 @@
 <div class="container fade-in-up">
-  <h2 class="text-gradient section-title">Demandes de Salles</h2>
+    <div class="return-header">
+    
+        <a routerLink="/admin/dashboard" class="back-btn">← Retour</a>
+  </div>
+  <div class="page-header">
+    <h2 class="text-gradient section-title">Demandes de Salles</h2>
+  </div>
   
   <div class="table-container">
     <table mat-table [dataSource]="pendingRequests()" class="custom-table">

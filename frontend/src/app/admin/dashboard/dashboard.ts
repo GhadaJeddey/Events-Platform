@@ -23,6 +23,7 @@ export class Dashboard implements OnInit {
   recentActivity = toSignal(this.adminService.getRecentEvents(), { initialValue: [] });
   pendingEvents = signal<Event[]>([]);
   pendingOrganizers = signal<Organizer[]>([]);
+  pendingRoomReservations = signal<any[]>([]);
   mostActiveOrganizers = signal<any[]>([]);
   users = signal<User[]>([]);
   inactiveSlots = signal<Set<string>>(new Set());
@@ -125,6 +126,7 @@ export class Dashboard implements OnInit {
   ngOnInit() {
     this.loadPendingEvents();
     this.loadPendingOrganizers();
+    this.loadPendingRoomReservations();
     this.loadUsers();
     this.loadMostActiveOrganizers();
   }
@@ -140,6 +142,13 @@ export class Dashboard implements OnInit {
     this.adminService.getPendingOrganizers().subscribe({
       next: (organizers) => this.pendingOrganizers.set(organizers || []),
       error: (err) => console.error('Error loading pending organizers:', err)
+    });
+  }
+
+  loadPendingRoomReservations() {
+    this.adminService.getPendingRoomReservations().subscribe({
+      next: (reservations) => this.pendingRoomReservations.set(reservations || []),
+      error: (err) => console.error('Error loading pending room reservations:', err)
     });
   }
 

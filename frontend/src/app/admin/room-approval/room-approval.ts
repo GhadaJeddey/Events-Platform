@@ -4,6 +4,7 @@ import { MatTableModule } from '@angular/material/table';
 import { ToastrService } from 'ngx-toastr';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AdminService } from '../../services/admin.service';
+import { RouterLink } from '@angular/router';
 
 interface RoomReservationRequest {
   id: string;
@@ -11,14 +12,21 @@ interface RoomReservationRequest {
   startDate: string;
   endDate: string;
   eventTitle?: string;
-  organizer?: { name?: string };
+  organizer?: {
+    id: string;
+    name: string;
+    user?: {
+      firstName?: string;
+      lastName?: string;
+    };
+  };
   status: string;
 }
 
 @Component({
   selector: 'app-room-approval',
   standalone: true,
-  imports: [CommonModule, MatTableModule, DatePipe],
+  imports: [CommonModule, MatTableModule, DatePipe, RouterLink],
   templateUrl: './room-approval.html',
   styleUrls: ['./room-approval.css']
 })
@@ -35,7 +43,16 @@ export class RoomApproval {
     'actions'
   ];
 
-  pendingRequests = toSignal(this.adminService.getPendingRoomReservations(), { initialValue: [] as RoomReservationRequest[] });
+  pendingRequests = toSignal(this.adminService.getPendingRoomReservations(), { 
+    initialValue: [] as RoomReservationRequest[] 
+  });
+
+  constructor() {
+    // Debug: log les données reçues
+    this.adminService.getPendingRoomReservations().subscribe(data => {
+      console.log('Pending room reservations:', data);
+    });
+  }
 
   approve(id: string) {
     this.adminService.approveRoomReservation(id).subscribe({
