@@ -2,13 +2,14 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Registration } from '../Models/registration.model'; 
+import { environment } from '../../../Commun/environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class RegistrationsService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:3000'; 
+  private apiUrl = environment.apiUrl; 
 
   getMyRegistrations(): Observable<Registration[]> {
     return this.http.get<Registration[]>(`${this.apiUrl}/registrations`);
@@ -19,6 +20,6 @@ export class RegistrationsService {
   }
 
   cancel(registrationId: string): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/registrations/${registrationId}/cancel`);
+    return this.http.delete(`${this.apiUrl}/registrations/${registrationId}`);
   }
 }

@@ -42,7 +42,7 @@
 }
 
 .btn-book-room {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
     color: white;
     border: none;
     padding: 10px 16px;
@@ -52,6 +52,7 @@
     font-weight: 500;
     transition: all 0.3s ease;
     white-space: nowrap;
+    height: 50px;
     margin-top: 5px;
 }
 
@@ -254,10 +255,12 @@
     justify-content: flex-end;
     padding-top: 20px;
     border-top: 2px solid #f1f5f9;
+    flex-wrap: wrap;
 }
 
 .btn-cancel,
-.btn-submit {
+.btn-submit,
+.btn-delete {
     padding: 16px 36px;
     border-radius: 16px;
     font-size: 16px;
@@ -277,6 +280,12 @@
     transform: translateY(-2px);
 }
 
+.btn-cancel:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
 .btn-submit {
     background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
     color: white;
@@ -286,6 +295,24 @@
 .btn-submit:hover {
     transform: translateY(-3px);
     box-shadow: 0 15px 40px rgba(99, 102, 241, 0.5);
+}
+
+.btn-delete {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+    box-shadow: 0 10px 30px rgba(239, 68, 68, 0.3);
+    margin-left: auto;
+}
+
+.btn-delete:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 40px rgba(239, 68, 68, 0.5);
+}
+
+.btn-delete:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
 }
 
 .image-upload-container {
@@ -379,4 +406,120 @@
     .full-width {
         grid-column: span 1;
     }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .btn-delete {
+        margin-left: 0;
+    }
+}
+
+/* Styles pour la boîte de dialogue */
+.dialog-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.dialog-box {
+    background: white;
+    border-radius: 20px;
+    max-width: 450px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: slideUp 0.3s ease;
+    overflow: hidden;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.dialog-header {
+    padding: 24px;
+    border-bottom: 1px solid #f1f5f9;
+    background: #f8fafc;
+}
+
+.dialog-header h2 {
+    margin: 0;
+    font-size: 20px;
+    color: #1e293b;
+    font-weight: 700;
+}
+
+.dialog-content {
+    padding: 24px;
+    color: #475569;
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+.dialog-content p {
+    margin: 0;
+}
+
+.dialog-content strong {
+    color: #1e293b;
+    font-weight: 600;
+}
+
+.dialog-actions {
+    padding: 20px 24px;
+    border-top: 1px solid #f1f5f9;
+    background: #f8fafc;
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+}
+
+.btn-delete-confirm {
+    padding: 12px 28px;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+    box-shadow: 0 5px 15px rgba(239, 68, 68, 0.2);
+}
+
+.btn-delete-confirm:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(239, 68, 68, 0.4);
+}
+
+.btn-delete-confirm:disabled,
+.dialog-actions .btn-cancel:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
 }

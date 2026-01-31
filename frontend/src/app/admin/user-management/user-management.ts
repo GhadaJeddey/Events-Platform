@@ -5,8 +5,6 @@ import { FormsModule } from '@angular/forms';
 import { MatTableModule } from '@angular/material/table';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatIconModule } from '@angular/material/icon';
 import { ToastrService } from 'ngx-toastr';
 import { AdminService } from '../../services/admin.service';
 import { UserRole, User } from '../../Models/auth.models';
@@ -16,7 +14,7 @@ import { RouterLink } from '@angular/router';
 @Component({
   selector: 'app-user-management',
   standalone: true,
-  imports: [CommonModule, MatTableModule, MatSelectModule, MatFormFieldModule, MatInputModule, MatIconModule, FormsModule, RouterLink],
+  imports: [CommonModule, MatTableModule, MatSelectModule, MatFormFieldModule, FormsModule, RouterLink],
   templateUrl: './user-management.html',
   styleUrls: ['./user-management.css']
 })
@@ -24,7 +22,7 @@ export class UserManagement {
   private adminService = inject(AdminService);
   private toastr = inject(ToastrService);
 
-  roles = Object.values(UserRole);
+  roles = [UserRole.STUDENT, UserRole.ORGANIZER, UserRole.ADMIN];
   displayedColumns: string[] = ['email', 'firstName', 'lastName', 'role'];
 
   searchTerm = signal('');

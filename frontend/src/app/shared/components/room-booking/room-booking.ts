@@ -238,7 +238,6 @@ export class RoomBookingComponent {
           this.isLoading.set(false);
         },
         error: (err) => {
-          console.error('Error loading occupied slots:', err);
           this.occupiedSlots.set([]);
           this.isLoading.set(false);
         }

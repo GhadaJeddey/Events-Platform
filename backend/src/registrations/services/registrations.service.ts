@@ -192,30 +192,30 @@ export class RegistrationsService {
 
   // --- Analytics in clubs dashboard ---
   async getAwaitingRegistrations(eventId: string): Promise<number> {
-    return await this.registrationRepository.count({
-      where: {
-        event: { id: String(eventId) },
-        status: RegistrationStatus.WAITLIST
-      }
-    });
+    const result = await this.registrationRepository
+      .createQueryBuilder('registration')
+      .where('registration.eventId = :eventId', { eventId })
+      .andWhere('registration.status = :status', { status: RegistrationStatus.WAITLIST })
+      .getCount();
+    return result;
   }
 
   async getConfirmedRegistrations(eventId: string): Promise<number> {
-    return await this.registrationRepository.count({
-      where: {
-        event: { id: String(eventId) },
-        status: RegistrationStatus.CONFIRMED
-      }
-    });
+    const result = await this.registrationRepository
+      .createQueryBuilder('registration')
+      .where('registration.eventId = :eventId', { eventId })
+      .andWhere('registration.status = :status', { status: RegistrationStatus.CONFIRMED })
+      .getCount();
+    return result;
   }
 
-  async getCancelledRegistrations(eventId: number): Promise<number> {
-    return await this.registrationRepository.count({
-      where: {
-        event: { id: String(eventId) },
-        status: RegistrationStatus.CANCELLED
-      }
-    });
+  async getCancelledRegistrations(eventId: string): Promise<number> {
+    const result = await this.registrationRepository
+      .createQueryBuilder('registration')
+      .where('registration.eventId = :eventId', { eventId })
+      .andWhere('registration.status = :status', { status: RegistrationStatus.CANCELLED })
+      .getCount();
+    return result;
   }
 
   async getMajorDistribution(eventId: string) {
@@ -233,31 +233,47 @@ export class RegistrationsService {
   }
 
   async getRegistrationsByDay(eventId: string) {
-    const registrationsByDayRaw = await this.registrationRepository
-      .createQueryBuilder('registration')
-      .select('DATE(registration.createdAt)', 'date')
-      .addSelect('COUNT(*)', 'count')
-      .where('registration.eventId = :eventId', { eventId })
-      .andWhere('registration.status = :status', { status: RegistrationStatus.CONFIRMED })
-      .groupBy('DATE(registration.createdAt)')
-      .orderBy('DATE(registration.createdAt)', 'ASC')
-      .getRawMany();
+    try {
+      console.log('📊 [REG] getRegistrationsByDay called for eventId:', eventId);
+      
+      const registrationsByDayRaw = await this.registrationRepository
+        .createQueryBuilder('registration')
+        .select('DATE(registration.createdAt)', 'date')
+        .addSelect('COUNT(*)', 'count')
+        .where('registration.eventId = :eventId', { eventId })
+        .andWhere('registration.status = :status', { status: RegistrationStatus.CONFIRMED })
+        .groupBy('DATE(registration.createdAt)')
+        .orderBy('DATE(registration.createdAt)', 'ASC')
+        .getRawMany();
 
-    return registrationsByDayRaw;
+      console.log('  ✅ Result:', registrationsByDayRaw);
+      return registrationsByDayRaw;
+    } catch (error) {
+      console.error('  ❌ Error in getRegistrationsByDay:', error);
+      throw error;
+    }
   }
 
   async getRegistrationsByHour(eventId: string) {
-    const registrationsByHourRaw = await this.registrationRepository
-      .createQueryBuilder('registration')
-      .select('EXTRACT(HOUR FROM registration.createdAt)', 'hour')
-      .addSelect('COUNT(*)', 'count')
-      .where('registration.eventId = :eventId', { eventId })
-      .andWhere('registration.status = :status', { status: RegistrationStatus.CONFIRMED })
-      .groupBy('EXTRACT(HOUR FROM registration.createdAt)')
-      .orderBy('EXTRACT(HOUR FROM registration.createdAt)', 'ASC')
-      .getRawMany();
+    try {
+      console.log('📊 [REG] getRegistrationsByHour called for eventId:', eventId);
+      
+      const registrationsByHourRaw = await this.registrationRepository
+        .createQueryBuilder('registration')
+        .select('EXTRACT(HOUR FROM registration.createdAt)', 'hour')
+        .addSelect('COUNT(*)', 'count')
+        .where('registration.eventId = :eventId', { eventId })
+        .andWhere('registration.status = :status', { status: RegistrationStatus.CONFIRMED })
+        .groupBy('EXTRACT(HOUR FROM registration.createdAt)')
+        .orderBy('EXTRACT(HOUR FROM registration.createdAt)', 'ASC')
+        .getRawMany();
 
-    return registrationsByHourRaw;
+      console.log('  ✅ Result:', registrationsByHourRaw);
+      return registrationsByHourRaw;
+    } catch (error) {
+      console.error('  ❌ Error in getRegistrationsByHour:', error);
+      throw error;
+    }
   }
 
   // --- FOR ORGANIZERS ---

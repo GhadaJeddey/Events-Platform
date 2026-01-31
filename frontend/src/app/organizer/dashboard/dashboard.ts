@@ -89,7 +89,6 @@ export class OrganizerDashboard implements OnInit {
 
     statusBreakdown = computed(() => {
         const list = this.myEvents();
-        console.log('Calculating status breakdown for events:', list);
         const counts = {
             'À venir': 0,
             'En cours': 0,
@@ -104,11 +103,9 @@ export class OrganizerDashboard implements OnInit {
             // Count by eventStatus
             if (e.eventStatus) {
                 const label = this.getStatusLabel(e.eventStatus);
-                console.log(`Event ID: ${e.id}, Status: ${e.eventStatus}, Label: ${label}`);
                 if (counts[label as keyof typeof counts] !== undefined) {
                     counts[label as keyof typeof counts]++;
                 }
-                console.log('Updated counts:', counts);
             }
             // Count by approvalStatus
             if (e.approvalStatus) {
@@ -118,7 +115,6 @@ export class OrganizerDashboard implements OnInit {
                 }
             }
         }
-        console.log('Final status breakdown counts:', counts);
         return counts;
     });
 
@@ -183,14 +179,11 @@ export class OrganizerDashboard implements OnInit {
     }
 
     load() {
-        console.log('Calling getMyEvents...');
         this.eventsService.getMyEvents().subscribe({
             next: (data) => {
-                console.log('Received events:', data);
                 this.events.set(data);
             },
             error: (err) => {
-                console.error('Error loading events:', err);
             }
         });
     }

@@ -1,13 +1,41 @@
 <div class="container fade-in-up">
-    <div class="return-header">
+    <div class="header-actions">
+        <div class="return-header">
+            <a routerLink="/admin/dashboard" class="back-btn">← Retour</a>
+        </div>
+        <div class="header-left">
+            <h2 class="text-gradient section-title">Demandes de Salles</h2>
+        </div>
+    </div>
     
-        <a routerLink="/admin/dashboard" class="back-btn">← Retour</a>
-  </div>
-  <div class="page-header">
-    <h2 class="text-gradient section-title">Demandes de Salles</h2>
-  </div>
+    <div class="search-wrapper">
+        <div class="search-box">
+            <input 
+                type="text" 
+                class="search-input" 
+                placeholder="Rechercher une demande..." 
+                [ngModel]="searchTerm()"
+                (ngModelChange)="searchTerm.set($event)"
+            />
+            @if (searchTerm()) {
+                <button class="clear-btn" (click)="searchTerm.set('')">
+                    <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            }
+            <button class="search-icon-btn">
+                <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="3" fill="none"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+            </button>
+        </div>
+    </div>
   
-  <div class="table-container">
+    <div class="table-container">
     <table mat-table [dataSource]="pendingRequests()" class="custom-table">
 
       <ng-container matColumnDef="room">

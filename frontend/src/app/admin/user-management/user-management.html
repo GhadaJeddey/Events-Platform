@@ -1,29 +1,39 @@
 <div class="container fade-in-up">
 
   <div class="header-actions">
-      <div class="return-header">
-    
-        <a routerLink="/admin/dashboard" class="back-btn">← Retour</a>
-  </div>
+    <div class="return-header">
+      <a routerLink="/admin/dashboard" class="back-btn">← Retour</a>
+    </div>
     <div class="header-left">
-
       <h2 class="text-gradient section-title">User Management</h2>
     </div>
+  </div>
 
-    <mat-form-field appearance="outline" class="search-field">
-      <mat-label>Search users...</mat-label>
-      <mat-icon matPrefix>search</mat-icon>
-      <input matInput
-             [ngModel]="searchTerm()"
-             (ngModelChange)="searchTerm.set($event)"
-             placeholder="Search by Name, Email...">
-
+  <div class="search-wrapper">
+    <div class="search-box">
+      <input 
+        type="text" 
+        class="search-input" 
+        placeholder="Rechercher par nom, email..." 
+        [ngModel]="searchTerm()"
+        (ngModelChange)="searchTerm.set($event)"
+      />
       @if (searchTerm()) {
-        <button mat-icon-button matSuffix (click)="searchTerm.set('')">
-          <mat-icon>close</mat-icon>
+        <button class="clear-btn" (click)="searchTerm.set('')">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
         </button>
       }
-    </mat-form-field>
+      <button class="search-icon-btn">
+        <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="3" fill="none"
+          stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+      </button>
+    </div>
   </div>
 
   <div class="table-container">
@@ -47,11 +57,13 @@
       <ng-container matColumnDef="role">
         <th mat-header-cell *matHeaderCellDef> Role </th>
         <td mat-cell *matCellDef="let user">
-          <mat-form-field appearance="outline" class="dense-select">
+          <mat-form-field appearance="outline" [class]="'dense-select role-select role-' + user.role">
             <mat-select [value]="user.role" (selectionChange)="updateRole(user, $event.value)">
               @for (role of roles; track role) {
-                <mat-option [value]="role">
-                  {{ role | titlecase }}
+                <mat-option [value]="role" [class]="'role-option-' + role">
+                  <span class="role-badge" [class]="'badge-' + role">
+                    {{ role | titlecase }}
+                  </span>
                 </mat-option>
               }
             </mat-select>

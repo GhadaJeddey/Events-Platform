@@ -155,7 +155,6 @@ export class EventStatisticsComponent implements OnInit {
         this.loading.set(false);
       },
       error: (err: any) => {
-        console.error('Error loading statistics:', err);
         this.error.set('Failed to load event statistics');
         this.loading.set(false);
       }

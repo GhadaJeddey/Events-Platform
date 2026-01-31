@@ -1,4 +1,4 @@
-import { Component, signal, output } from '@angular/core';
+import { Component, signal, output, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -12,6 +12,12 @@ import { FormsModule } from '@angular/forms';
 export class SearchComponent {
   searchTerm = signal('');
   searchSubmitted = output<string>();
+
+  constructor() {
+    effect(() => {
+      this.searchSubmitted.emit(this.searchTerm());
+    });
+  }
 
   onSearch(): void {
     this.searchSubmitted.emit(this.searchTerm());

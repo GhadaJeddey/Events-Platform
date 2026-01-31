@@ -52,7 +52,7 @@ export class AllMyEvents implements OnInit {
     loadEvents() {
         this.eventsService.getMyEvents().subscribe({
             next: (data) => this.events.set(data),
-            error: (err) => console.error('Error loading events:', err)
+            error: (err) => {}
         });
     }
 

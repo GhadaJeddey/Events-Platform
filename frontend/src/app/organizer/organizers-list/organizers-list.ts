@@ -28,7 +28,6 @@ export class OrganizersList implements OnInit {
                 this.isLoading.set(false);
             },
             error: (err) => {
-                console.error('Error loading organizers:', err);
                 this.isLoading.set(false);
             }
         });

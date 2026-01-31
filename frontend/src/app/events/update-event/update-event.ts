@@ -26,6 +26,8 @@ export class UpdateEvent {
   eventId: string | null = null;
   selectedFile = signal<File | null>(null);
   imagePreview = signal<string | null>(null);
+  showDeleteDialog = signal<boolean>(false);
+  isDeleting = signal<boolean>(false);
   
   // Room booking
   availableRooms = signal<string[]>([]);
@@ -134,20 +136,14 @@ export class UpdateEvent {
         return;
       }
       this.isLoadingRooms.set(true);
-      console.log('🔍 [UPDATE] Vérification disponibilité salles:', {
-        start: this.startDateValue,
-        end: this.endDateValue
-      });
       
       this.eventsService.getAvailableRooms(this.startDateValue, this.endDateValue).subscribe({
         next: (rooms) => {
-          console.log('✅ [UPDATE] Salles disponibles reçues:', rooms);
           this.availableRooms.set(rooms);
           this.isLoadingRooms.set(false);
           this.updateRoomAvailability();
         },
         error: (err) => {
-          console.error('❌ [UPDATE] Erreur getAvailableRooms:', err);
           this.availableRooms.set([]);
           this.isLoadingRooms.set(false);
           this.roomAvailability.set(null);
@@ -167,45 +163,25 @@ export class UpdateEvent {
 
   private updateRoomAvailability() {
     if (!this.selectedLocation || !this.startDateValue || !this.endDateValue) {
-      console.log('⚠️ [UPDATE] updateRoomAvailability: données manquantes');
       this.roomAvailability.set(null);
       return;
     }
-
-    console.log('🔍 [UPDATE] Vérification créneaux pour salle:', {
-      room: this.selectedLocation,
-      start: this.startDateValue,
-      end: this.endDateValue
-    });
 
     this.eventsService
       .getRoomSlots(this.selectedLocation, this.startDateValue, this.endDateValue)
       .subscribe({
         next: (slots) => {
-          console.log('📊 [UPDATE] Créneaux occupés reçus:', slots);
           const isAvailable = slots.length === 0;
-          console.log(`${isAvailable ? '✅' : '❌'} [UPDATE] Salle disponible:`, isAvailable);
           this.roomAvailability.set(isAvailable);
         },
         error: (err) => {
-          console.error('❌ [UPDATE] Erreur getRoomSlots:', err);
           this.roomAvailability.set(null);
         },
       });
   }
 
   reserveRoom() {
-    console.log('🎯 [UPDATE] Tentative réservation salle:', {
-      selectedLocation: this.selectedLocation,
-      startDate: this.startDateValue,
-      endDate: this.endDateValue,
-      roomAvailability: this.roomAvailability(),
-      isRoomAvailable: this.isRoomAvailable(),
-      availableRooms: this.availableRooms()
-    });
-
     if (!this.isRoomAvailable()) {
-      console.warn('⚠️ [UPDATE] Réservation bloquée: créneau non disponible');
       this.toastr.warning('Ce créneau n\'est pas disponible pour cette salle.');
       return;
     }
@@ -218,16 +194,39 @@ export class UpdateEvent {
       eventTitle: this.currentEvent()?.title,
     };
 
-    console.log('📤 [UPDATE] Envoi demande réservation:', reservationData);
-
     this.eventsService.requestRoomReservation(reservationData).subscribe({
       next: (response) => {
-        console.log('✅ [UPDATE] Réservation envoyée avec succès:', response);
         this.toastr.success('Demande de réservation envoyée à l\'administrateur. En attente d\'approbation.');
       },
       error: (err) => {
-        console.error('❌ [UPDATE] Erreur envoi réservation:', err);
         const errorMessage = err.error?.message || 'Erreur lors de l\'envoi de la demande de réservation';
+        this.toastr.error(errorMessage);
+      }
+    });
+  }
+
+  openDeleteDialog() {
+    this.showDeleteDialog.set(true);
+  }
+
+  closeDeleteDialog() {
+    this.showDeleteDialog.set(false);
+  }
+
+  confirmDelete() {
+    if (!this.eventId) return;
+
+    this.isDeleting.set(true);
+    this.eventsService.deleteEvent(this.eventId).subscribe({
+      next: (response) => {
+        this.isDeleting.set(false);
+        this.showDeleteDialog.set(false);
+        this.toastr.success('Événement supprimé avec succès !');
+        this.router.navigate(['/organizer/dashboard']);
+      },
+      error: (err) => {
+        this.isDeleting.set(false);
+        const errorMessage = err.error?.message || 'Erreur lors de la suppression de l\'événement';
         this.toastr.error(errorMessage);
       }
     });

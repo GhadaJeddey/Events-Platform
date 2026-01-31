@@ -9,7 +9,6 @@ export const adminOrOrganizerGuard = () => {
     if (authService.isAuthenticated() && (authService.isOrganizer() || authService.isAdmin())) {
         return true;
     }
-    console.warn('Access denied: Organizer or Admin privileges required.');
     router.navigate(['/events']);
     return false;
 };

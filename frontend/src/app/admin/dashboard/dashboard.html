@@ -65,6 +65,10 @@
                   <p class="item-title">{{ reservation.room }}</p>
                   <p class="item-meta">{{ reservation.startDate | date:'EEE d MMM' }} • {{ reservation.eventTitle || 'Sans titre' }}</p>
                 </div>
+                <div class="item-actions">
+                  <button class="action-btn approve" (click)="approveRoomReservation(reservation.id)">✓</button>
+                  <button class="action-btn reject" (click)="rejectRoomReservation(reservation.id)">✕</button>
+                </div>
               </div>
             }
             @if (pendingRoomReservations().length > 1) {

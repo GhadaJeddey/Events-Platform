@@ -168,7 +168,6 @@ export class Profile implements OnInit {
           this.isEditing = true;
           this.cd.detectChanges();
           this.toastr.error('Failed to update profile.', 'Error');
-          console.error(err);
         }
       });
     } else {

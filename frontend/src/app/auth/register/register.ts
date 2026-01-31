@@ -124,8 +124,6 @@ export class RegisterComponent {
                 };
             }
 
-            console.log('🚀 Sending registration request:', request);
-
             this.authService.register(request).subscribe({
                 next: () => {
                     if (formValue.role === UserRole.ORGANIZER) {

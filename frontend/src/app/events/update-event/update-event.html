@@ -141,10 +141,36 @@
                 <button type="submit" class="btn-submit">
                     Enregistrer les modifications
                 </button>
+                <button type="button" class="btn-delete" (click)="openDeleteDialog()">
+                    Supprimer
+                </button>
             </div>
         </form>
         } @else {
         <app-loader message="Chargement des données de l'événement..."></app-loader>
         }
     </div>
+
+    <!-- Dialogue de confirmation de suppression -->
+    @if(showDeleteDialog()) {
+    <div class="dialog-overlay" (click)="closeDeleteDialog()">
+        <div class="dialog-box" (click)="$event.stopPropagation()">
+            <div class="dialog-header">
+                <h2>Confirmer la suppression</h2>
+            </div>
+            <div class="dialog-content">
+                <p>Êtes-vous sûr de vouloir supprimer cet événement ? Cette action est <strong>irréversible</strong>.</p>
+            </div>
+            <div class="dialog-actions">
+                <button class="btn-cancel" (click)="closeDeleteDialog()" [disabled]="isDeleting()">
+                    Annuler
+                </button>
+                <button class="btn-delete-confirm" (click)="confirmDelete()" [disabled]="isDeleting()">
+                    @if(isDeleting()) { Suppression en cours... }
+                    @else { Oui, supprimer }
+                </button>
+            </div>
+        </div>
+    </div>
+    }
 </div>

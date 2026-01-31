@@ -6,6 +6,8 @@ import { environment } from '../../../../Commun/environments/environment';
 import { HoverElevateDirective } from '../../directives/hover-elevate.directive';
 import { StatusBadgeDirective } from '../../directives/status-badge.directive';
 import { RegistrationsService } from '../../services/registrations';
+import { ToastrService } from 'ngx-toastr';
+import { switchMap } from 'rxjs';
 
 @Component({
   selector: 'app-event-card',
@@ -15,6 +17,7 @@ import { RegistrationsService } from '../../services/registrations';
 })
 export class EventCard {
   private registrationsService = inject(RegistrationsService);
+  private toastr = inject(ToastrService);
   
   event = input<Event>();
   isRegistered = input<boolean>();
@@ -32,14 +35,24 @@ export class EventCard {
     if (!eventId) return;
 
     this.isCancelling.set(true);
-    this.registrationsService.cancel(eventId).subscribe({
+    
+    this.registrationsService.getMyRegistrations().pipe(
+      switchMap(registrations => {
+        const registration = registrations.find(r => r.event.id === eventId);
+        if (!registration) {
+          throw new Error('Inscription non trouvée');
+        }
+        return this.registrationsService.cancel(registration.id);
+      })
+    ).subscribe({
       next: () => {
         this.isCancelling.set(false);
+        this.toastr.success('Votre inscription a été annulée avec succès');
         this.registrationCancelled.emit();
       },
       error: (err) => {
-        console.error('Erreur lors de l\'annulation', err);
         this.isCancelling.set(false);
+        this.toastr.error('Erreur lors de l\'annulation de l\'inscription');
       }
     });
   }

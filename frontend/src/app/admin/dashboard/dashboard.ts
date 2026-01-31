@@ -134,38 +134,37 @@ export class Dashboard implements OnInit {
   loadPendingEvents() {
     this.adminService.getPendingEvents().subscribe({
       next: (events) => this.pendingEvents.set(events || []),
-      error: (err) => console.error('Error loading pending events:', err)
+      error: (err) => {}
     });
   }
 
   loadPendingOrganizers() {
     this.adminService.getPendingOrganizers().subscribe({
       next: (organizers) => this.pendingOrganizers.set(organizers || []),
-      error: (err) => console.error('Error loading pending organizers:', err)
+      error: (err) => {}
     });
   }
 
   loadPendingRoomReservations() {
     this.adminService.getPendingRoomReservations().subscribe({
       next: (reservations) => this.pendingRoomReservations.set(reservations || []),
-      error: (err) => console.error('Error loading pending room reservations:', err)
+      error: (err) => {}
     });
   }
 
   loadUsers() {
     this.adminService.getAllUsers().subscribe({
       next: (users) => this.users.set(users || []),
-      error: (err) => console.error('Error loading users:', err)
+      error: (err) => {}
     });
   }
 
   loadMostActiveOrganizers() {
     this.adminService.getMostActiveOrganizers().subscribe({
       next: (organizers) => {
-        console.log('Most Active Organizers:', organizers);
         this.mostActiveOrganizers.set(organizers || []);
       },
-      error: (err) => console.error('Error loading most active organizers:', err)
+      error: (err) => {}
     });
   }
 
@@ -175,7 +174,7 @@ export class Dashboard implements OnInit {
         const updated = this.pendingEvents().filter(e => e.id !== eventId);
         this.pendingEvents.set(updated);
       },
-      error: (err) => console.error('Error approving event:', err)
+      error: (err) => {}
     });
   }
 
@@ -185,7 +184,7 @@ export class Dashboard implements OnInit {
         const updated = this.pendingEvents().filter(e => e.id !== eventId);
         this.pendingEvents.set(updated);
       },
-      error: (err) => console.error('Error rejecting event:', err)
+      error: (err) => {}
     });
   }
 
@@ -195,7 +194,7 @@ export class Dashboard implements OnInit {
         const updated = this.pendingOrganizers().filter(o => o.id !== organizerId);
         this.pendingOrganizers.set(updated);
       },
-      error: (err) => console.error('Error approving organizer:', err)
+      error: (err) => {}
     });
   }
 
@@ -205,7 +204,27 @@ export class Dashboard implements OnInit {
         const updated = this.pendingOrganizers().filter(o => o.id !== organizerId);
         this.pendingOrganizers.set(updated);
       },
-      error: (err) => console.error('Error rejecting organizer:', err)
+      error: (err) => {}
+    });
+  }
+
+  approveRoomReservation(reservationId: string) {
+    this.adminService.approveRoomReservation(reservationId).subscribe({
+      next: () => {
+        const updated = this.pendingRoomReservations().filter(r => r.id !== reservationId);
+        this.pendingRoomReservations.set(updated);
+      },
+      error: (err) => {}
+    });
+  }
+
+  rejectRoomReservation(reservationId: string) {
+    this.adminService.rejectRoomReservation(reservationId).subscribe({
+      next: () => {
+        const updated = this.pendingRoomReservations().filter(r => r.id !== reservationId);
+        this.pendingRoomReservations.set(updated);
+      },
+      error: (err) => {}
     });
   }
 

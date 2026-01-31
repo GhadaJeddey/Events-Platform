@@ -1,10 +1,11 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal, computed } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
 import { ToastrService } from 'ngx-toastr';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AdminService } from '../../services/admin.service';
 import { RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 
 interface RoomReservationRequest {
   id: string;
@@ -26,13 +27,15 @@ interface RoomReservationRequest {
 @Component({
   selector: 'app-room-approval',
   standalone: true,
-  imports: [CommonModule, MatTableModule, DatePipe, RouterLink],
+  imports: [CommonModule, MatTableModule, DatePipe, RouterLink, FormsModule],
   templateUrl: './room-approval.html',
   styleUrls: ['./room-approval.css']
 })
 export class RoomApproval {
   private adminService = inject(AdminService);
   private toastr = inject(ToastrService);
+
+  searchTerm = signal('');
 
   displayedColumns: string[] = [
     'room',
@@ -43,15 +46,24 @@ export class RoomApproval {
     'actions'
   ];
 
-  pendingRequests = toSignal(this.adminService.getPendingRoomReservations(), { 
+  allRequests = toSignal(this.adminService.getPendingRoomReservations(), { 
     initialValue: [] as RoomReservationRequest[] 
   });
 
+  pendingRequests = computed(() => {
+    const term = this.searchTerm().toLowerCase();
+    const requests = this.allRequests();
+    
+    if (!term) return requests;
+    
+    return requests.filter(r =>
+      r.room?.toLowerCase().includes(term) ||
+      r.organizer?.name?.toLowerCase().includes(term) ||
+      r.eventTitle?.toLowerCase().includes(term)
+    );
+  });
+
   constructor() {
-    // Debug: log les données reçues
-    this.adminService.getPendingRoomReservations().subscribe(data => {
-      console.log('Pending room reservations:', data);
-    });
   }
 
   approve(id: string) {

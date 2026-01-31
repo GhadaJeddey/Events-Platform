@@ -12,7 +12,7 @@
             <div class="form-grid">
                 <div class="form-group full-width">
                     <label for="title">Titre de l'évènement</label>
-                    <input type="text" id="title" name="title" ngModel required minlength="3" #titleInput="ngModel"
+                    <input type="text" id="title" name="title" [(ngModel)]="eventTitleValue" required minlength="3" #titleInput="ngModel"
                         [class.invalid]="titleInput.invalid && (titleInput.dirty || titleInput.touched || eventForm.submitted)">
                     @if (titleInput.invalid && (titleInput.dirty || titleInput.touched || eventForm.submitted)) {
                     <div class="error-message">

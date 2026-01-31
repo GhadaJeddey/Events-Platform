@@ -53,7 +53,6 @@ export class EventDetails implements OnInit {
         this.isLoading.set(false);
       },
       error: (err) => {
-        console.error('Erreur lors du chargement de l\'événement:', err);
         this.isLoading.set(false);
       }
     });
@@ -175,7 +174,6 @@ export class EventDetails implements OnInit {
       },
       error: (error) => {
         this.isCancelling.set(false);
-        console.error('Erreur lors de l\'annulation:', error);
         this.toastr.error('Une erreur est survenue lors de l\'annulation de votre inscription', 'Erreur');
       }
     });
@@ -194,7 +192,6 @@ export class EventDetails implements OnInit {
         this.isUserRegistered.set(isRegistered);
       },
       error: (err) => {
-        console.error('Erreur lors de la vérification des inscriptions:', err);
         this.isUserRegistered.set(false);
       }
     });

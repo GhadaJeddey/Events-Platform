@@ -108,4 +108,8 @@ export class EventsService {
       reservationData
     );
   }
+
+  deleteEvent(id: string): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/events/${id}`);
+  }
 }

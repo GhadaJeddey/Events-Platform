@@ -393,83 +393,90 @@ export class EventsService {
   }
 
   async getEventStatistics(eventId: string) {
+    try {
 
-    const event = await this.eventsRepository.findOne({
-      where: { id: eventId },
-      relations: ['registrations', 'registrations.student', 'organizer'],
-    });
+      const event = await this.eventsRepository.findOne({
+        where: { id: eventId },
+        relations: ['registrations', 'registrations.student', 'organizer'],
+      });
 
-    if (!event) {
-      throw new NotFoundException(`Event with ID ${eventId} not found`);
-    }
-
-    // Compter les inscriptions par statut
-    const confirmed = await this.registrationsService.getConfirmedRegistrations(eventId);
-    const waitlist = await this.registrationsService.getAwaitingRegistrations(eventId);
-    const cancelled = await this.registrationsService.getCancelledRegistrations(Number(eventId));
-
-    // Répartition par filière 
-    const majors = ['IIA', 'IMI', 'GL', 'RT'];
-    const majorsRaw = await this.registrationsService.getMajorDistribution(eventId);
-
-    const majorDistribution = majors.map((major) => {
-      const entry = majorsRaw.find((m) => (m.major || '').toUpperCase() === major);
-      return { major, count: entry ? Number(entry.count) : 0 };
-    });
-
-    // Inscriptions par jour 
-    const registrationsByDayRaw = await this.registrationsService.getRegistrationsByDay(eventId);
-
-    const registrationsByDay = registrationsByDayRaw.map((row) => ({
-      date: row.date instanceof Date ? row.date.toISOString().split('T')[0] : row.date,
-      count: Number(row.count),
-    }));
-
-    // Inscriptions par heure
-    const registrationsByHourRaw = await this.registrationsService.getRegistrationsByHour(eventId);
-
-    const registrationsByHour = registrationsByHourRaw.map((row) => ({
-      hour: Number(row.hour),
-      count: Number(row.count),
-    }));
-
-    // Récupérer le statut de réservation de salle pour cet événement
-    let roomBookingStatus: ReservationStatus | null = null;
-    if (event.location && event.organizer) {
-      const roomReservation = await this.roomReservationRequestRepository
-        .createQueryBuilder('reservation')
-        .where('reservation.organizerId = :organizerId', { organizerId: event.organizer.id })
-        .andWhere('reservation.room = :room', { room: event.location })
-        .andWhere('reservation.startDate = :startDate', { startDate: event.startDate })
-        .andWhere('reservation.endDate = :endDate', { endDate: event.endDate })
-        .orderBy('reservation.createdAt', 'DESC')
-        .getOne();
-
-      if (roomReservation) {
-        roomBookingStatus = roomReservation.status;
+      if (!event) {
+        throw new NotFoundException(`Event with ID ${eventId} not found`);
       }
-    }
 
-    return {
-      eventId: event.id,
-      title: event.title,
-      description: event.description,
-      startDate: event.startDate,
-      endDate: event.endDate,
-      location: event.location,
-      capacity: event.capacity,
-      participants: confirmed,
-      waitlist,
-      cancelled,
-      fillRate: event.capacity > 0 ? Math.round((confirmed / event.capacity) * 100) : 0,
-      availableSpots: Math.max(0, event.capacity - confirmed),
-      approvalStatus: event.approvalStatus,
-      eventStatus: event.eventStatus,
-      roomBookingStatus,
-      majorDistribution,
-      registrationsByDay,
-      registrationsByHour,
-    };
+      const confirmed = await this.registrationsService.getConfirmedRegistrations(eventId);
+      
+      const waitlist = await this.registrationsService.getAwaitingRegistrations(eventId);
+      
+      const cancelled = await this.registrationsService.getCancelledRegistrations(eventId);
+      const majors = ['IIA', 'IMI', 'GL', 'RT'];
+      const majorsRaw = await this.registrationsService.getMajorDistribution(eventId);
+
+      const majorDistribution = majors.map((major) => {
+        const entry = majorsRaw.find((m) => (m.major || '').toUpperCase() === major);
+        return { major, count: entry ? Number(entry.count) : 0 };
+      });
+
+   
+      const registrationsByDayRaw = await this.registrationsService.getRegistrationsByDay(eventId);
+
+      const registrationsByDay = registrationsByDayRaw.map((row) => ({
+        date: row.date instanceof Date ? row.date.toISOString().split('T')[0] : row.date,
+        count: Number(row.count),
+      }));
+
+      // Inscriptions par heure
+      const registrationsByHourRaw = await this.registrationsService.getRegistrationsByHour(eventId);
+
+      const registrationsByHour = registrationsByHourRaw.map((row) => ({
+        hour: Number(row.hour),
+        count: Number(row.count),
+      }));
+
+      // Récupérer le statut de réservation de salle pour cet événement
+      let roomBookingStatus: ReservationStatus | null = null;
+      if (event.location && event.organizer) {
+        const roomReservation = await this.roomReservationRequestRepository
+          .createQueryBuilder('reservation')
+          .where('reservation.organizerId = :organizerId', { organizerId: event.organizer.id })
+          .andWhere('reservation.room = :room', { room: event.location })
+          .andWhere('reservation.startDate = :startDate', { startDate: event.startDate })
+          .andWhere('reservation.endDate = :endDate', { endDate: event.endDate })
+          .orderBy('reservation.createdAt', 'DESC')
+          .getOne();
+
+        if (roomReservation) {
+          roomBookingStatus = roomReservation.status;
+        }
+      }
+
+      const result = {
+        eventId: event.id,
+        title: event.title,
+        description: event.description,
+        startDate: event.startDate,
+        endDate: event.endDate,
+        location: event.location,
+        capacity: event.capacity,
+        participants: confirmed,
+        waitlist,
+        cancelled,
+        fillRate: event.capacity > 0 ? Math.round((confirmed / event.capacity) * 100) : 0,
+        availableSpots: Math.max(0, event.capacity - confirmed),
+        approvalStatus: event.approvalStatus,
+        eventStatus: event.eventStatus,
+        roomBookingStatus,
+        majorDistribution,
+        registrationsByDay,
+        registrationsByHour,
+      };
+
+      console.log('✅ [BACKEND] getEventStatistics completed successfully');
+      return result;
+    } catch (error) {
+      console.error('❌ [BACKEND] Error in getEventStatistics:', error);
+      throw error;
+    }
   }
 
   // --- ADMIN METHODS ---

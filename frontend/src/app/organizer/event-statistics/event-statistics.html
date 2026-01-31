@@ -34,7 +34,7 @@
           <h3>Statut</h3>
           <p>
             <span class="status-badge" [ngClass]="statistics().approvalStatus">
-              {{ statistics().approvalStatus }}
+              Événement: {{ statistics().approvalStatus }}
             </span>
             <span class="status-badge" [ngClass]="statistics().eventStatus">
               {{ statistics().eventStatus }}
@@ -42,6 +42,10 @@
             @if (statistics().roomBookingStatus) {
               <span class="status-badge" [ngClass]="statistics().roomBookingStatus">
                 Salle: {{ statistics().roomBookingStatus }}
+              </span>
+            } @else {
+              <span class="status-badge unknown">
+                Salle: Non assignée
               </span>
             }
           </p>

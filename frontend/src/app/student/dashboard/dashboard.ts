@@ -63,7 +63,7 @@ export class StudentDashboard implements OnInit {
         // Charger tous les événements
         this.eventsService.getEvents().subscribe({
             next: (data) => this.allEvents.set(data),
-            error: (err) => console.error('Erreur events', err)
+            error: (err) => {}
         });
 
         // Charger mes inscriptions
@@ -72,7 +72,7 @@ export class StudentDashboard implements OnInit {
                 const events = regs.map(r => r.event);
                 this.myEvents.set(events);
             },
-            error: (err) => console.error('Erreur registrations', err)
+            error: (err) => {}
         });
        
     }

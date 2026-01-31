@@ -16,7 +16,6 @@ export const adminGuard = () => {
 
     // If not admin, redirect to events list (or a forbidden page)
     // We could also show a toast message here
-    console.warn('Access denied: Admin privileges required.');
     router.navigate(['/events']);
     return false;
 };
