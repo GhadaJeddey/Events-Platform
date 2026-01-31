@@ -1,4 +1,4 @@
-import { Organizer } from './organizer';
+import { Organizer } from './Organizer';
 export enum RoomLocation {
   A1 = 'A1',
   A2 = 'A2',

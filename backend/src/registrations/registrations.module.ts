@@ -7,14 +7,14 @@ import { AuthModule } from '../auth/auth.module';
 import { StudentsModule } from '../students/students.module';
 import { EventsModule } from '../events/events.module';
 
-console.log('RegistrationsService:', RegistrationsService);
+
 
 
 @Module({
   imports: [TypeOrmModule.forFeature([Registration]),
     AuthModule,
     StudentsModule,
-    forwardRef(() => EventsModule),
+  forwardRef(() => EventsModule),
   ],
   controllers: [RegistrationsController],
   providers: [RegistrationsService],

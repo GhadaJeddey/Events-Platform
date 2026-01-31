@@ -27,7 +27,7 @@ export class RegistrationsService {
 
     if (!event) throw new NotFoundException('Event not found');
 
-    // Verif doublon
+    // Vérifier s'il existe déjà une inscription (peu importe le statut)
     const existingRegistration = await this.registrationRepository.findOne({
       where: {
         student: { id: student.id },
@@ -36,7 +36,27 @@ export class RegistrationsService {
     });
 
     if (existingRegistration) {
-      throw new ConflictException('Vous êtes déjà inscrit à cet évènement');
+      // Si inscription CANCELLED, la réactiver
+      if (existingRegistration.status === RegistrationStatus.CANCELLED) {
+        // Déterminer le nouveau statut
+        let newStatus = RegistrationStatus.CONFIRMED;
+        if (event.currentRegistrations >= event.capacity) {
+          newStatus = RegistrationStatus.WAITLIST;
+        }
+
+        existingRegistration.status = newStatus;
+        await this.registrationRepository.save(existingRegistration);
+
+        if (newStatus === RegistrationStatus.CONFIRMED) {
+          await this.eventsService.incrementRegistrations(event.id);
+        }
+
+        this.sendRegistrationEmail(student, event, newStatus);
+        return existingRegistration;
+      } else {
+        // Sinon, c'est une inscription active
+        throw new ConflictException('Vous êtes déjà inscrit à cet évènement');
+      }
     }
 
     // verif statut
@@ -144,11 +164,39 @@ export class RegistrationsService {
       return { message: 'Registration already cancelled', id };
     }
 
-    // cancel registration --> update its status 
+    const event = registration.event;
+
+    // If registration was CONFIRMED --> handle waitlist and decrement count
+    if (previousStatus === RegistrationStatus.CONFIRMED) {
+      const nextInLine = await this.registrationRepository.findOne({
+        where: { event: { id: event.id }, status: RegistrationStatus.WAITLIST },
+        order: { createdAt: 'ASC' }, // FIFO for waitlist
+        relations: ['student', 'student.user']
+      });
+
+      if (nextInLine) {
+        nextInLine.status = RegistrationStatus.CONFIRMED;
+        await this.registrationRepository.save(nextInLine);
+        console.log(`Promoted student ${nextInLine.student.id} from waitlist.`);
+        await this.mailerService.sendMail({
+          to: nextInLine.student.user.email,
+          subject: `Good News ! You are confirmed for : ${registration.event.title}`,
+          template: './waitlist',
+          context: {
+            name: nextInLine.student.user.firstName,
+            eventTitle: registration.event.title,
+          },
+        });
+      } else {
+        await this.eventsService.decrementRegistrations(event.id);
+      }
+    }
+
+    // Marquer l'inscription comme CANCELLED au lieu de la supprimer physiquement
     registration.status = RegistrationStatus.CANCELLED;
     await this.registrationRepository.save(registration);
 
-    //Email de confirmation de l'annulation 
+    // Email de confirmation de l'annulation 
     await this.mailerService.sendMail({
       to: registration.student.user.email,
       subject: `Cancellation: ${registration.event.title}`,
@@ -158,34 +206,6 @@ export class RegistrationsService {
         eventTitle: registration.event.title,
       },
     });
-
-    // If registration was CONFIRMED --> handle waitlist
-    const event = registration.event;
-    if (previousStatus === RegistrationStatus.CONFIRMED) {
-      const nextInLine = await this.registrationRepository.findOne({
-        where: { event: { id: event.id }, status: RegistrationStatus.WAITLIST },
-        order: { createdAt: 'ASC' }, // FIFO for waitlist
-        relations: ['user']
-      });
-
-      if (nextInLine) {
-        nextInLine.status = RegistrationStatus.CONFIRMED;
-        await this.registrationRepository.save(nextInLine);
-        console.log(`Promoted student ${nextInLine.student.id} from waitlist.`);
-        await this.mailerService.sendMail({
-          to: registration.student.user.email,
-          subject: `Good News ! You are confirmed for : ${registration.event.title}`,
-          template: './waitlist',
-          context: {
-            name: registration.student.user.firstName,
-            eventTitle: registration.event.title,
-          },
-        });
-      } else {
-        await this.eventsService.decrementRegistrations(event.id);
-
-      }
-    }
 
     return { message: 'Registration cancelled successfully' };
   }

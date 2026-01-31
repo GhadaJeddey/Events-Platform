@@ -13,7 +13,11 @@
             <h2 class="section-title">Mes Inscriptions</h2>
             <p class="section-subtitle">Préparez-vous pour vos prochains événements</p>
         </div>
-        @if (myEvents() && myEvents()!.length > 0) {
+        @if (isLoadingRegistrations()) {
+        <div class="no-results-message">
+            <p class="main-text">Chargement de vos inscriptions...</p>
+        </div>
+        } @else if (myEvents() && myEvents()!.length > 0) {
         <div class="events-grid">
             @for(event of myEvents()!; track event.id) {
                 <app-event-card 
@@ -39,7 +43,11 @@
             <h2 class="section-title">Cette Semaine</h2>
             <p class="section-subtitle">Ne manquez pas ce qui se passe maintenant !</p>
         </div>
-        @if (thisWeekEvents().length > 0) {
+        @if (isLoadingEvents()) {
+        <div class="no-results-message">
+            <p class="main-text">Chargement des événements de la semaine...</p>
+        </div>
+        } @else if (thisWeekEvents().length > 0) {
         <div class="events-grid">
             @for(event of thisWeekEvents(); track event.id) {
                 <app-event-card 

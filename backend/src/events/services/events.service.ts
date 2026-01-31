@@ -51,7 +51,7 @@ export class EventsService {
     const startDate = new Date(startStr);
     const endDate = new Date(endStr);
 
-    console.log('🔍 [BACKEND] getAvailableRooms:', { startStr, endStr, startDate, endDate });
+
 
     if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
       throw new BadRequestException('Dates invalides');
@@ -66,12 +66,12 @@ export class EventsService {
       .andWhere('reservation.endDate > :startDate', { startDate })
       .getMany();
 
-    console.log('📋 [BACKEND] Réservations conflictuelles:', conflictingReservations);
+
 
     const occupiedRooms = conflictingReservations.map((r) => r.room);
     const availableRooms = ALL_ROOMS.filter((room) => !occupiedRooms.includes(room));
-    
-    console.log('✅ [BACKEND] Salles disponibles:', availableRooms);
+
+
     return availableRooms;
   }
 
@@ -79,7 +79,7 @@ export class EventsService {
     const startDate = new Date(startStr);
     const endDate = new Date(endStr);
 
-    console.log('🔍 [BACKEND] getRoomSlots:', { room, startStr, endStr, startDate, endDate });
+
 
     if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
       throw new BadRequestException('Dates invalides');
@@ -94,7 +94,7 @@ export class EventsService {
       .andWhere('reservation.endDate > :startDate', { startDate })
       .getMany();
 
-    console.log('📋 [BACKEND] Réservations trouvées pour', room, ':', reservations);
+
 
     // Retourner les réservations avec leurs créneaux
     const result = reservations.map(reservation => ({
@@ -104,8 +104,8 @@ export class EventsService {
       endDate: reservation.endDate,
       approvalStatus: reservation.status
     }));
-    
-    console.log('✅ [BACKEND] Résultats getRoomSlots:', result);
+
+
     return result;
   }
 
@@ -542,12 +542,7 @@ export class EventsService {
     const startDate = new Date(createRoomReservationRequestDto.startDate);
     const endDate = new Date(createRoomReservationRequestDto.endDate);
 
-    console.log('📥 [BACKEND] createRoomReservationRequest:', {
-      dto: createRoomReservationRequestDto,
-      userId,
-      startDate,
-      endDate
-    });
+
 
     if (startDate >= endDate) {
       throw new BadRequestException('La date de fin doit être après la date de début');
@@ -558,9 +553,9 @@ export class EventsService {
       startDate,
       endDate
     );
-    
-    console.log(`${isFree ? '✅' : '❌'} [BACKEND] Disponibilité:`, isFree);
-    
+
+
+
     if (!isFree) {
       throw new ConflictException(
         `La salle ${createRoomReservationRequestDto.room} n'est pas disponible pour ce créneau.`
@@ -576,7 +571,7 @@ export class EventsService {
     });
 
     const saved = await this.roomReservationRequestRepository.save(reservationRequest);
-    console.log('✅ [BACKEND] Réservation créée:', saved);
+
     return saved;
   }
 

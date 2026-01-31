@@ -5,7 +5,7 @@ import { map } from 'rxjs/operators';
 import { Event } from '../Models/Event';
 import { User, UserRole } from '../Models/auth.models';
 import { DashboardStats } from '../Models/AdminStats';
-import { Organizer } from '../Models/organizer';
+import { Organizer } from '../Models/Organizer';
 import { environment } from '../../../Commun/environments/environment';
 
 @Injectable({

@@ -59,7 +59,7 @@ export class CreateEventForm {
   onDateChange() {
     if (this.startDateValue && this.endDateValue) {
       if (this.startDateValue >= this.endDateValue) {
-        this.availableRooms.set([]); 
+        this.availableRooms.set([]);
         this.roomAvailability.set(false);
         return;
       }
@@ -71,7 +71,7 @@ export class CreateEventForm {
           this.availableRooms.set(rooms);
           this.isLoadingRooms.set(false);
           this.updateRoomAvailability();
-          
+
           if (rooms.length === 0) {
             this.toastr.info('Aucune salle disponible pour ce créneau.');
           }
@@ -123,7 +123,7 @@ export class CreateEventForm {
     }
   }
 
-  
+
   onSubmit(form: NgForm) {
     if (form.valid) {
       const eventData = {
@@ -144,7 +144,7 @@ export class CreateEventForm {
 
           if (err.status === 409) {
             this.toastr.error("La salle sélectionnée n'est plus disponible. Veuillez réactualiser.");
-            this.onDateChange(); 
+            this.onDateChange();
           } else {
             const errorMessage = err.error?.message || 'Erreur lors de la création de l\'événement';
             this.toastr.error(errorMessage);

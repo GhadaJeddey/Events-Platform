@@ -16,18 +16,16 @@ export class RolesGuard implements CanActivate {
             return true;
         }
         const { user } = context.switchToHttp().getRequest();
-        console.log('User in RolesGuard:', user);
-        console.log('Required Roles:', requiredRoles);
+
 
         if (!user || !user.role) {
-            console.log('No user or role found in request');
             return false;
         }
 
         // Case-insensitive role comparison
         const userRoleLower = user.role.toLowerCase();
         const hasRole = requiredRoles.some((role) => role.toLowerCase() === userRoleLower);
-        console.log('Has Required Role:', hasRole);
+
         return hasRole;
     }
 }

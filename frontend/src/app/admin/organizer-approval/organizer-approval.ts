@@ -4,7 +4,7 @@ import { MatTableModule } from '@angular/material/table';
 import { ToastrService } from 'ngx-toastr';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AdminService } from '../../services/admin.service';
-import { Organizer } from '../../Models/organizer';
+import { Organizer } from '../../Models/Organizer';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 

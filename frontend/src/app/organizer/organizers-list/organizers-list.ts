@@ -2,7 +2,7 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { OrganizersService } from '../../services/organizers.service';
-import { Organizer } from '../../Models/organizer';
+import { Organizer } from '../../Models/Organizer';
 
 @Component({
     selector: 'app-organizers-list',

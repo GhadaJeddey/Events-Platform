@@ -82,7 +82,7 @@
                             </div>
                             <div class="info-text">
                                 <label>Organisateur</label>
-                                <p>{{ event.organizer?.name  }}</p>
+                                <p>{{ event.organizer?.name }}</p>
                             </div>
                         </div>
                     </div>
@@ -104,31 +104,39 @@
                         </div>
                     </div>
 
-                    <button 
-                        [class.btn-cancel]="isUserRegistered()"
-                        class="btn-register-primary" 
-                        appHoverElevate 
-                        elevateAmount="-3px"
-                        (click)="isUserRegistered() ? cancelRegistration() : registerForEvent()"
+                    @if (!authService.isAuthenticated() || isStudent()) {
+                    <button [class.btn-cancel]="isUserRegistered()" class="btn-register-primary" appHoverElevate
+                        elevateAmount="-3px" (click)="isUserRegistered() ? cancelRegistration() : registerForEvent()"
                         [disabled]="isUserRegistered() ? isCancelling() : isRegistering()">
                         @if (isUserRegistered()) {
-                            {{ isCancelling() ? 'Annulation en cours...' : 'Annuler mon inscription' }}
+                        {{ isCancelling() ? 'Annulation en cours...' : 'Annuler mon inscription' }}
                         } @else {
-                            {{ isRegistering() ? 'Inscription en cours...' : 
-                               (event.currentRegistrations >= event.capacity ? 'Rejoindre la liste d\'attente' : 'S\'inscrire maintenant')
-                            }}
+                        {{ isRegistering() ? 'Inscription en cours...' :
+                        (event.currentRegistrations >= event.capacity ? 'Rejoindre la liste d\'attente' : 'S\'inscrire
+                        maintenant')
+                        }}
                         }
                     </button>
+                    } @else if (isOrganizer() || isAdmin()) {
+                    <div class="role-restriction-msg">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                        <span>Seuls les étudiants peuvent s'inscrire aux événements.</span>
+                    </div>
+                    }
 
-                    @if (event.currentRegistrations < event.capacity) {
-                        <p class="signup-guarantee">
-                            Rejoignez-nous pour une expérience inoubliable !
+                    @if (event.currentRegistrations < event.capacity) { <p class="signup-guarantee">
+                        Rejoignez-nous pour une expérience inoubliable !
                         </p>
-                    } @else {
+                        } @else {
                         <p class="signup-guarantee">
                             Vous serez notifié lorsque des places se libéreront !
                         </p>
-                    }
+                        }
                 </div>
             </aside>
         </div>
@@ -138,5 +146,39 @@
 <app-loader message="Chargement de l'évènement..."></app-loader>
 <div style="text-align: center; margin-top: -20px; padding-bottom: 40px;">
     <a routerLink="/events" class="btn-secondary">Retour à la liste</a>
+</div>
+}
+
+<!-- Modal de confirmation d'annulation -->
+@if (showCancelConfirmDialog()) {
+<div class="modal-overlay" (click)="closeCancelConfirmDialog()">
+    <div class="modal-dialog" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h2>Confirmer l'annulation</h2>
+            <button class="modal-close" (click)="closeCancelConfirmDialog()" aria-label="Fermer">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <p class="modal-message">Êtes-vous sûr de vouloir annuler votre inscription ?</p>
+            <p class="modal-submessage">Cette action ne peut pas être annulée immédiatement.</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" (click)="closeCancelConfirmDialog()" [disabled]="isCancelling()">
+                Garder l'inscription
+            </button>
+            <button class="btn-danger" (click)="confirmCancelRegistration()" [disabled]="isCancelling()">
+                @if (isCancelling()) {
+                    Annulation en cours...
+                } @else {
+                    Annuler l'inscription
+                }
+            </button>
+        </div>
+    </div>
 </div>
 }

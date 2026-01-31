@@ -1,6 +1,6 @@
-import { Component, inject, OnInit, signal, computed } from '@angular/core';
+import { Component, inject, signal, computed } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, ParamMap, Router } from '@angular/router';
 import { EventsService } from '../../services/events';
 
 import { environment } from '../../../../Commun/environments/environment';
@@ -10,9 +10,11 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { map, switchMap, of, tap } from 'rxjs';
 import { LoaderComponent } from '../../shared/components/loader/loader';
 import { CommonModule } from '@angular/common';
+import { Event as EventModel } from '../../Models/Event';
 
 @Component({
   selector: 'app-update-event',
+  standalone: true,
   imports: [FormsModule, LoaderComponent, CommonModule],
   templateUrl: './update-event.html',
   styleUrl: './update-event.css',
@@ -59,16 +61,19 @@ export class UpdateEvent {
     return `${year}-${month}-${day}T${hours}:${minutes}`;
   }
 
-  currentEvent = toSignal(
+  currentEvent = toSignal<EventModel | null>(
     this.route.paramMap.pipe(
-      map(params => params.get('id')),
+      map((params: ParamMap) => params.get('id')),
       tap(id => this.eventId = id),
       switchMap(id => {
         if (!id) return of(null);
         return this.eventsService.getEventById(id).pipe(
           tap(event => {
-            if (event?.imageUrl) {
-              this.imagePreview.set(environment.apiUrl + event.imageUrl);
+            if (event?.imageUrl && !this.selectedFile()) {
+              const fullUrl = event.imageUrl.startsWith('http')
+                ? event.imageUrl
+                : `${environment.apiUrl}${event.imageUrl.startsWith('/') ? '' : '/'}${event.imageUrl}`;
+              this.imagePreview.set(fullUrl);
             }
             if (event) {
               this.selectedLocation = event.location;
@@ -85,16 +90,18 @@ export class UpdateEvent {
     { initialValue: null }
   );
 
-  onFileSelected(event: any) {
-    const file = event.target.files[0];
-    if (file) {
-      this.selectedFile.set(file);
-      const reader = new FileReader();
-      reader.onload = () => {
-        this.imagePreview.set(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
+  onFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement | null;
+    const file = input?.files?.[0] ?? null;
+    if (!file) return;
+
+    this.selectedFile.set(file);
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      this.imagePreview.set(result);
+    };
+    reader.readAsDataURL(file);
   }
 
   onSubmit(form: NgForm) {
@@ -123,7 +130,7 @@ export class UpdateEvent {
   minDate() {
     return new Date().toISOString().slice(0, 16);
   }
-  
+
   return() {
     this.router.navigate(['/organizer/dashboard']);
   }
@@ -185,7 +192,7 @@ export class UpdateEvent {
       this.toastr.warning('Ce créneau n\'est pas disponible pour cette salle.');
       return;
     }
-    
+
     // Envoyer une demande de réservation au dashboard admin
     const reservationData = {
       room: this.selectedLocation,

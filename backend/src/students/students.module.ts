@@ -5,7 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Student } from './entities/student.entity';
 import { AuthModule } from '../auth/auth.module';
 
-console.log('StudentsService:', StudentsService);
+
 
 @Module({
   imports: [
@@ -17,4 +17,4 @@ console.log('StudentsService:', StudentsService);
   exports: [StudentsService],
 
 })
-export class StudentsModule {}
+export class StudentsModule { }

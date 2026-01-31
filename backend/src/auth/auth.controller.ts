@@ -20,7 +20,7 @@ export class AuthController {
     @Post('register')
     @ApiOperation({ summary: 'Register a new user (student or organizer)' })
     async register(@Body() body: UnifiedRegisterDto) {
-        console.log('Received registration body:', JSON.stringify(body, null, 2));
+
         return this.authService.register(body);
     }
 

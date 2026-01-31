@@ -23,14 +23,19 @@ export class EventDetails implements OnInit {
   private router = inject(Router);
   private eventsService = inject(EventsService);
   private registrationsService = inject(RegistrationsService);
-  private authService = inject(AuthService);
+  public authService = inject(AuthService);
   private toastr = inject(ToastrService);
 
   isRegistering = signal(false);
   isCancelling = signal(false);
   isUserRegistered = signal(false);
+  currentRegistrationId = signal<string | null>(null);
+  showCancelConfirmDialog = signal(false);
   event = signal<Event | undefined>(undefined);
   isLoading = signal(true);
+  isStudent = computed(() => this.authService.currentUser()?.role === 'student');
+  isOrganizer = computed(() => this.authService.currentUser()?.role === 'organizer');
+  isAdmin = computed(() => this.authService.currentUser()?.role === 'admin');
 
   ngOnInit() {
     // Se désabonner des changements de route et charger l'événement
@@ -40,7 +45,6 @@ export class EventDetails implements OnInit {
         this.isLoading.set(true);
         this.isRegistering.set(false);
         this.isCancelling.set(false);
-        this.checkIfUserIsRegistered(id);
         this.loadEvent(id);
       }
     });
@@ -51,6 +55,8 @@ export class EventDetails implements OnInit {
       next: (event) => {
         this.event.set(event);
         this.isLoading.set(false);
+        // Vérifier le statut d'inscription après le chargement de l'événement
+        this.checkIfUserIsRegistered(id);
       },
       error: (err) => {
         this.isLoading.set(false);
@@ -58,9 +64,7 @@ export class EventDetails implements OnInit {
     });
   }
 
-  constructor() {
-    this.fetchEventData();
-  }
+  constructor() { }
 
   fetchEventData() {
     const id = this.route.snapshot.paramMap.get('id');
@@ -74,27 +78,7 @@ export class EventDetails implements OnInit {
     });
   }
 
-  onRegister() {
-    if (!this.authService.isAuthenticated()) {
-      this.router.navigate(['/auth/login']);
-      return;
-    }
-
-    const currentEvent = this.event();
-    if (!currentEvent) return;
-
-    this.registrationsService.register(currentEvent.id).subscribe({
-      next: () => {
-        this.toastr.success('Vous êtes maintenant inscrit à cet évènement !', 'Succès');
-
-        this.fetchEventData();
-      },
-      error: (err) => {
-        const errorMessage = err.error?.message || 'Une erreur est survenue lors de l\'inscription.';
-        this.toastr.error(errorMessage, 'Erreur');
-      }
-    });
-  }
+  // Suppression de onRegister redondant
 
   getFillPercentage(event: Event): number {
     return (event.currentRegistrations / event.capacity) * 100;
@@ -120,8 +104,17 @@ export class EventDetails implements OnInit {
       return;
     }
 
+    // Vérifier si déjà inscrit
+    if (this.isUserRegistered()) {
+      this.toastr.info('Vous êtes déjà inscrit à cet événement.', 'Information');
+      return;
+    }
+
     const event = this.event();
     if (!event) return;
+
+    // Empêcher les doubles clics
+    if (this.isRegistering()) return;
 
     this.isRegistering.set(true);
 
@@ -133,18 +126,22 @@ export class EventDetails implements OnInit {
         } else {
           this.toastr.success('Inscription réussie ! Vous êtes désormais inscrit à l\'événement.', 'Succès');
         }
-        // Mettre à jour l'état
+        // Mettre à jour l'état avec l'ID de l'inscription retourné par le serveur
         this.isUserRegistered.set(true);
-        this.fetchEventData(); // Rafraîchir les données au lieu de naviguer ? Ou naviguer ?
-        // On peut rester sur la page pour voir le changement ou naviguer vers le dashboard
-        // this.router.navigate(['']); 
+        if (response && response.id) {
+          this.currentRegistrationId.set(response.id);
+        }
+        this.fetchEventData();
+        // Vérifier à nouveau le statut d'inscription pour être sûr
+        this.checkIfUserIsRegistered(event.id);
       },
       error: (error) => {
         this.isRegistering.set(false);
         console.error('Erreur lors de l\'inscription:', error);
         if (error.status === 409) {
           this.toastr.info('Vous êtes déjà inscrit à cet événement.', 'Information');
-          this.isUserRegistered.set(true);
+          // Rafraîchir le statut d'inscription
+          this.checkIfUserIsRegistered(event.id);
         } else if (error.status === 401) {
           this.toastr.warning('Votre session a expiré. Veuillez vous reconnecter.', 'Session expirée');
           this.router.navigate(['/auth/login']);
@@ -156,20 +153,24 @@ export class EventDetails implements OnInit {
   }
 
   cancelRegistration() {
+    this.showCancelConfirmDialog.set(true);
+  }
+
+  confirmCancelRegistration() {
     const event = this.event();
-    if (!event) return;
+    const registrationId = this.currentRegistrationId();
+    
+    if (!event || !registrationId) return;
 
-    if (!confirm('Êtes-vous sûr de vouloir annuler votre inscription ?')) {
-      return;
-    }
-
+    this.showCancelConfirmDialog.set(false);
     this.isCancelling.set(true);
 
-    this.registrationsService.cancel(event.id).subscribe({
+    this.registrationsService.cancel(registrationId).subscribe({
       next: () => {
         this.isCancelling.set(false);
         this.toastr.success('Votre inscription a été annulée avec succès.', 'Annulation réussie');
         this.isUserRegistered.set(false);
+        this.currentRegistrationId.set(null);
         this.fetchEventData();
       },
       error: (error) => {
@@ -179,20 +180,32 @@ export class EventDetails implements OnInit {
     });
   }
 
+  closeCancelConfirmDialog() {
+    this.showCancelConfirmDialog.set(false);
+  }
+
   checkIfUserIsRegistered(eventId: string) {
     const currentUser = this.authService.currentUser();
     if (!currentUser || currentUser.role !== 'student') {
       this.isUserRegistered.set(false);
+      this.currentRegistrationId.set(null);
       return;
     }
 
     this.registrationsService.getMyRegistrations().subscribe({
       next: (registrations) => {
-        const isRegistered = registrations.some(reg => reg.event.id === eventId);
-        this.isUserRegistered.set(isRegistered);
+        const registration = registrations.find(reg => reg.event.id === eventId);
+        if (registration) {
+          this.isUserRegistered.set(true);
+          this.currentRegistrationId.set(registration.id);
+        } else {
+          this.isUserRegistered.set(false);
+          this.currentRegistrationId.set(null);
+        }
       },
       error: (err) => {
         this.isUserRegistered.set(false);
+        this.currentRegistrationId.set(null);
       }
     });
   }

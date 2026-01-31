@@ -22,6 +22,9 @@ export class StudentDashboard implements OnInit {
     currentUser = this.authService.currentUser;
     allEvents = signal<Event[] | null>(null);
     myEvents = signal<Event[] | null>(null);
+    isLoadingEvents = signal(true);
+    isLoadingRegistrations = signal(true);
+    
     myEventIds = computed(() => {
         const events = this.myEvents();
         return events ? new Set(events.map(e => e.id)) : new Set();
@@ -61,18 +64,28 @@ export class StudentDashboard implements OnInit {
 
     loadData() {
         // Charger tous les événements
+        this.isLoadingEvents.set(true);
         this.eventsService.getEvents().subscribe({
-            next: (data) => this.allEvents.set(data),
-            error: (err) => {}
+            next: (data) => {
+                this.allEvents.set(data);
+                this.isLoadingEvents.set(false);
+            },
+            error: (err) => {
+                this.isLoadingEvents.set(false);
+            }
         });
 
         // Charger mes inscriptions
+        this.isLoadingRegistrations.set(true);
         this.registrationsService.getMyRegistrations().subscribe({
             next: (regs) => {
                 const events = regs.map(r => r.event);
                 this.myEvents.set(events);
+                this.isLoadingRegistrations.set(false);
             },
-            error: (err) => {}
+            error: (err) => {
+                this.isLoadingRegistrations.set(false);
+            }
         });
        
     }

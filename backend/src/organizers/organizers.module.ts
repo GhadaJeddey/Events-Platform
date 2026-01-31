@@ -6,7 +6,7 @@ import { Organizer } from './entities/organizer.entity';
 import { User } from '../users/entities/user.entity';
 import { AuthModule } from '../auth/auth.module';
 
-console.log('OrganizersService:', OrganizersService);
+
 
 
 @Module({
@@ -18,4 +18,4 @@ console.log('OrganizersService:', OrganizersService);
   providers: [OrganizersService],
   exports: [OrganizersService],
 })
-export class OrganizersModule {}
+export class OrganizersModule { }

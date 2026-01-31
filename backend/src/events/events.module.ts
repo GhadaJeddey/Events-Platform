@@ -9,7 +9,7 @@ import { AuthModule } from '../auth/auth.module';
 import { OrganizersModule } from '../organizers/organizers.module';
 import { RegistrationsModule } from '../registrations/registrations.module';
 
-console.log('EventsService:', EventsService);
+
 
 
 @Module({

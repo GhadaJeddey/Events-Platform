@@ -2,11 +2,11 @@ import { Component, inject, computed, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartOptions } from 'chart.js';
-import { toSignal } from '@angular/core/rxjs-interop'; 
+import { toSignal } from '@angular/core/rxjs-interop';
 import { AdminService } from '../../services/admin.service';
 import { RouterLink } from '@angular/router';
 import { Event } from '../../Models/Event';
-import { Organizer } from '../../Models/organizer';
+import { Organizer } from '../../Models/Organizer';
 import { User } from '../../Models/auth.models';
 
 @Component({
@@ -28,11 +28,11 @@ export class Dashboard implements OnInit {
   users = signal<User[]>([]);
   inactiveSlots = signal<Set<string>>(new Set());
   currentDate = new Date();
-  
+
   public pieChartOptions: ChartOptions<'pie'> = {
     responsive: true,
     plugins: {
-      legend: { 
+      legend: {
         position: 'bottom',
         labels: {
           color: '#a0aec0',
@@ -45,7 +45,7 @@ export class Dashboard implements OnInit {
 
   pieChartData = computed<ChartConfiguration<'pie'>['data']>(() => {
     const data = this.stats();
-    
+
     if (!data) return { labels: [], datasets: [] };
 
     // Traduction des statuts en français
@@ -57,21 +57,21 @@ export class Dashboard implements OnInit {
     };
 
     const colorMap: Record<string, string> = {
-      'approved': '#6fef9a',  
-      'pending': '#667eea',   
-      'rejected': '#f5576c',  
+      'approved': '#6fef9a',
+      'pending': '#667eea',
+      'rejected': '#f5576c',
       'cancelled': '#764ba2',
     };
 
     const labels = data.details.eventsByApprovalStatus.map(d => d.approvalStatus);
     const counts = data.details.eventsByApprovalStatus.map(d => parseInt(d.count));
-    
+
     const bgColors = labels.map(label => colorMap[label] || '#cbd5e0');
 
     return {
       labels: labels.map(l => statusTranslations[l] || l),
-      datasets: [{ 
-        data: counts, 
+      datasets: [{
+        data: counts,
         backgroundColor: bgColors,
         hoverBackgroundColor: bgColors,
         borderColor: '#ffffff',
@@ -84,18 +84,18 @@ export class Dashboard implements OnInit {
   public barChartOptions: ChartConfiguration<'bar'>['options'] = {
     responsive: true,
     scales: {
-      y: { 
-        beginAtZero: true, 
+      y: {
+        beginAtZero: true,
         ticks: { stepSize: 1, color: '#a0aec0' },
         grid: { color: 'rgba(102, 126, 234, 0.1)' }
-      }, 
-      x: { 
+      },
+      x: {
         grid: { display: false },
         ticks: { color: '#a0aec0' }
       }
     },
     plugins: {
-      legend: { display: false }, 
+      legend: { display: false },
       title: { display: true, text: 'Occupation des Salles (Top 10)', color: '#764ba2' }
     }
   };
@@ -107,14 +107,14 @@ export class Dashboard implements OnInit {
 
     // On trie pour avoir les salles les plus utilisées en premier
     const sortedLocs = [...data.details.eventsByLocation]
-        .sort((a, b) => parseInt(b.count) - parseInt(a.count))
-        .slice(0, 10); 
+      .sort((a, b) => parseInt(b.count) - parseInt(a.count))
+      .slice(0, 10);
 
     return {
       labels: sortedLocs.map(l => l.location),
       datasets: [{
         data: sortedLocs.map(l => parseInt(l.count)),
-        backgroundColor: 'rgba(102, 126, 234, 0.8)', 
+        backgroundColor: 'rgba(102, 126, 234, 0.8)',
         borderColor: '#667eea',
         borderWidth: 1,
         borderRadius: 5,

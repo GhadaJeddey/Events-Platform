@@ -13,7 +13,7 @@ import { StudentsModule } from '../students/students.module';
 import { OrganizersModule } from '../organizers/organizers.module';
 import { MailModule } from '../mail/mail.module';
 
-console.log('AuthService:', AuthService);
+
 
 @Module({
     imports: [
