@@ -92,5 +92,4 @@ export class StudentsService {
     return await this.studentRepository.save(updatedStudent);
   }
 
-
 }

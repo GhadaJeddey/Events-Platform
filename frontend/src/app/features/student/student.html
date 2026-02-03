@@ -1,0 +1,10 @@
+<div class="events-container">
+    <div class="events-header">
+        <h1 class="events-title">Tableau de Bord Étudiant</h1>
+        @if (currentUser()) {
+            <p class="events-subtitle">Bienvenue, {{ currentUser()?.firstName }} {{ currentUser()?.lastName }}!</p>
+        }
+    </div>
+</div>
+
+<router-outlet></router-outlet>

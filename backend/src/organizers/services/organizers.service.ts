@@ -5,23 +5,26 @@ import { Organizer } from '../entities/organizer.entity';
 import { CreateOrganizerDto } from '../dto/create-organizer.dto';
 import { UpdateOrganizerDto } from '../dto/update-organizer.dto';
 import { User } from '../../users/entities/user.entity';
+import { UsersService } from 'src/users/services/users.service';
+import { ApiAcceptedResponse } from '@nestjs/swagger';
 
 @Injectable()
 export class OrganizersService {
   constructor(
     @InjectRepository(Organizer)
     private readonly organizerRepository: Repository<Organizer>,
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
+    private usersService: UsersService,
   ) { }
 
   async create(user: User, createOrganizerDto: CreateOrganizerDto): Promise<Organizer> {
 
-    // On vérifie si le nom du club est déjà pris 
-    const existing = await this.organizerRepository.findOne({ where: { name: createOrganizerDto.name } });
-    if (existing) {
-      throw new ConflictException('Organization name already exists');
-    }
+    const [existing, existingProfile] = await Promise.all([
+      this.organizerRepository.findOne({ where: { name: createOrganizerDto.name } }),
+      this.organizerRepository.findOne({ where: { user: { id: user.id } } }),
+    ]);
+
+    if (existing) throw new ConflictException('Organization name already exists');
+    if (existingProfile) throw new ConflictException('User is already an organizer');
 
     const organizer = this.organizerRepository.create({
       ...createOrganizerDto,
@@ -66,17 +69,25 @@ export class OrganizersService {
     if (!organizer) {
       throw new NotFoundException(`Organizer with ID ${id} not found`);
     }
-
     return await this.organizerRepository.save(organizer);
   }
 
-  async verifyOrganizer(id: string): Promise<Organizer> {
-    const organizer = await this.findOne(id);
-    organizer.isVerified = true;
-    return await this.organizerRepository.save(organizer);
-  }
 
   // --- ADMIN LOGIC ---
+
+  async findMostActiveOrganizers(limit: number = 4) {
+    return await this.organizerRepository
+      .createQueryBuilder('organizer')
+      .leftJoin('organizer.events', 'event')
+      .select('organizer.id', 'id')
+      .addSelect('organizer.name', 'name')
+      .addSelect('COUNT(event.id)', 'eventCount')
+      .groupBy('organizer.id')
+      .addGroupBy('organizer.name')
+      .orderBy('COUNT(event.id)', 'DESC')
+      .limit(limit)
+      .getRawMany();
+  }
 
   async getPendingOrganizers(): Promise<Organizer[]> {
 
@@ -99,10 +110,12 @@ export class OrganizersService {
       relations: ['user'],
     });
     if (!organizer) throw new NotFoundException(`Organizer #${id} not found`);
+
     if (organizer.user?.id) {
-      await this.userRepository.delete(organizer.user.id);
+      await this.usersService.remove(organizer.user.id); // l'effet cascade supprimera l'organisateur
       return;
     }
+
     await this.organizerRepository.delete(id);
   }
 

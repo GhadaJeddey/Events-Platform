@@ -106,6 +106,12 @@ export class EventsController {
     return this.eventsService.getRoomSlots(room, start, end);
   }
 
+  @Get('organizer/:organizerId')
+  @ApiOperation({ summary: 'Get events by organizer ID' })
+  findByOrganizerId(@Param('organizerId') organizerId: string) {
+    return this.eventsService.findByOrganizerId(organizerId);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get event by ID' })
   findOne(@Param('id') id: string) {

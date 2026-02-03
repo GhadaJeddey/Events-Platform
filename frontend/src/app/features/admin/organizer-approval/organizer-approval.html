@@ -1,0 +1,65 @@
+<div class="container fade-in-up">
+    <div class="header-actions">
+        <div class="return-header">
+            <a routerLink="/admin/dashboard" class="back-btn">← Retour</a>
+        </div>
+        <div class="header-left">
+            <h2 class="text-gradient section-title">Clubs en Attente</h2>
+        </div>
+    </div>
+    
+    <app-search (searchSubmitted)="onSearch($event)"></app-search>
+
+    @if (isLoading()) {
+        <app-loader message="Chargement des clubs en attente..."></app-loader>
+    } @else {
+    <div class="table-container">
+    <table mat-table [dataSource]="pendingOrganizers()" class="custom-table">
+
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef> Club </th>
+        <td mat-cell *matCellDef="let org" class="font-medium"> {{ org.name }} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="president">
+        <th mat-header-cell *matHeaderCellDef> Président </th>
+        <td mat-cell *matCellDef="let org"> {{ org.user?.firstName }} {{ org.user?.lastName }} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="email">
+        <th mat-header-cell *matHeaderCellDef> Email </th>
+        <td mat-cell *matCellDef="let org"> {{ org.user?.email }} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="website">
+        <th mat-header-cell *matHeaderCellDef> Site </th>
+        <td mat-cell *matCellDef="let org"> {{ org.website || '-' }} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="createdAt">
+        <th mat-header-cell *matHeaderCellDef> Demande </th>
+        <td mat-cell *matCellDef="let org"> {{ org.createdAt | date:'short' }} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef class="text-right"> Actions </th>
+        <td mat-cell *matCellDef="let org">
+          <div class="action-buttons">
+            <button class="btn-action approve" (click)="approve(org.id)">Approuver</button>
+            <button class="btn-action reject" (click)="reject(org.id)">Rejeter</button>
+          </div>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+
+    @if (pendingOrganizers().length === 0) {
+      <div class="empty-state">
+        Aucun club en attente d'approbation.
+      </div>
+    }
+  </div>
+  }
+</div>

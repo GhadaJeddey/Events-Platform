@@ -1,8 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { Event } from '../Models/Event';
+import { Event } from '../shared/models/Event';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { environment } from '../../../Commun/environments/environment';
+import { environment } from '../shared/environments/environment';
 import { AuthService } from './auth.service';
 
 @Injectable({

@@ -53,7 +53,7 @@ export class AdminController {
     @Get('organizers/most-active')
     @ApiOperation({ summary: 'Get most active organizers (Admin)' })
     async getMostActiveOrganizers() {
-        return this.adminService.getMostActiveOrganizers(5);
+        return this.adminService.findMostActiveOrganizers();
     }
 
     @Patch('organizers/:id/status')

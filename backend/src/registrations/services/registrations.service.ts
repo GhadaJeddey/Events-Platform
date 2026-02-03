@@ -23,71 +23,52 @@ export class RegistrationsService {
 
   async create(createRegistrationDto: CreateRegistrationDto, userId: string) {
     const student = await this.studentsService.findOneByUserId(userId);
-    const event = await this.eventsService.findOne(createRegistrationDto.eventId);
 
-    if (!event) throw new NotFoundException('Event not found');
-
-    // Vérifier s'il existe déjà une inscription (peu importe le statut)
-    const existingRegistration = await this.registrationRepository.findOne({
-      where: {
-        student: { id: student.id },
-        event: { id: event.id }
-      },
-    });
-
-    if (existingRegistration) {
-      // Si inscription CANCELLED, la réactiver
-      if (existingRegistration.status === RegistrationStatus.CANCELLED) {
-        // Déterminer le nouveau statut
-        let newStatus = RegistrationStatus.CONFIRMED;
-        if (event.currentRegistrations >= event.capacity) {
-          newStatus = RegistrationStatus.WAITLIST;
-        }
-
-        existingRegistration.status = newStatus;
-        await this.registrationRepository.save(existingRegistration);
-
-        if (newStatus === RegistrationStatus.CONFIRMED) {
-          await this.eventsService.incrementRegistrations(event.id);
-        }
-
-        this.sendRegistrationEmail(student, event, newStatus);
-        return existingRegistration;
-      } else {
-        // Sinon, c'est une inscription active
-        throw new ConflictException('Vous êtes déjà inscrit à cet évènement');
-      }
-    }
-
-    // verif statut
-    let status = RegistrationStatus.CONFIRMED;
-    if (event.currentRegistrations >= event.capacity) {
-      status = RegistrationStatus.WAITLIST;
-    }
-
-    // Transaction SQL - datasource for when two students try to register at the same time
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
     try {
-      const newRegistration = this.registrationRepository.create({
-        student,
-        event,
-        status,
+      // lock l'événement pour empêcher d'autres écritures simultanées
+      const event = await queryRunner.manager.findOne(Event, {
+        where: { id: createRegistrationDto.eventId },
+        lock: { mode: 'pessimistic_write' } // reserver la ligne de l'événement pour ta transaction en cours
       });
 
-      await queryRunner.manager.save(newRegistration);
+      if (!event) throw new NotFoundException('Event not found');
 
-      if (status === RegistrationStatus.CONFIRMED) {
-        await queryRunner.manager.increment(Event, { id: event.id }, 'currentRegistrations', 1);
+      // 2. Vérifier si une inscription existe déjà (y compris annulée)
+      let registration = await queryRunner.manager.findOne(Registration, {
+        where: { student: { id: student.id }, event: { id: event.id } }
+      });
+
+      let status = RegistrationStatus.CONFIRMED;
+      if (event.currentRegistrations >= event.capacity) {
+        status = RegistrationStatus.WAITLIST;
       }
 
-      await queryRunner.commitTransaction(); 
+      if (registration) {
+        if (registration.status !== RegistrationStatus.CANCELLED) {
+          throw new ConflictException('Déjà inscrit');
+        }
+        // Réactivation d'une inscription annulée
+        registration.status = status;
+      } else {
+        // Nouvelle inscription
+        registration = this.registrationRepository.create({ student, event, status });
+      }
+
+      await queryRunner.manager.save(registration);
+
+      if (status === RegistrationStatus.CONFIRMED) {
+        event.currentRegistrations += 1;
+        await queryRunner.manager.save(event);
+      }
+
+      await queryRunner.commitTransaction();
 
       this.sendRegistrationEmail(student, event, status);
-
-      return newRegistration;
+      return registration;
 
     } catch (error) {
       await queryRunner.rollbackTransaction();
@@ -254,8 +235,7 @@ export class RegistrationsService {
 
   async getRegistrationsByDay(eventId: string) {
     try {
-      console.log('📊 [REG] getRegistrationsByDay called for eventId:', eventId);
-      
+
       const registrationsByDayRaw = await this.registrationRepository
         .createQueryBuilder('registration')
         .select('DATE(registration.createdAt)', 'date')
@@ -266,18 +246,16 @@ export class RegistrationsService {
         .orderBy('DATE(registration.createdAt)', 'ASC')
         .getRawMany();
 
-      console.log('  ✅ Result:', registrationsByDayRaw);
+
       return registrationsByDayRaw;
     } catch (error) {
-      console.error('  ❌ Error in getRegistrationsByDay:', error);
+
       throw error;
     }
   }
 
   async getRegistrationsByHour(eventId: string) {
     try {
-      console.log('📊 [REG] getRegistrationsByHour called for eventId:', eventId);
-      
       const registrationsByHourRaw = await this.registrationRepository
         .createQueryBuilder('registration')
         .select('EXTRACT(HOUR FROM registration.createdAt)', 'hour')
@@ -287,11 +265,10 @@ export class RegistrationsService {
         .groupBy('EXTRACT(HOUR FROM registration.createdAt)')
         .orderBy('EXTRACT(HOUR FROM registration.createdAt)', 'ASC')
         .getRawMany();
-
-      console.log('  ✅ Result:', registrationsByHourRaw);
+        
       return registrationsByHourRaw;
     } catch (error) {
-      console.error('  ❌ Error in getRegistrationsByHour:', error);
+
       throw error;
     }
   }
@@ -300,7 +277,7 @@ export class RegistrationsService {
 
   async getEventRegistrations(eventId: string) {
     return await this.registrationRepository.find({
-      where: { 
+      where: {
         event: { id: eventId },
         status: In([RegistrationStatus.CONFIRMED, RegistrationStatus.WAITLIST])
       },

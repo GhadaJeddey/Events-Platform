@@ -1,8 +1,8 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
-import { environment } from '../../../Commun/environments/environment';
-import { AuthResponse, LoginRequest, RegisterRequest, User, UserRole } from '../Models/auth.models';
+import { environment } from '../shared/environments/environment';
+import { AuthResponse, LoginRequest, RegisterRequest, User, UserRole } from '../shared/models/auth.models';
 import { jwtDecode } from 'jwt-decode';
 @Injectable({
     providedIn: 'root'

@@ -2,11 +2,11 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { Event } from '../Models/Event';
-import { User, UserRole } from '../Models/auth.models';
-import { DashboardStats } from '../Models/AdminStats';
-import { Organizer } from '../Models/Organizer';
-import { environment } from '../../../Commun/environments/environment';
+import { Event } from '../shared/models/Event';
+import { User, UserRole } from '../shared/models/auth.models';
+import { DashboardStats } from '../shared/models/AdminStats';
+import { Organizer } from '../shared/models/Organizer';
+import { environment } from '../shared/environments/environment';
 
 @Injectable({
   providedIn: 'root'

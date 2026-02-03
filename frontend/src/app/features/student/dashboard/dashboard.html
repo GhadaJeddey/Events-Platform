@@ -1,0 +1,85 @@
+<div class="events-container">
+    <!-- Section 1: Mes Inscriptions -->
+    
+    <div class="section-wrapper my-events-section">
+        <div class="section-header">
+            <h2 class="section-title">Mes Inscriptions</h2>
+            <p class="section-subtitle">Préparez-vous pour vos prochains événements</p>
+        </div>
+        @if (isLoadingRegistrations()) {
+            <app-loader message="Chargement de vos inscriptions..."></app-loader>
+        } @else if (myEvents() && myEvents()!.length > 0) {
+        <div class="events-grid">
+            @for(event of myEvents()!; track event.id) {
+                <app-event-card 
+                    [event]="event" 
+                    [isRegistered]="true"
+                    (registrationCancelled)="onRegistrationCancelled()">
+                </app-event-card>
+            }
+        </div>
+    } @else {
+        <div class="no-results-message">
+            <p class="main-text">Vous n'êtes inscrit à aucun événement pour le moment.</p>
+        </div>
+    }
+    </div>
+
+
+    <!-- Section 2: Cette Semaine -->
+    
+    <div class="section-wrapper week-section">
+
+        <div class="section-header">
+            <h2 class="section-title">Cette Semaine</h2>
+            <p class="section-subtitle">Ne manquez pas ce qui se passe maintenant !</p>
+        </div>
+        @if (isLoadingEvents()) {
+            <app-loader message="Chargement des événements de la semaine..."></app-loader>
+        } @else if (thisWeekEvents().length > 0) {
+        <div class="events-grid">
+            @for(event of thisWeekEvents(); track event.id) {
+                <app-event-card 
+                    [event]="event"
+                    [isRegistered]="myEventIds().has(event.id)"
+                    (registrationCancelled)="onRegistrationCancelled()">
+                </app-event-card>
+            }
+        </div>
+        } 
+        @else {
+        <div class="no-results-message">
+            <p class="main-text">Aucun événement prévu cette semaine.</p>
+        </div> }
+    </div>
+
+    <!-- Section 3: Explorer le Catalogue -->
+    <div class="divider"></div>
+    
+    <div class="section-wrapper catalog-section">
+        <div class="section-header">
+            <h2 class="section-title">Explorer le Catalogue</h2>
+            <p class="section-subtitle">Découvrez tous les événements de notre communauté</p>
+        </div>
+        
+        <app-search (searchSubmitted)="onSearch($event)"></app-search>
+
+        @if (isLoadingEvents()) {
+            <app-loader message="Chargement des événements..."></app-loader>
+        } @else if (filteredAllEvents() && filteredAllEvents()!.length > 0) {
+        <div class="events-grid">
+            @for(event of filteredAllEvents()!; track event.id) {
+                <app-event-card 
+                    [event]="event"
+                    [isRegistered]="myEventIds().has(event.id)"
+                    (registrationCancelled)="onRegistrationCancelled()">
+                </app-event-card>
+            }
+        </div>
+        } @else {
+        <div class="no-results-message">
+            <p class="main-text">Aucun événement ne correspond à votre recherche.</p>
+        </div>
+        }
+    </div>
+</div>

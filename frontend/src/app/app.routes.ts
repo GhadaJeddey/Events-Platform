@@ -1,27 +1,28 @@
 ﻿import { Routes, Router } from '@angular/router';
 import { inject } from '@angular/core';
-import { EventList } from './events/event-list/event-list';
-import { EventDetails } from './events/event-details/event-details';
-import { CreateEventForm } from './events/create-event-form/create-event-form';
-import { UpdateEvent } from './events/update-event/update-event';
-import { LoginComponent } from './auth/login/login';
-import { RegisterComponent } from './auth/register/register';
-import { ForgotPasswordComponent } from './auth/forgot-password/forgot-password';
+import { EventList } from './features/events/event-list/event-list';
+import { EventDetails } from './features/events/event-details/event-details';
+import { CreateEventForm } from './features/events/create-event-form/create-event-form';
+import { UpdateEvent } from './features/events/update-event/update-event';
+import { LoginComponent } from './features/auth/login/login';
+import { RegisterComponent } from './features/auth/register/register';
+import { ForgotPasswordComponent } from './features/auth/forgot-password/forgot-password';
 import { authGuard } from './guards/auth.guard';
 import { adminOrOrganizerGuard } from './guards/adminororganizer.guard';
 import { adminGuard } from './guards/admin.guard';
-import { Dashboard } from './admin/dashboard/dashboard';
-import { EventApproval } from './admin/event-approval/event-approval';
-import { UserManagement } from './admin/user-management/user-management';
-import { OrganizerApproval } from './admin/organizer-approval/organizer-approval';
-import { RoomApproval } from './admin/room-approval/room-approval';
-import { StudentDashboard } from './student/dashboard/dashboard';
-import { OrganizerDashboard } from './organizer/dashboard/dashboard';
-import { EventStatisticsComponent } from './organizer/event-statistics/event-statistics';
-import { OrganizersList } from './organizer/organizers-list/organizers-list';
-import { OrganizerDetails } from './organizer/organizer-details/organizer-details';
-import { AllMyEvents } from './organizer/all-my-events/all-my-events';
-import { Profile } from './profile/profile';
+import { Dashboard } from './features/admin/dashboard/dashboard';
+import { EventApproval } from './features/admin/event-approval/event-approval';
+import { UserManagement } from './features/admin/user-management/user-management';
+import { OrganizerApproval } from './features/admin/organizer-approval/organizer-approval';
+import { RoomApproval } from './features/admin/room-approval/room-approval';
+import { Student } from './features/student/student';
+import { StudentDashboard } from './features/student/dashboard/dashboard';
+import { OrganizerDashboard } from './features/organizer/dashboard/dashboard';
+import { EventStatisticsComponent } from './features/organizer/event-statistics/event-statistics';
+import { OrganizersList } from './features/organizer/organizers-list/organizers-list';
+import { OrganizerDetails } from './features/organizer/organizer-details/organizer-details';
+import { AllMyEvents } from './features/organizer/all-my-events/all-my-events';
+import { Profile } from './features/profile/profile';
 import { organizerGuard } from './guards/organizer.guard';
 
 export const routes: Routes = [
@@ -49,7 +50,7 @@ export const routes: Routes = [
             { path: 'forgot-password', component: ForgotPasswordComponent },
         ]
     },
-    { path: 'reset-password', loadComponent: () => import('./auth/reset-password/reset-password').then(m => m.ResetPassword) },
+    { path: 'reset-password', loadComponent: () => import('./features/auth/reset-password/reset-password').then(m => m.ResetPassword) },
     {
         path: 'admin',
         children: [
@@ -64,10 +65,12 @@ export const routes: Routes = [
     },
     {
         path: 'student',
+        component: Student,
+        canActivate: [authGuard],
         children: [
             { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-            { path: 'dashboard', component: StudentDashboard, canActivate: [authGuard] },
-            { path: 'profile', component: Profile, canActivate: [authGuard] }
+            { path: 'dashboard', component: StudentDashboard },
+            { path: 'profile', component: Profile }
         ]
     },
     {

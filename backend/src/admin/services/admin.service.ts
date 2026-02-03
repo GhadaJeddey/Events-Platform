@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { UpdateEventStatusDto } from '../dto/update-event-status.dto';
 import { UpdateUserRoleDto } from '../dto/update-user-role.dto';
 import { UpdateOrganizerStatusDto } from '../dto/update-organizer-status.dto';
@@ -14,7 +14,7 @@ export class AdminService {
     private readonly usersService: UsersService,
     private readonly eventsService: EventsService,
     private readonly organizersService: OrganizersService,
-  ) {}
+  ) { }
 
   // --- EVENTS LOGIC ---
 
@@ -26,14 +26,16 @@ export class AdminService {
     return this.eventsService.updateApprovalStatus(id, updateEventStatusDto.status);
   }
 
+
+
   // --- USERS LOGIC ---
 
   async getAllUsers(skip: number = 0, take: number = 10) {
-    const [users, total] = await Promise.all([
+    const [users, total] = await Promise.all([   //Promise.all : exec // de users et total 
       this.usersService.findAllPaginated(skip, take),
       this.usersService.countAll(),
     ]);
-    
+
     return {
       data: users,
       total,
@@ -50,12 +52,14 @@ export class AdminService {
   // --- REPORTS / STATS ---
 
   async getDashboardStats() {
-    const totalUsers = await this.usersService.findAll();
-    const eventStats = await this.eventsService.getDashboardStats();
+    const [totalUsers, eventStats] = await Promise.all([
+      this.usersService.countAll(),
+      this.eventsService.getDashboardStats(),
+    ]);
 
     return {
       overview: {
-        totalUsers: totalUsers.length,
+        totalUsers: totalUsers,
         totalEvents: eventStats.totalEvents,
         pendingEvents: eventStats.pendingEvents,
       },
@@ -76,25 +80,22 @@ export class AdminService {
     return this.organizersService.getPendingOrganizers();
   }
 
-  async getMostActiveOrganizers(limit: number = 5) {
-    const allOrganizers = await this.organizersService.findAll();
-    const organizersWithEventCounts = allOrganizers.map(org => ({
-      id: org.id,
-      name: org.name,
-      eventCount: org.events ? org.events.length : 0,
-    }));
-    
-    return organizersWithEventCounts
-      .sort((a, b) => b.eventCount - a.eventCount)
-      .slice(0, limit);
+  async findMostActiveOrganizers(limit: number = 4) {
+    return this.organizersService.findMostActiveOrganizers(limit);
   }
 
   async updateOrganizerStatus(id: string, updateOrganizerStatusDto: UpdateOrganizerStatusDto) {
     if (updateOrganizerStatusDto.status === OrganizerStatus.APPROVED) {
-      return this.organizersService.approveOrganizer(id);
-    } else if (updateOrganizerStatusDto.status === OrganizerStatus.REJECTED) {
+      await this.organizersService.approveOrganizer(id);
+      return { message: 'Organisateur approuvé' };
+    }
+    else if (updateOrganizerStatusDto.status === OrganizerStatus.REJECTED) {
       await this.organizersService.rejectOrganizer(id);
-      return { message: 'Organizer request rejected and removed' };
+      return { message: 'Demande d\'organisateur supprimée' };
+    }
+    else {
+      throw new BadRequestException('Statut invalide pour l\'organisateur');
     }
   }
+
 }

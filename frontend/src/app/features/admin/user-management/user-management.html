@@ -1,0 +1,63 @@
+<div class="container fade-in-up">
+
+  <div class="header-actions">
+    <div class="return-header">
+      <a routerLink="/admin/dashboard" class="back-btn">← Retour</a>
+    </div>
+    <div class="header-left">
+      <h2 class="text-gradient section-title">User Management</h2>
+    </div>
+  </div>
+
+  <app-search (searchSubmitted)="onSearch($event)"></app-search>
+
+  @if (isLoading()) {
+    <app-loader message="Chargement des utilisateurs..."></app-loader>
+  } @else {
+  <div class="table-container">
+    <table mat-table [dataSource]="filteredUsers()" class="custom-table">
+
+      <ng-container matColumnDef="email">
+        <th mat-header-cell *matHeaderCellDef> Email </th>
+        <td mat-cell *matCellDef="let user"> {{user.email}} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="firstName">
+        <th mat-header-cell *matHeaderCellDef> First Name </th>
+        <td mat-cell *matCellDef="let user"> {{user.firstName}} </td>
+      </ng-container>
+
+       <ng-container matColumnDef="lastName">
+        <th mat-header-cell *matHeaderCellDef> Last Name </th>
+        <td mat-cell *matCellDef="let user"> {{user.lastName}} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="role">
+        <th mat-header-cell *matHeaderCellDef> Role </th>
+        <td mat-cell *matCellDef="let user">
+          <mat-form-field appearance="outline" [class]="'dense-select role-select role-' + user.role">
+            <mat-select [value]="user.role" (selectionChange)="updateRole(user, $event.value)">
+              @for (role of roles; track role) {
+                <mat-option [value]="role" [class]="'role-option-' + role">
+                  <span class="role-badge" [class]="'badge-' + role">
+                    {{ role | titlecase }}
+                  </span>
+                </mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+      <tr class="mat-row" *matNoDataRow>
+        <td class="mat-cell" [attr.colspan]="displayedColumns.length">
+          No data matching the filter "{{searchTerm()}}"
+        </td>
+      </tr>
+    </table>
+  </div>
+  }
+</div>

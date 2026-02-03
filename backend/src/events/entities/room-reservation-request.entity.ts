@@ -8,14 +8,8 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { Organizer } from '../../organizers/entities/organizer.entity';
-import { RoomLocation } from 'src/common/enums/room-location.enum';
-
-export enum ReservationStatus {
-  PENDING = 'PENDING',
-  APPROVED = 'APPROVED',
-  REJECTED = 'REJECTED',
-  CANCELLED = 'CANCELLED',
-}
+import { RoomLocation } from '../../common/enums/room-location.enum';
+import { ReservationStatus } from '../../common/enums/room-status.enum';
 
 @Entity('room_reservation_requests')
 export class RoomReservationRequest {
@@ -57,6 +51,4 @@ export class RoomReservationRequest {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @Column({ type: 'text', nullable: true })
-  rejectionReason?: string;
 }
